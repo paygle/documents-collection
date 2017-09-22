@@ -26,3 +26,29 @@ device-dpi - 设备本身的像素
 high-dpi -用高像素，中低像素屏幕适当缩小。
 medium- 中等像素，高的屏幕放大，低的变小是默认值
 low-dpi - 低像素，中高像素会适当变大。
+
+
+但在IOS10 safari 下官方规定了不能禁止用户缩放，就是说上述标签是无效的。
+
+window.onload = function () {
+    document.addEventListener('gesturestart', function (e) {
+        e.preventDefault();
+    });
+    document.addEventListener('dblclick', function (e) {
+        e.preventDefault();
+    });
+    document.addEventListener('touchstart', function (event) {
+        if (event.touches.length > 1) {
+            event.preventDefault();
+        }
+    });
+    var lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+        var now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+};
+
