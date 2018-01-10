@@ -54,7 +54,7 @@
 
     var fs = require("fs");
 
-    var data = 'hello 雨林博客';
+    var data = 'hello world';
 
     fs.writeFile('c:a.txt', data, 'ascii', function(err){
 
@@ -75,7 +75,7 @@
 
     var fs = require("fs");
 
-    var data = 'hello 雨林博客';
+    var data = 'hello world';
 
     fs.readFile('c:a.txt','ascii', function(err, data){
 
