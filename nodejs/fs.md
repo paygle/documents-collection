@@ -222,7 +222,7 @@
         }
     });
 
-* 其它状态函数：
+* 其它状态函数：以下函数都有相同的异步函数追加 Async。如：isFileAsync()
 
     stats.isFile()
 
@@ -237,4 +237,6 @@
     stats.isFIFO()
 
     stats.isSocket()
+
+    stats.isFIFO
 ---
