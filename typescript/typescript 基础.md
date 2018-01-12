@@ -431,7 +431,7 @@ let search = { food: "rich", ...defaults };
 
 > 对象展开还有其它一些意想不到的限制。
 
-# 接口初探
+# 接口
 
 > 它有时被称做“鸭式辨型法”或“结构性子类型化”。口的作用就是为这些类型命名和为你的代码或第三方代码定义契约。
 
@@ -1548,7 +1548,7 @@ const enum Directions {
 }
 ```
 
-# 外部枚举
+### 外部枚举
 
 > 外部枚举用来描述已经存在的枚举类型的形状。
 
@@ -1559,5 +1559,363 @@ declare enum Enum {
     C = 2
 }
 ```
+
+# Symbols 类型
+
+除了用户定义的symbols，还有一些已经众所周知的内置symbols。
+内置symbols用来表示语言内部的行为。
+
+以下为这些symbols的列表：
+
+### `Symbol.hasInstance`
+
+方法，会被`instanceof`运算符调用。构造器对象用来识别一个对象是否是其实例。
+
+### `Symbol.isConcatSpreadable`
+
+布尔值，表示当在一个对象上调用`Array.prototype.concat`时，这个对象的数组元素是否可展开。
+
+### `Symbol.iterator`
+
+方法，被`for-of`语句调用。返回对象的默认迭代器。
+
+### `Symbol.match`
+
+方法，被`String.prototype.match`调用。正则表达式用来匹配字符串。
+
+### `Symbol.replace`
+
+方法，被`String.prototype.replace`调用。正则表达式用来替换字符串中匹配的子串。
+
+### `Symbol.search`
+
+方法，被`String.prototype.search`调用。正则表达式返回被匹配部分在字符串中的索引。
+
+### `Symbol.species`
+
+函数值，为一个构造函数。用来创建派生对象。
+
+### `Symbol.split`
+
+方法，被`String.prototype.split`调用。正则表达式来用分割字符串。
+
+### `Symbol.toPrimitive`
+
+方法，被`ToPrimitive`抽象操作调用。把对象转换为相应的原始值。
+
+### `Symbol.toStringTag`
+
+方法，被内置方法`Object.prototype.toString`调用。返回创建对象时默认的字符串描述。
+
+### `Symbol.unscopables`
+
+对象，它自己拥有的属性会被`with`作用域排除在外。
+
+# 可迭代性
+
+一些内置的类型如`Array`，`Map`，`Set`，`String`，`Int32Array`，`Uint32Array`等都已经实现了各自的`Symbol.iterator`。
+对象上的`Symbol.iterator`函数负责返回供迭代的值。
+
+## `for..of` 语句
+
+`for..of`会遍历可迭代的对象，调用对象上的`Symbol.iterator`方法。
+
+```ts
+let someArray = [1, "string", false];
+
+for (let entry of someArray) {
+    console.log(entry); // 1, "string", false
+}
+```
+
+### `for..of` vs. `for..in` 语句
+
+> `for..of`和`for..in`均可迭代一个列表；但是用于迭代的值却不同
+> `for..in`迭代的是对象的 *键* 的列表，可以操作任何对象
+> `for..of`则迭代对象的键对应的值
+
+下面的例子展示了两者之间的区别：
+
+```ts
+let list = [4, 5, 6];
+
+for (let i in list) {
+    console.log(i); // "0", "1", "2",
+}
+
+for (let i of list) {
+    console.log(i); // "4", "5", "6"
+}
+```
+
+> 目标代码生成为 ES5 和 ES3
+
+当生成目标为ES5或ES3，迭代器只允许在`Array`类型上使用。
+在非数组值上使用`for..of`语句会得到一个错误，就算这些非数组值已经实现了`Symbol.iterator`属性。
+
+> 目标代码生成为 ECMAScript 2015 或更高
+
+当目标为兼容ECMAScipt 2015的引擎时，编译器会生成相应引擎的`for..of`内置迭代器实现方式。
+
+# 模块定义
+
+> 模块是自声明的；两个模块之间的关系是通过在文件级别上使用imports和exports建立的。
+> TypeScript与ECMAScript 2015一样，任何包含顶级`import`或者`export`的文件都被当成一个模块。
+> 相反地，如果一个文件不带有顶级的`import`或者`export`声明，那么它的内容被视为全局可见的（因此对模块也是可见的）。
+
+## export 导出声明
+
+> 任何声明（比如变量，函数，类，类型别名或接口）都能够通过添加`export`关键字来导出。
+
+```ts
+class ZipCodeValidator implements StringValidator {
+    isAcceptable(s: string) {
+        return s.length === 5 && numberRegexp.test(s);
+    }
+}
+export { ZipCodeValidator };
+export { ZipCodeValidator as mainValidator };
+```
+
+### 重新导出
+
+```ts
+export class ParseIntBasedZipCodeValidator {
+    isAcceptable(s: string) {
+        return s.length === 5 && parseInt(s).toString() === s;
+    }
+}
+
+// 导出原先的验证器但做了重命名
+export {ZipCodeValidator as RegExpBasedZipCodeValidator} from "./ZipCodeValidator";
+```
+
+> 或者一个模块可以包裹多个模块，并把他们导出的内容联合在一起通过语法：`export * from "module"`。
+
+```ts
+export * from "./StringValidator"; // exports interface StringValidator
+export * from "./ZipCodeValidator";  // exports class ZipCodeValidator
+```
+
+## import 导入声明
+
+```ts
+import { ZipCodeValidator } from "./ZipCodeValidator";
+
+let myValidator = new ZipCodeValidator();
+```
+
+可以对导入内容重命名
+
+```ts
+import { ZipCodeValidator as ZCV } from "./ZipCodeValidator";
+let myValidator = new ZCV();
+```
+
+## 将整个模块导入到一个变量，并通过它来访问模块的导出部分
+
+```ts
+import * as validator from "./ZipCodeValidator";
+let myValidator = new validator.ZipCodeValidator();
+```
+
+> 具有副作用的导入模块 (尽管不推荐这么做，一些模块会设置一些全局状态供其它模块使用)
+
+```ts
+import "./my-module.js";
+```
+
+# 默认导出
+
+每个模块都可以有一个`default`导出。
+默认导出使用`default`关键字标记；并且一个模块只能够有一个`default`导出。
+需要使用一种特殊的导入形式来导入`default`导出。
+
+##### JQuery.d.ts
+
+```ts
+declare let $: JQuery;
+export default $;
+```
+
+## `export =` 和 `import = require()`
+
+> TypeScript模块支持`export =`语法以支持传统的CommonJS和AMD的工作流模型。
+> `export =`语法定义一个模块的导出对象。它可以是类，接口，命名空间，函数或枚举。
+> 若要导入一个使用了`export =`的模块时，必须使用TypeScript提供的特定语法`import module = require("module")`。
+
+##### ZipCodeValidator.ts
+
+```ts
+let numberRegexp = /^[0-9]+$/;
+class ZipCodeValidator {
+    isAcceptable(s: string) {
+        return s.length === 5 && numberRegexp.test(s);
+    }
+}
+export = ZipCodeValidator;
+```
+
+##### Test.ts
+
+```ts
+import zip = require("./ZipCodeValidator");
+
+// Some samples to try
+let strings = ["Hello", "98052", "101"];
+
+// Validators to use
+let validator = new zip();
+
+// Show whether each string passed each validator
+strings.forEach(s => {
+  console.log(`"${ s }" - ${ validator.isAcceptable(s) ? "matches" : "does not match" }`);
+});
+```
+
+# 可选的模块加载和其它高级加载场景
+
+有时候，你只想在某种条件下才加载某个模块。
+在TypeScript里，使用下面的方式来实现它和其它的高级加载场景，我们可以直接调用模块加载器并且可以保证类型完全。
+
+编译器会检测是否每个模块都会在生成的JavaScript中用到。
+如果一个模块标识符只在类型注解部分使用，并且完全没有在表达式中使用时，就不会生成`require`这个模块的代码。
+省略掉没有用到的引用对性能提升是很有益的，并同时提供了选择性加载模块的能力。
+
+这种模式的核心是`import id = require("...")`语句可以让我们访问模块导出的类型。
+模块加载器会被动态调用（通过`require`），就像下面`if`代码块里那样。
+它利用了省略引用的优化，所以模块只在被需要时加载。
+为了让这个模块工作，一定要注意`import`定义的标识符只能在表示类型处使用（不能在会转换成JavaScript的地方）。
+
+为了确保类型安全性，我们可以使用`typeof`关键字。
+`typeof`关键字，当在表示类型的地方使用时，会得出一个类型值，这里就表示模块的类型。
+
+##### 示例：Node.js里的动态模块加载
+
+```ts
+declare function require(moduleName: string): any;
+
+import { ZipCodeValidator as Zip } from "./ZipCodeValidator";
+
+if (needZipValidation) {
+    let ZipCodeValidator: typeof Zip = require("./ZipCodeValidator");
+    let validator = new ZipCodeValidator();
+    if (validator.isAcceptable("...")) { /* ... */ }
+}
+```
+
+##### 示例：require.js里的动态模块加载
+
+```ts
+declare function require(moduleNames: string[], onLoad: (...args: any[]) => void): void;
+
+import * as Zip from "./ZipCodeValidator";
+
+if (needZipValidation) {
+    require(["./ZipCodeValidator"], (ZipCodeValidator: typeof Zip) => {
+        let validator = new ZipCodeValidator.ZipCodeValidator();
+        if (validator.isAcceptable("...")) { /* ... */ }
+    });
+}
+```
+
+##### 示例：System.js里的动态模块加载
+
+```ts
+declare const System: any;
+
+import { ZipCodeValidator as Zip } from "./ZipCodeValidator";
+
+if (needZipValidation) {
+    System.import("./ZipCodeValidator").then((ZipCodeValidator: typeof Zip) => {
+        var x = new ZipCodeValidator();
+        if (x.isAcceptable("...")) { /* ... */ }
+    });
+}
+```
+
+# 使用其它的JavaScript库，它们通常是在`.d.ts`文件里定义的。
+
+要想描述非TypeScript编写的类库的类型，我们需要声明类库所暴露出的API。
+我们可以使用顶级的`export`声明来为每个模块都定义一个`.d.ts`文件，但最好还是写在一个大的`.d.ts`文件里。
+我们使用与构造一个外部命名空间相似的方法，但是这里使用`module`关键字并且把名字用引号括起来，方便之后`import`。
+例如：
+
+##### node.d.ts (simplified excerpt)
+
+```ts
+declare module "url" {
+    export interface Url {
+        protocol?: string;
+        hostname?: string;
+        pathname?: string;
+    }
+
+    export function parse(urlStr: string, parseQueryString?, slashesDenoteHost?): Url;
+}
+
+declare module "path" {
+    export function normalize(p: string): string;
+    export function join(...paths: any[]): string;
+    export let sep: string;
+}
+```
+
+现在我们可以`/// <reference>` `node.d.ts`并且使用`import url = require("url");`或`import * as URL from "url"`加载模块。
+
+```ts
+/// <reference path="node.d.ts"/>
+import * as URL from "url";
+let myUrl = URL.parse("http://www.typescriptlang.org");
+```
+
+### 外部模块简写
+
+假如你不想在使用一个新模块之前花时间去编写声明，你可以采用声明的简写形式以便能够快速使用它。
+
+##### declarations.d.ts
+
+```ts
+declare module "hot-new-module";
+```
+
+简写模块里所有导出的类型将是`any`。
+
+```ts
+import x, {y} from "hot-new-module";
+x(y);
+```
+
+### 模块声明通配符
+
+```ts
+declare module "*!text" {
+    const content: string;
+    export default content;
+}
+// Some do it the other way around.
+declare module "json!*" {
+    const value: any;
+    export default value;
+}
+```
+
+现在你可以就导入匹配`"*!text"`或`"json!*"`的内容了。
+
+```ts
+import fileContent from "./xyz.txt!text";
+import data from "json!http://example.com/data.json";
+console.log(data, fileContent);
+```
+
+> 模块里不要使用命名空间
+
+### 危险信号
+
+以下均为模块结构上的危险信号。重新检查以确保你没有在对模块使用命名空间：
+
+* 文件的顶层声明是`export namespace Foo { ... }` （删除`Foo`并把所有内容向上层移动一层）
+* 文件只有一个`export class`或`export function` （考虑使用`export default`）
+* 多个文件的顶层具有同样的`export namespace Foo {` （不要以为这些会合并到一个`Foo`中！）
 
 
