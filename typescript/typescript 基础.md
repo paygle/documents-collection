@@ -757,3 +757,807 @@ class Location {
 在`Control`类内部，是允许通过`SelectableControl`的实例来访问私有成员`state`的。
 实际上，`SelectableControl`就像`Control`一样，并拥有一个`select`方法。
 `Button`和`TextBox`类是`SelectableControl`的子类（因为它们都继承自`Control`并有`select`方法），但`Image`和`Location`类并不是这样的。
+
+# 类
+
+下面看一个使用类的例子：
+
+```ts
+class Greeter {
+    greeting: string;
+    constructor(message: string) {
+        this.greeting = message;
+    }
+    greet() {
+        return "Hello, " + this.greeting;
+    }
+}
+
+let greeter = new Greeter("world");
+```
+
+## 继承
+
+```ts
+class Animal {
+    name: string;
+    constructor(theName: string) { this.name = theName; }
+    move(distanceInMeters: number = 0) {
+        console.log(`${this.name} moved ${distanceInMeters}m.`);
+    }
+}
+
+class Snake extends Animal {
+    constructor(name: string) { super(name); }
+    move(distanceInMeters = 5) {
+        console.log("Slithering...");
+        super.move(distanceInMeters);
+    }
+}
+
+class Horse extends Animal {
+    constructor(name: string) { super(name); }
+    move(distanceInMeters = 45) {
+        console.log("Galloping...");
+        super.move(distanceInMeters);
+    }
+}
+
+let sam = new Snake("Sammy the Python");
+let tom: Animal = new Horse("Tommy the Palomino");
+
+sam.move();
+tom.move(34);
+```
+
+```text
+Slithering...
+Sammy the Python moved 5m.
+Galloping...
+Tommy the Palomino moved 34m.
+```
+
+### 公共，私有与受保护的修饰符
+
+> 默认为`public`
+> 当成员被标记成`private`时，它就不能在声明它的类的外部访问。
+
+```ts
+class Animal {
+    private name: string;
+    constructor(theName: string) { this.name = theName; }
+}
+
+new Animal("Cat").name; // 错误: 'name' 是私有的.
+```
+
+> 如果其中一个类型里包含一个`private`成员，那么只有当另外一个类型中也存在这样一个`private`成员， 并且它们都是来自同一处声明时，我们才认为这两个类型是兼容的。对于`protected`成员也使用这个规则。
+
+```ts
+class Animal {
+    private name: string;
+    constructor(theName: string) { this.name = theName; }
+}
+
+class Rhino extends Animal {
+    constructor() { super("Rhino"); }
+}
+
+class Employee {
+    private name: string;
+    constructor(theName: string) { this.name = theName; }
+}
+
+let animal = new Animal("Goat");
+let rhino = new Rhino();
+let employee = new Employee("Bob");
+
+animal = rhino;
+animal = employee; // 错误: Animal 与 Employee 不兼容.
+```
+
+> 理解`protected`
+
+`protected`修饰符与`private`修饰符的行为很相似，但有一点不同，`protected`成员在派生类中仍然可以访问。
+
+```ts
+class Person {
+    protected name: string;
+    constructor(name: string) { this.name = name; }
+}
+
+class Employee extends Person {
+    private department: string;
+
+    constructor(name: string, department: string) {
+        super(name)
+        this.department = department;
+    }
+
+    public getElevatorPitch() {
+        return `Hello, my name is ${this.name} and I work in ${this.department}.`;
+    }
+}
+
+let howard = new Employee("Howard", "Sales");
+console.log(howard.getElevatorPitch());
+console.log(howard.name); // 错误
+```
+
+## readonly修饰符
+
+> 你可以使用`readonly`关键字将属性设置为只读的。
+> 只读属性必须在声明时或构造函数里被初始化。
+
+```ts
+class Octopus {
+    readonly name: string;
+    readonly numberOfLegs: number = 8;
+    constructor (theName: string) {
+        this.name = theName;
+    }
+}
+let dad = new Octopus("Man with the 8 strong legs");
+dad.name = "Man with the 3-piece suit"; // 错误! name 是只读的.
+```
+
+## 存取器
+
+> TypeScript支持通过getters/setters来截取对对象成员的访问。
+> 下面来看如何把一个简单的类改写成使用`get`和`set`。
+> 存取器要求你将编译器设置为输出ECMAScript 5或更高。
+> 其次，只带有`get`不带有`set`的存取器自动被推断为`readonly`。
+
+```ts
+let passcode = "secret passcode";
+
+class Employee {
+    private _fullName: string;
+
+    get fullName(): string {
+        return this._fullName;
+    }
+
+    set fullName(newName: string) {
+        if (passcode && passcode == "secret passcode") {
+            this._fullName = newName;
+        }
+        else {
+            console.log("Error: Unauthorized update of employee!");
+        }
+    }
+}
+
+let employee = new Employee();
+employee.fullName = "Bob Smith";
+if (employee.fullName) {
+    alert(employee.fullName);
+}
+```
+
+## 静态属性
+
+> 如同在实例属性上使用`this.`前缀来访问属性一样，这里我们使用`Grid.`来访问静态属性。
+
+```ts
+class Grid {
+    static origin = {x: 0, y: 0};
+    calculateDistanceFromOrigin(point: {x: number; y: number;}) {
+        let xDist = (point.x - Grid.origin.x);
+        let yDist = (point.y - Grid.origin.y);
+        return Math.sqrt(xDist * xDist + yDist * yDist) / this.scale;
+    }
+    constructor (public scale: number) { }
+}
+
+let grid1 = new Grid(1.0);  // 1x scale
+let grid2 = new Grid(5.0);  // 5x scale
+
+console.log(grid1.calculateDistanceFromOrigin({x: 10, y: 10}));
+console.log(grid2.calculateDistanceFromOrigin({x: 10, y: 10}));
+```
+
+## 抽象类
+
+> 抽象类做为其它派生类的基类使用。它们一般不会直接被实例化。不同于接口，抽象类可以包含成员的实现细节。
+> `abstract`关键字是用于定义抽象类和在抽象类内部定义抽象方法。
+> 抽象类中的抽象方法不包含具体实现并且必须在派生类中实现。
+
+```ts
+abstract class Department {
+
+    constructor(public name: string) {
+    }
+
+    printName(): void {
+        console.log('Department name: ' + this.name);
+    }
+
+    abstract printMeeting(): void; // 必须在派生类中实现
+}
+
+class AccountingDepartment extends Department {
+
+    constructor() {
+        super('Accounting and Auditing'); // 在派生类的构造函数中必须调用 super()
+    }
+
+    printMeeting(): void {
+        console.log('The Accounting Department meets each Monday at 10am.');
+    }
+
+    generateReports(): void {
+        console.log('Generating accounting reports...');
+    }
+}
+
+let department: Department; // 允许创建一个对抽象类型的引用
+department = new Department(); // 错误: 不能创建一个抽象类的实例
+department = new AccountingDepartment(); // 允许对一个抽象子类进行实例化和赋值
+department.printName();
+department.printMeeting();
+department.generateReports(); // 错误: 方法在声明的抽象类中不存在
+```
+
+## 高级技巧
+
+> 构造函数
+
+```ts
+class Greeter {
+    greeting: string;
+    constructor(message: string) {
+        this.greeting = message;
+    }
+    greet() {
+        return "Hello, " + this.greeting;
+    }
+}
+
+let greeter: Greeter;
+greeter = new Greeter("world");
+console.log(greeter.greet());
+```
+
+## 把类当做接口使用
+
+> 因为类可以创建出类型，所以你能够在允许使用接口的地方使用类。
+
+```ts
+class Point {
+    x: number;
+    y: number;
+}
+
+interface Point3d extends Point {
+    z: number;
+}
+
+let point3d: Point3d = {x: 1, y: 2, z: 3};
+```
+
+# 函数
+
+## 为函数定义类型
+
+让我们为上面那个函数添加类型：
+
+```ts
+function add(x: number, y: number): number {
+    return x + y;
+}
+
+let myAdd = function(x: number, y: number): number { return x + y; };
+```
+
+我们可以给每个参数添加类型之后再为函数本身添加返回值类型。
+TypeScript能够根据返回语句自动推断出返回值类型，因此我们通常省略它。
+
+## 书写完整函数类型
+
+```ts
+let myAdd: (baseValue: number, increment: number) => number =
+    function(x: number, y: number): number { return x + y; };
+```
+
+只要参数类型是匹配的，那么就认为它是有效的函数类型，而不在乎参数名是否正确。
+
+第二部分是返回值类型。
+对于返回值，我们在函数和返回值类型之前使用(`=>`)符号，使之清晰明了。
+如之前提到的，返回值类型是函数类型的必要部分，如果函数没有返回任何值，你也必须指定返回值类型为`void`而不能留空。
+
+函数的类型只是由参数类型和返回值组成的。
+函数中使用的捕获变量不会体现在类型里。
+实际上，这些变量是函数的隐藏状态并不是组成API的一部分。
+
+## 推断类型
+
+如果你在赋值语句的一边指定了类型但是另一边没有类型的话，TypeScript编译器会自动识别出类型：
+
+```ts
+// myAdd has the full function type
+let myAdd = function(x: number, y: number): number { return x + y; };
+
+// The parameters `x` and `y` have the type number
+let myAdd: (baseValue: number, increment: number) => number =
+    function(x, y) { return x + y; };
+```
+
+> 可选参数和默认参数, 可选参数必须跟在必须参数后面（除非设置默认值）。
+
+## 剩余参数
+
+> 编译器创建参数数组，名字是你在省略号（`...`）后面给定的名字，你可以在函数体内使用这个数组。
+在JavaScript里，你可以使用`arguments`来访问所有传入的参数。
+在TypeScript里，你可以把所有参数收集到一个变量里：
+
+```ts
+function buildName(firstName: string, ...restOfName: string[]) {
+  return firstName + " " + restOfName.join(" ");
+}
+
+let employeeName = buildName("Joseph", "Samuel", "Lucas", "MacKinzie");
+```
+
+## `this`和箭头函数
+
+> JavaScript里，`this`的值在函数被调用的时候才会指定。
+> 箭头函数能保存函数创建时的`this`值，而不是调用时的值：
+
+```ts
+interface Card {
+    suit: string;
+    card: number;
+}
+interface Deck {
+    suits: string[];
+    cards: number[];
+    createCardPicker(this: Deck): () => Card;
+}
+let deck: Deck = {
+    suits: ["hearts", "spades", "clubs", "diamonds"],
+    cards: Array(52),
+    // NOTE: The function now explicitly specifies that its callee must be of type Deck
+    createCardPicker: function(this: Deck) {
+        return () => {
+            let pickedCard = Math.floor(Math.random() * 52);
+            let pickedSuit = Math.floor(pickedCard / 13);
+
+            return {suit: this.suits[pickedSuit], card: pickedCard % 13};
+        }
+    }
+}
+
+let cardPicker = deck.createCardPicker();
+let pickedCard = cardPicker();
+
+alert("card: " + pickedCard.card + " of " + pickedCard.suit);
+```
+
+现在TypeScript知道`createCardPicker`期望在某个`Deck`对象上调用。
+也就是说`this`是`Deck`类型的，而非`any`，因此`--noImplicitThis`不会报错了。
+
+## 重载
+
+> 它查找重载列表，尝试使用第一个重载定义。如果匹配的话就使用这个。
+> 在定义重载的时候，一定要把最精确的定义放在最前面。
+
+```ts
+let suits = ["hearts", "spades", "clubs", "diamonds"];
+
+function pickCard(x: {suit: string; card: number; }[]): number;
+function pickCard(x: number): {suit: string; card: number; };
+function pickCard(x): any {
+    // Check to see if we're working with an object/array
+    // if so, they gave us the deck and we'll pick the card
+    if (typeof x == "object") {
+        let pickedCard = Math.floor(Math.random() * x.length);
+        return pickedCard;
+    }
+    // Otherwise just let them pick the card
+    else if (typeof x == "number") {
+        let pickedSuit = Math.floor(x / 13);
+        return { suit: suits[pickedSuit], card: x % 13 };
+    }
+}
+
+let myDeck = [{ suit: "diamonds", card: 2 }, { suit: "spades", card: 10 }, { suit: "hearts", card: 4 }];
+let pickedCard1 = myDeck[pickCard(myDeck)];
+alert("card: " + pickedCard1.card + " of " + pickedCard1.suit);
+
+let pickedCard2 = pickCard(15);
+alert("card: " + pickedCard2.card + " of " + pickedCard2.suit);
+```
+
+> 注意，`function pickCard(x): any`并不是重载列表的一部分，因此这里只有两个重载：一个是接收对象另一个接收数字。以其它参数调用`pickCard`会产生错误。
+
+
+# 介绍
+
+软件工程中，我们不仅要创建一致的定义良好的API，同时也要考虑可重用性。
+组件不仅能够支持当前的数据类型，同时也能支持未来的数据类型，这在创建大型系统时为你提供了十分灵活的功能。
+
+在像C#和Java这样的语言中，可以使用`泛型`来创建可重用的组件，一个组件可以支持多种类型的数据。
+这样用户就可以以自己的数据类型来使用组件。
+
+# 泛型之Hello World
+
+下面来创建第一个使用泛型的例子：identity函数。
+这个函数会返回任何传入它的值。
+你可以把这个函数当成是`echo`命令。
+
+不用泛型的话，这个函数可能是下面这样：
+
+```ts
+function identity(arg: number): number {
+    return arg;
+}
+```
+
+或者，我们使用`any`类型来定义函数：
+
+```ts
+function identity(arg: any): any {
+    return arg;
+}
+```
+
+使用`any`类型会导致这个函数可以接收任何类型的`arg`参数，这样就丢失了一些信息：传入的类型与返回的类型应该是相同的。
+如果我们传入一个数字，我们只知道任何类型的值都有可能被返回。
+
+因此，我们需要一种方法使返回值的类型与传入参数的类型是相同的。
+这里，我们使用了*类型变量*，它是一种特殊的变量，只用于表示类型而不是值。
+
+```ts
+function identity<T>(arg: T): T {
+    return arg;
+}
+```
+
+我们给identity添加了类型变量`T`。
+`T`帮助我们捕获用户传入的类型（比如：`number`），之后我们就可以使用这个类型。
+之后我们再次使用了`T`当做返回值类型。现在我们可以知道参数类型与返回值类型是相同的了。
+这允许我们跟踪函数里使用的类型的信息。
+
+我们把这个版本的`identity`函数叫做泛型，因为它可以适用于多个类型。
+不同于使用`any`，它不会丢失信息，像第一个例子那像保持准确性，传入数值类型并返回数值类型。
+
+我们定义了泛型函数后，可以用两种方法使用。
+第一种是，传入所有的参数，包含类型参数：
+
+```ts
+let output = identity<string>("myString");  // type of output will be 'string'
+```
+
+这里我们明确的指定了`T`是`string`类型，并做为一个参数传给函数，使用了`<>`括起来而不是`()`。
+
+第二种方法更普遍。利用了*类型推论* -- 即编译器会根据传入的参数自动地帮助我们确定T的类型：
+
+```ts
+let output = identity("myString");  // type of output will be 'string'
+```
+
+注意我们没必要使用尖括号（`<>`）来明确地传入类型；编译器可以查看`myString`的值，然后把`T`设置为它的类型。
+类型推论帮助我们保持代码精简和高可读性。如果编译器不能够自动地推断出类型的话，只能像上面那样明确的传入T的类型，在一些复杂的情况下，这是可能出现的。
+
+# 使用泛型变量
+
+使用泛型创建像`identity`这样的泛型函数时，编译器要求你在函数体必须正确的使用这个通用的类型。
+换句话说，你必须把这些参数当做是任意或所有类型。
+
+看下之前`identity`例子：
+
+```ts
+function identity<T>(arg: T): T {
+    return arg;
+}
+```
+
+如果我们想同时打印出`arg`的长度。
+我们很可能会这样做：
+
+```ts
+function loggingIdentity<T>(arg: T): T {
+    console.log(arg.length);  // Error: T doesn't have .length
+    return arg;
+}
+```
+
+如果这么做，编译器会报错说我们使用了`arg`的`.length`属性，但是没有地方指明`arg`具有这个属性。
+记住，这些类型变量代表的是任意类型，所以使用这个函数的人可能传入的是个数字，而数字是没有`.length`属性的。
+
+现在假设我们想操作`T`类型的数组而不直接是`T`。由于我们操作的是数组，所以`.length`属性是应该存在的。
+我们可以像创建其它数组一样创建这个数组：
+
+```ts
+function loggingIdentity<T>(arg: T[]): T[] {
+    console.log(arg.length);  // Array has a .length, so no more error
+    return arg;
+}
+```
+
+你可以这样理解`loggingIdentity`的类型：泛型函数`loggingIdentity`，接收类型参数`T`和参数`arg`，它是个元素类型是`T`的数组，并返回元素类型是`T`的数组。
+如果我们传入数字数组，将返回一个数字数组，因为此时`T`的的类型为`number`。
+这可以让我们把泛型变量T当做类型的一部分使用，而不是整个类型，增加了灵活性。
+
+我们也可以这样实现上面的例子：
+
+```ts
+function loggingIdentity<T>(arg: Array<T>): Array<T> {
+    console.log(arg.length);  // Array has a .length, so no more error
+    return arg;
+}
+```
+
+使用过其它语言的话，你可能对这种语法已经很熟悉了。
+在下一节，会介绍如何创建自定义泛型像`Array<T>`一样。
+
+# 泛型类型
+
+上一节，我们创建了identity通用函数，可以适用于不同的类型。
+在这节，我们研究一下函数本身的类型，以及如何创建泛型接口。
+
+泛型函数的类型与非泛型函数的类型没什么不同，只是有一个类型参数在最前面，像函数声明一样：
+
+```ts
+function identity<T>(arg: T): T {
+    return arg;
+}
+
+let myIdentity: <T>(arg: T) => T = identity;
+```
+
+我们也可以使用不同的泛型参数名，只要在数量上和使用方式上能对应上就可以。
+
+```ts
+function identity<T>(arg: T): T {
+    return arg;
+}
+
+let myIdentity: <U>(arg: U) => U = identity;
+```
+
+我们还可以使用带有调用签名的对象字面量来定义泛型函数：
+
+```ts
+function identity<T>(arg: T): T {
+    return arg;
+}
+
+let myIdentity: {<T>(arg: T): T} = identity;
+```
+
+这引导我们去写第一个泛型接口了。
+我们把上面例子里的对象字面量拿出来做为一个接口：
+
+```ts
+interface GenericIdentityFn {
+    <T>(arg: T): T;
+}
+
+function identity<T>(arg: T): T {
+    return arg;
+}
+
+let myIdentity: GenericIdentityFn = identity;
+```
+
+一个相似的例子，我们可能想把泛型参数当作整个接口的一个参数。
+这样我们就能清楚的知道使用的具体是哪个泛型类型（比如：`Dictionary<string>而不只是Dictionary`）。
+这样接口里的其它成员也能知道这个参数的类型了。
+
+```ts
+interface GenericIdentityFn<T> {
+    (arg: T): T;
+}
+
+function identity<T>(arg: T): T {
+    return arg;
+}
+
+let myIdentity: GenericIdentityFn<number> = identity;
+```
+
+# 泛型类
+
+> 泛型类看上去与泛型接口差不多。
+> 泛型类使用（`<>`）括起泛型类型，跟在类名后面。
+
+```ts
+class GenericNumber<T> {
+    zeroValue: T;
+    add: (x: T, y: T) => T;
+}
+
+let myGenericNumber = new GenericNumber<number>();
+myGenericNumber.zeroValue = 0;
+myGenericNumber.add = function(x, y) { return x + y; };
+```
+
+`GenericNumber`类的使用没有什么去限制它只能使用`number`类型。也可以使用字符串或其它更复杂的类型。
+
+## 泛型约束
+
+> 创建一个包含`.length`属性的接口，使用这个接口和`extends`关键字来实现约束：
+
+```ts
+interface Lengthwise {
+    length: number;
+}
+
+function loggingIdentity<T extends Lengthwise>(arg: T): T {
+    console.log(arg.length);  // Now we know it has a .length property, so no more error
+    return arg;
+}
+```
+
+现在这个泛型函数被定义了约束，因此它不再是适用于任意类型：
+
+```ts
+loggingIdentity(3);  // Error, number doesn't have a .length property
+```
+
+我们需要传入符合约束类型的值，必须包含必须的属性：
+
+```ts
+loggingIdentity({length: 10, value: 3});
+```
+
+## 在泛型约束中使用类型参数
+
+我们想要确保这个属性存在于对象`obj`上，因此我们需要在这两个类型之间使用约束。
+
+```ts
+function getProperty<T, K extends keyof T>(obj: T, key: K) {
+    return obj[key];
+}
+
+let x = { a: 1, b: 2, c: 3, d: 4 };
+
+getProperty(x, "a"); // okay
+getProperty(x, "m"); // error: Argument of type 'm' isn't assignable to 'a' | 'b' | 'c' | 'd'.
+```
+
+## 在泛型里使用类类型
+
+在TypeScript使用泛型创建工厂函数时，需要引用构造函数的类类型。比如，
+
+```ts
+function create<T>(c: {new(): T; }): T {
+    return new c();
+}
+```
+
+一个更高级的例子，使用原型属性推断并约束构造函数与类实例的关系。
+
+```ts
+class BeeKeeper {
+    hasMask: boolean;
+}
+
+class ZooKeeper {
+    nametag: string;
+}
+
+class Animal {
+    numLegs: number;
+}
+
+class Bee extends Animal {
+    keeper: BeeKeeper;
+}
+
+class Lion extends Animal {
+    keeper: ZooKeeper;
+}
+
+function createInstance<A extends Animal>(c: new () => A): A {
+    return new c();
+}
+
+createInstance(Lion).keeper.nametag;  // typechecks!
+createInstance(Bee).keeper.hasMask;   // typechecks!
+```
+
+# 枚举
+
+TypeScript支持数字的和基于字符串的枚举。
+
+## 数字枚举
+
+> 数字枚举可以被混入到计算过的和常量成员
+
+```ts
+enum Direction {
+    Up = 1,
+    Down,
+    Left,
+    Right
+}
+
+console.log("Direction:", Direction.Down)
+```
+
+如上，我们定义了一个数字枚举，`Up`使用初始化为`1`。其余的成员会从`1`开始自动增长。
+换句话说，`Direction.Up`的值为`1`，`Down`为`2`，`Left`为`3`，`Right`为`4`。
+
+我们还可以完全不使用初始化器：`Up`的值为`0`，`Down`的值为`1`等等。
+当我们不在乎成员的值的时候，这种自增长的行为是很有用处的，但是要注意每个枚举成员的值都是不同的。
+
+## 字符串枚举
+
+> 在一个字符串枚举里，每个成员都必须用字符串字面量，或另外一个字符串枚举成员进行初始化。
+
+```ts
+enum Direction {
+    Up = "UP",
+    Down = "DOWN",
+    Left = "LEFT",
+    Right = "RIGHT",
+}
+```
+
+## 异构枚举（Heterogeneous enums）
+
+从技术的角度来说，枚举可以混合字符串和数字成员，但是似乎你并不会这么做：
+
+```ts
+enum BooleanLikeHeterogeneousEnum {
+    No = 0,
+    Yes = "YES",
+}
+```
+
+除非你真的想要利用JavaScript运行时的行为，否则我们不建议这样做。
+
+> 计算的和常量成员。每个枚举成员都带有一个值，它可以是*常量*或*计算出来的*。
+
+### 反向映射
+
+> 数字枚举成员还具有了*反向映射*，要注意的是*不会*为字符串枚举成员生成反向映射。
+
+```ts
+enum Enum {
+    A
+}
+let a = Enum.A;
+let nameOfA = Enum[a]; // "A"
+```
+
+TypeScript可能会将这段代码编译为下面的JavaScript：
+
+```js
+var Enum;
+(function (Enum) {
+    Enum[Enum["A"] = 0] = "A";
+})(Enum || (Enum = {}));
+var a = Enum.A;
+var nameOfA = Enum[a]; // "A"
+```
+
+### `const`枚举
+
+> 常量枚举通过在枚举上使用`const`修饰符来定义，常量枚举不允许包含计算成员。
+
+```ts
+const enum Directions {
+    Up,
+    Down,
+    Left,
+    Right
+}
+```
+
+# 外部枚举
+
+> 外部枚举用来描述已经存在的枚举类型的形状。
+
+```ts
+declare enum Enum {
+    A = 1,
+    B,
+    C = 2
+}
+```
+
+
