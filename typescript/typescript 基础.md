@@ -11,6 +11,7 @@
 * [模块定义](#module-def)
 * [命名空间](#namespace)
 * [声明合并](#declare-merge)
+* [三斜线指令](#Triple-Slash)
 
 
 
