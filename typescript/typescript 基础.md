@@ -1,7 +1,20 @@
 # Typescript 基础语法
 
+* [基础类型](#base-type)
+* [接口](#interface)
+* [类](#class)
+* [函数](#functions)
+* [泛型](#generics)
+* [枚举](#enums)
+* [Symbol 类型](#symbols)
+* [可迭代性](#iterators)
+* [模块定义](#module-def)
+* [命名空间](#namespace)
+* [声明合并](#declare-merge)
 
-## 基础类型
+
+
+## <a name="base-type"></a>基础类型
 
 #### 布尔值
 
@@ -431,7 +444,7 @@ let search = { food: "rich", ...defaults };
 
 > 对象展开还有其它一些意想不到的限制。
 
-# 接口
+# <a name="interface"></a>接口
 
 > 它有时被称做“鸭式辨型法”或“结构性子类型化”。口的作用就是为这些类型命名和为你的代码或第三方代码定义契约。
 
@@ -758,7 +771,7 @@ class Location {
 实际上，`SelectableControl`就像`Control`一样，并拥有一个`select`方法。
 `Button`和`TextBox`类是`SelectableControl`的子类（因为它们都继承自`Control`并有`select`方法），但`Image`和`Location`类并不是这样的。
 
-# 类
+# <a name="class"></a>类
 
 下面看一个使用类的例子：
 
@@ -1036,7 +1049,7 @@ interface Point3d extends Point {
 let point3d: Point3d = {x: 1, y: 2, z: 3};
 ```
 
-# 函数
+# <a name="functions"></a>函数
 
 ## 为函数定义类型
 
@@ -1171,16 +1184,7 @@ alert("card: " + pickedCard2.card + " of " + pickedCard2.suit);
 
 > 注意，`function pickCard(x): any`并不是重载列表的一部分，因此这里只有两个重载：一个是接收对象另一个接收数字。以其它参数调用`pickCard`会产生错误。
 
-
-# 介绍
-
-软件工程中，我们不仅要创建一致的定义良好的API，同时也要考虑可重用性。
-组件不仅能够支持当前的数据类型，同时也能支持未来的数据类型，这在创建大型系统时为你提供了十分灵活的功能。
-
-在像C#和Java这样的语言中，可以使用`泛型`来创建可重用的组件，一个组件可以支持多种类型的数据。
-这样用户就可以以自己的数据类型来使用组件。
-
-# 泛型之Hello World
+# <a name="generics"></a>泛型
 
 下面来创建第一个使用泛型的例子：identity函数。
 这个函数会返回任何传入它的值。
@@ -1240,7 +1244,7 @@ let output = identity("myString");  // type of output will be 'string'
 注意我们没必要使用尖括号（`<>`）来明确地传入类型；编译器可以查看`myString`的值，然后把`T`设置为它的类型。
 类型推论帮助我们保持代码精简和高可读性。如果编译器不能够自动地推断出类型的话，只能像上面那样明确的传入T的类型，在一些复杂的情况下，这是可能出现的。
 
-# 使用泛型变量
+### 使用泛型变量
 
 使用泛型创建像`identity`这样的泛型函数时，编译器要求你在函数体必须正确的使用这个通用的类型。
 换句话说，你必须把这些参数当做是任意或所有类型。
@@ -1289,76 +1293,7 @@ function loggingIdentity<T>(arg: Array<T>): Array<T> {
 }
 ```
 
-使用过其它语言的话，你可能对这种语法已经很熟悉了。
-在下一节，会介绍如何创建自定义泛型像`Array<T>`一样。
-
-# 泛型类型
-
-上一节，我们创建了identity通用函数，可以适用于不同的类型。
-在这节，我们研究一下函数本身的类型，以及如何创建泛型接口。
-
-泛型函数的类型与非泛型函数的类型没什么不同，只是有一个类型参数在最前面，像函数声明一样：
-
-```ts
-function identity<T>(arg: T): T {
-    return arg;
-}
-
-let myIdentity: <T>(arg: T) => T = identity;
-```
-
-我们也可以使用不同的泛型参数名，只要在数量上和使用方式上能对应上就可以。
-
-```ts
-function identity<T>(arg: T): T {
-    return arg;
-}
-
-let myIdentity: <U>(arg: U) => U = identity;
-```
-
-我们还可以使用带有调用签名的对象字面量来定义泛型函数：
-
-```ts
-function identity<T>(arg: T): T {
-    return arg;
-}
-
-let myIdentity: {<T>(arg: T): T} = identity;
-```
-
-这引导我们去写第一个泛型接口了。
-我们把上面例子里的对象字面量拿出来做为一个接口：
-
-```ts
-interface GenericIdentityFn {
-    <T>(arg: T): T;
-}
-
-function identity<T>(arg: T): T {
-    return arg;
-}
-
-let myIdentity: GenericIdentityFn = identity;
-```
-
-一个相似的例子，我们可能想把泛型参数当作整个接口的一个参数。
-这样我们就能清楚的知道使用的具体是哪个泛型类型（比如：`Dictionary<string>而不只是Dictionary`）。
-这样接口里的其它成员也能知道这个参数的类型了。
-
-```ts
-interface GenericIdentityFn<T> {
-    (arg: T): T;
-}
-
-function identity<T>(arg: T): T {
-    return arg;
-}
-
-let myIdentity: GenericIdentityFn<number> = identity;
-```
-
-# 泛型类
+### 泛型类
 
 > 泛型类看上去与泛型接口差不多。
 > 泛型类使用（`<>`）括起泛型类型，跟在类名后面。
@@ -1376,7 +1311,7 @@ myGenericNumber.add = function(x, y) { return x + y; };
 
 `GenericNumber`类的使用没有什么去限制它只能使用`number`类型。也可以使用字符串或其它更复杂的类型。
 
-## 泛型约束
+### 泛型约束
 
 > 创建一个包含`.length`属性的接口，使用这个接口和`extends`关键字来实现约束：
 
@@ -1403,7 +1338,7 @@ loggingIdentity(3);  // Error, number doesn't have a .length property
 loggingIdentity({length: 10, value: 3});
 ```
 
-## 在泛型约束中使用类型参数
+### 在泛型约束中使用类型参数
 
 我们想要确保这个属性存在于对象`obj`上，因此我们需要在这两个类型之间使用约束。
 
@@ -1418,7 +1353,7 @@ getProperty(x, "a"); // okay
 getProperty(x, "m"); // error: Argument of type 'm' isn't assignable to 'a' | 'b' | 'c' | 'd'.
 ```
 
-## 在泛型里使用类类型
+### 在泛型里使用类类型
 
 在TypeScript使用泛型创建工厂函数时，需要引用构造函数的类类型。比如，
 
@@ -1459,11 +1394,11 @@ createInstance(Lion).keeper.nametag;  // typechecks!
 createInstance(Bee).keeper.hasMask;   // typechecks!
 ```
 
-# 枚举
+# <a name="enums"></a>枚举
 
 TypeScript支持数字的和基于字符串的枚举。
 
-## 数字枚举
+### 数字枚举
 
 > 数字枚举可以被混入到计算过的和常量成员
 
@@ -1484,7 +1419,7 @@ console.log("Direction:", Direction.Down)
 我们还可以完全不使用初始化器：`Up`的值为`0`，`Down`的值为`1`等等。
 当我们不在乎成员的值的时候，这种自增长的行为是很有用处的，但是要注意每个枚举成员的值都是不同的。
 
-## 字符串枚举
+### 字符串枚举
 
 > 在一个字符串枚举里，每个成员都必须用字符串字面量，或另外一个字符串枚举成员进行初始化。
 
@@ -1497,7 +1432,7 @@ enum Direction {
 }
 ```
 
-## 异构枚举（Heterogeneous enums）
+### 异构枚举（Heterogeneous enums）
 
 从技术的角度来说，枚举可以混合字符串和数字成员，但是似乎你并不会这么做：
 
@@ -1560,7 +1495,7 @@ declare enum Enum {
 }
 ```
 
-# Symbols 类型
+# <a name="symbols"></a>Symbol 类型
 
 除了用户定义的symbols，还有一些已经众所周知的内置symbols。
 内置symbols用来表示语言内部的行为。
@@ -1611,7 +1546,7 @@ declare enum Enum {
 
 对象，它自己拥有的属性会被`with`作用域排除在外。
 
-# 可迭代性
+# <a name="iterators"></a>可迭代性
 
 一些内置的类型如`Array`，`Map`，`Set`，`String`，`Int32Array`，`Uint32Array`等都已经实现了各自的`Symbol.iterator`。
 对象上的`Symbol.iterator`函数负责返回供迭代的值。
@@ -1657,7 +1592,7 @@ for (let i of list) {
 
 当目标为兼容ECMAScipt 2015的引擎时，编译器会生成相应引擎的`for..of`内置迭代器实现方式。
 
-# 模块定义
+# <a name="module-def"></a>模块定义
 
 > 模块是自声明的；两个模块之间的关系是通过在文件级别上使用imports和exports建立的。
 > TypeScript与ECMAScript 2015一样，任何包含顶级`import`或者`export`的文件都被当成一个模块。
@@ -1725,7 +1660,7 @@ let myValidator = new validator.ZipCodeValidator();
 import "./my-module.js";
 ```
 
-# 默认导出
+### 默认导出
 
 每个模块都可以有一个`default`导出。
 默认导出使用`default`关键字标记；并且一个模块只能够有一个`default`导出。
@@ -1773,7 +1708,7 @@ strings.forEach(s => {
 });
 ```
 
-# 可选的模块加载和其它高级加载场景
+#### 可选的模块加载和其它高级加载场景
 
 有时候，你只想在某种条件下才加载某个模块。
 在TypeScript里，使用下面的方式来实现它和其它的高级加载场景，我们可以直接调用模块加载器并且可以保证类型完全。
@@ -1834,7 +1769,7 @@ if (needZipValidation) {
 }
 ```
 
-# 使用其它的JavaScript库，它们通常是在`.d.ts`文件里定义的。
+##### 使用其它的JavaScript库，它们通常是在`.d.ts`文件里定义的。
 
 要想描述非TypeScript编写的类库的类型，我们需要声明类库所暴露出的API。
 我们可以使用顶级的`export`声明来为每个模块都定义一个`.d.ts`文件，但最好还是写在一个大的`.d.ts`文件里。
@@ -1869,7 +1804,7 @@ import * as URL from "url";
 let myUrl = URL.parse("http://www.typescriptlang.org");
 ```
 
-### 外部模块简写
+#### 外部模块简写
 
 假如你不想在使用一个新模块之前花时间去编写声明，你可以采用声明的简写形式以便能够快速使用它。
 
@@ -1886,7 +1821,7 @@ import x, {y} from "hot-new-module";
 x(y);
 ```
 
-### 模块声明通配符
+#### 模块声明通配符
 
 ```ts
 declare module "*!text" {
@@ -1910,7 +1845,7 @@ console.log(data, fileContent);
 
 > 模块里不要使用命名空间
 
-### 危险信号
+#### 危险信号
 
 以下均为模块结构上的危险信号。重新检查以确保你没有在对模块使用命名空间：
 
@@ -1918,4 +1853,206 @@ console.log(data, fileContent);
 * 文件只有一个`export class`或`export function` （考虑使用`export default`）
 * 多个文件的顶层具有同样的`export namespace Foo {` （不要以为这些会合并到一个`Foo`中！）
 
+# <a name="namespace"></a>命名空间
 
+> 命名空间是位于全局命名空间下的一个普通的带有名字的JavaScript对象。
+> 像命名空间一样，模块可以包含代码和声明。不同的是模块可以*声明*它的依赖。
+> 对于Node.js应用来说，模块是默认并推荐的组织代码的方式。
+> 不应该对模块使用命名空间，使用命名空间是为了提供逻辑分组和避免命名冲突。
+> 模块文件本身已经是一个逻辑分组，并且它的名字是由导入这个模块的代码指定，所以没有必要为导出的对象增加额外的模块层。
+> 使用命名空间的验证器
+
+```ts
+namespace Validation {
+    export interface StringValidator {
+        isAcceptable(s: string): boolean;
+    }
+
+    const lettersRegexp = /^[A-Za-z]+$/;
+    const numberRegexp = /^[0-9]+$/;
+
+    export class LettersOnlyValidator implements StringValidator {
+        isAcceptable(s: string) {
+            return lettersRegexp.test(s);
+        }
+    }
+
+    export class ZipCodeValidator implements StringValidator {
+        isAcceptable(s: string) {
+            return s.length === 5 && numberRegexp.test(s);
+        }
+    }
+}
+
+// Some samples to try
+let strings = ["Hello", "98052", "101"];
+
+// Validators to use
+let validators: { [s: string]: Validation.StringValidator; } = {};
+validators["ZIP code"] = new Validation.ZipCodeValidator();
+validators["Letters only"] = new Validation.LettersOnlyValidator();
+
+// Show whether each string passed each validator
+for (let s of strings) {
+    for (let name in validators) {
+        console.log(`"${ s }" - ${ validators[name].isAcceptable(s) ? "matches" : "does not match" } ${ name }`);
+    }
+}
+```
+
+> 多文件中的命名空间, 尽管是不同的文件，它们仍是同一个命名空间，并且在使用的时候就如同它们在一个文件中定义的一样。
+> 当涉及到多文件时，我们必须确保所有编译后的代码都被加载了。
+
+我们有两种方式。
+
+第一种方式，把所有的输入文件编译为一个输出文件，需要使用`--outFile`标记：
+
+```Shell
+tsc --outFile sample.js Test.ts
+```
+
+编译器会根据源码里的引用标签自动地对输出进行排序。你也可以单独地指定每个文件。
+
+```Shell
+tsc --outFile sample.js Validation.ts LettersOnlyValidator.ts ZipCodeValidator.ts Test.ts
+```
+
+第二种方式，我们可以编译每一个文件（默认方式），那么每个源文件都会对应生成一个JavaScript文件。
+然后，在页面上通过`<script>`标签把所有生成的JavaScript文件按正确的顺序引进来，比如：
+
+##### MyTestPage.html (excerpt)
+
+```html
+    <script src="Validation.js" type="text/javascript" />
+    <script src="LettersOnlyValidator.js" type="text/javascript" />
+    <script src="ZipCodeValidator.js" type="text/javascript" />
+    <script src="Test.js" type="text/javascript" />
+```
+
+## 别名
+
+另一种简化命名空间操作的方法是使用`import q = x.y.z`给常用的对象起一个短的名字。
+不要与用来加载模块的`import x = require('name')`语法弄混了，这里的语法是为指定的符号创建一个别名。
+你可以用这种方法为任意标识符创建别名，也包括导入的模块中的对象。
+
+```ts
+namespace Shapes {
+    export namespace Polygons {
+        export class Triangle { }
+        export class Square { }
+    }
+}
+
+import polygons = Shapes.Polygons;
+let sq = new polygons.Square(); // Same as "new Shapes.Polygons.Square()"
+```
+
+注意，我们并没有使用`require`关键字，而是直接使用导入符号的限定名赋值。
+这与使用`var`相似，但它还适用于类型和导入的具有命名空间含义的符号。
+重要的是，对于值来讲，`import`会生成与原始符号不同的引用，所以改变别名的`var`值并不会影响原始变量的值。
+
+### 外部命名空间
+
+流行的程序库D3在全局对象`d3`里定义它的功能。
+因为这个库通过一个`<script>`标签加载（不是通过模块加载器），它的声明文件使用内部模块来定义它的类型。
+为了让TypeScript编译器识别它的类型，我们使用外部命名空间声明。
+比如，我们可以像下面这样写：
+
+##### D3.d.ts (部分摘录)
+
+```ts
+declare namespace D3 {
+    export interface Selectors {
+        select: {
+            (selector: string): Selection;
+            (element: EventTarget): Selection;
+        };
+    }
+
+    export interface Event {
+        x: number;
+        y: number;
+    }
+
+    export interface Base extends Selectors {
+        event: Event;
+    }
+}
+
+declare var d3: D3.Base;
+```
+
+# <a name="declare-merge"></a>声明合并
+
+> “声明合并”是指编译器将针对同一个名字的两个独立声明合并为单一声明。
+> 合并后的声明同时拥有原先两个声明的特性。
+> 任何数量的声明都可被合并；不局限于两个声明。
+
+### 基础概念
+
+TypeScript中的声明会创建以下三种实体之一：命名空间，类型或值。
+
+| Declaration Type | Namespace | Type | Value |
+|------------------|:---------:|:----:|:-----:|
+| Namespace        |     X     |      |   X   |
+| Class            |           |   X  |   X   |
+| Enum             |           |   X  |   X   |
+| Interface        |           |   X  |       |
+| Type Alias       |           |   X  |       |
+| Function         |           |      |   X   |
+| Variable         |           |      |   X   |
+
+理解每个声明创建了什么，有助于理解当声明合并时有哪些东西被合并了。
+
+#### 合并接口
+
+从根本上说，合并的机制是把双方的成员放到一个同名的接口里。
+
+```ts
+interface Box {
+    height: number;
+    width: number;
+}
+
+interface Box {
+    scale: number;
+}
+
+let box: Box = {height: 5, width: 6, scale: 10};
+```
+
+接口的非函数的成员应该是唯一的。
+如果它们不是唯一的，那么它们必须是相同的类型。
+如果两个接口中同时声明了同名的非函数成员且它们的类型不同，则编译器会报错。
+对于函数成员，每个同名函数声明都会被当成这个函数的一个重载。
+
+* 同时需要注意，当接口`A`与后来的接口`A`合并时，后面的接口具有更高的优先级。
+* 注意每组接口里的声明顺序保持不变，但各组接口之间的顺序是后来的接口重载出现在靠前位置。
+* 合并命名空间，非导出成员仅在其原有的（合并前的）命名空间内可见。合并之后，从其它命名空间合并进来的成员无法访问非导出成员。
+
+# <a name="Triple-Slash"></a> 三斜线指令
+
+> 三斜线指令是包含单个XML标签的单行注释。
+> 注释的内容会做为编译器指令使用。
+
+三斜线指令*仅*可放在包含它的文件的最顶端。
+一个三斜线指令的前面只能出现单行或多行注释，这包括其它的三斜线指令。
+如果它们出现在一个语句或声明之后，那么它们会被当做普通的单行注释，并且不具有特殊的涵义。
+
+> 用于声明文件间的*依赖*。
+
+```ts
+/// <reference path="..." />
+```
+
+> 声明了对某个包的依赖，仅当在你需要写一个`d.ts`文件时才使用这个指令。
+
+```ts
+/// <reference types="..." />
+```
+
+> 把一个文件标记成*默认库*。你会在`lib.d.ts`文件和它不同的变体的顶端看到这个注释。
+
+```ts
+/// <reference no-default-lib="true"/>
+```
