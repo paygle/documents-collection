@@ -10,7 +10,7 @@
 
 ### ArrayBuffer 函数
 
-### Base64 对象
+### Base64 （类）对象
 
 * atob() 函数
 * btoa() 函数
@@ -25,9 +25,9 @@
 * utob() 函数
 * VERSION 版本
 
-### Boolean
+### Boolean 类型
 
-### Buffer
+### Buffer （类）对象
 
 * alloc() 函数
 * allocUnsafe() 函数
@@ -48,7 +48,7 @@
 
 ### clearTimeout() 函数
 
-### console 对象
+### console （类）对象
 
 ### COUNTER_HTTP_CLIENT_REQUEST() 函数
 
@@ -108,7 +108,7 @@
 
 ### Int8Array() 函数
 
-### Intl 对象
+### Intl （类）对象
 
 * Collator() 函数
 * DateTimeFormat() 函数
@@ -200,7 +200,7 @@
 
 ### ReferenceError() 函数
 
-### Reflect 对象
+### Reflect （类）对象
 
 * apply() 函数
 * construct() 函数
