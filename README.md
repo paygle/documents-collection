@@ -1,9 +1,17 @@
-# 编程帮助文档
+# 帮助文档
 
 ## java文档
+
 ```txt
 1. java基础语法
 2. simple.example 一个简单例子
+
+```
+
+## java/kotlin 基础
+
+```txt
+1. kotlin语法
 
 ```
 
