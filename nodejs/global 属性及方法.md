@@ -6,7 +6,7 @@
 * ipv6 (string)
 * mac (string)
 
-### Array 函数
+### Array 类型
 
 ### ArrayBuffer 函数
 
@@ -64,7 +64,7 @@
 
 ### DateView() 函数
 
-### Date() 函数
+### Date() 类型
 
 ### decodeURI() 函数
 
@@ -94,19 +94,19 @@
 
 ### EvalError() 函数
 
-### Float32Array() 函数
+### Float32Array() 类型
 
-### Float64Array() 函数
+### Float64Array() 类型
 
 ### Function 函数
 
 ### Infinity 类型
 
-### Int16Array() 函数
+### Int16Array() 类型
 
-### Int32Array() 函数
+### Int32Array() 类型
 
-### Int8Array() 函数
+### Int8Array() 类型
 
 ### Intl （类）对象
 
@@ -119,17 +119,17 @@
 
 ### isNaN() 函数
 
-### JSON 函数
+### JSON 对象
 
-### Map 函数
+### Map 类型
 
-### Math 函数
+### Math 对象
 
 ### NaN 类型
 
-### Number() 函数
+### Number() 类型
 
-### Object() 函数
+### Object() 类型
 
 ### parseFloat() 函数
 
@@ -220,7 +220,7 @@
 
 ### root 对象，其属性方法与 global 一致
 
-### Set() 函数
+### Set() 类型
 
 ### setImmediate() 函数
 
@@ -228,9 +228,9 @@
 
 ### setTimeout() 函数
 
-### String() 函数
+### String() 类型
 
-### Symbol() 函数
+### Symbol() 类型
 
 * arguments
 * caller
@@ -255,13 +255,13 @@
 
 ### TypeError() 函数
 
-### Uint16Array() 函数
+### Uint16Array() 类型
 
-### Uint32Array() 函数
+### Uint32Array() 类型
 
-### Uint8Array() 函数
+### Uint8Array() 类型
 
-### Uint8ClampedArray() 函数
+### Uint8ClampedArray() 类型
 
 ### undefined 类型
 
@@ -269,6 +269,6 @@
 
 ### URIError() 函数
 
-### WeakMap() 函数
+### WeakMap 对象
 
-### WeakSet() 函数
+### WeakSet 对象
