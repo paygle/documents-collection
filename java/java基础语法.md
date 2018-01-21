@@ -60,6 +60,416 @@ public class Something{
 }
 ```
 
+## Java 数据结构
+
+### 枚举（Enumeration）
+
+虽然它本身不属于数据结构,但它在其他数据结构的范畴里应用很广。 枚举（The Enumeration）接口定义了一种从数据结构中取回连续元素的方式。
+
+```java
+import java.util.Vector;
+import java.util.Enumeration;
+ 
+public class EnumerationTester {
+ 
+   public static void main(String args[]) {
+      Enumeration<String> days;
+      Vector<String> dayNames = new Vector<String>();
+      dayNames.add("Sunday");
+      dayNames.add("Monday");
+      dayNames.add("Tuesday");
+      dayNames.add("Wednesday");
+      dayNames.add("Thursday");
+      dayNames.add("Friday");
+      dayNames.add("Saturday");
+      days = dayNames.elements();
+      while (days.hasMoreElements()){
+         System.out.println(days.nextElement()); 
+      }
+   }
+}
+```
+
+### 位集合（BitSet）
+
+Bitset类创建一种特殊类型的数组来保存位值。BitSet中数组大小会随需要增加。这和位向量（vector of bits）比较类似。
+
+```java
+import java.util.BitSet;
+ 
+public class BitSetDemo {
+ 
+  public static void main(String args[]) {
+     BitSet bits1 = new BitSet(16);
+     BitSet bits2 = new BitSet(16);
+      
+     // set some bits
+     for(int i=0; i<16; i++) {
+        if((i%2) == 0) bits1.set(i);
+        if((i%5) != 0) bits2.set(i);
+     }
+     System.out.println("Initial pattern in bits1: ");
+     System.out.println(bits1);
+     System.out.println("\nInitial pattern in bits2: ");
+     System.out.println(bits2);
+ 
+     // AND bits
+     bits2.and(bits1);
+     System.out.println("\nbits2 AND bits1: ");
+     System.out.println(bits2);
+ 
+     // OR bits
+     bits2.or(bits1);
+     System.out.println("\nbits2 OR bits1: ");
+     System.out.println(bits2);
+ 
+     // XOR bits
+     bits2.xor(bits1);
+     System.out.println("\nbits2 XOR bits1: ");
+     System.out.println(bits2);
+  }
+}
+```
+
+### 向量（Vector）
+
+向量（Vector）类和传统数组非常相似，但是Vector的大小能根据需要动态的变化。
+
+和数组一样，Vector对象的元素也能通过索引访问。
+
+使用Vector类最主要的好处就是在创建对象的时候不必给对象指定大小，它的大小会根据需要动态的变化。
+
+```java
+import java.util.*;
+
+public class VectorDemo {
+
+   public static void main(String args[]) {
+      // initial size is 3, increment is 2
+      Vector v = new Vector(3, 2);
+      System.out.println("Initial size: " + v.size());
+      System.out.println("Initial capacity: " +
+      v.capacity());
+      v.addElement(new Integer(1));
+      v.addElement(new Integer(2));
+      v.addElement(new Integer(3));
+      v.addElement(new Integer(4));
+      System.out.println("Capacity after four additions: " +
+          v.capacity());
+
+      v.addElement(new Double(5.45));
+      System.out.println("Current capacity: " +
+      v.capacity());
+      v.addElement(new Double(6.08));
+      v.addElement(new Integer(7));
+      System.out.println("Current capacity: " +
+      v.capacity());
+      v.addElement(new Float(9.4));
+      v.addElement(new Integer(10));
+      System.out.println("Current capacity: " +
+      v.capacity());
+      v.addElement(new Integer(11));
+      v.addElement(new Integer(12));
+      System.out.println("First element: " +
+         (Integer)v.firstElement());
+      System.out.println("Last element: " +
+         (Integer)v.lastElement());
+      if(v.contains(new Integer(3)))
+         System.out.println("Vector contains 3.");
+      // enumerate the elements in the vector.
+      Enumeration vEnum = v.elements();
+      System.out.println("\nElements in vector:");
+      while(vEnum.hasMoreElements())
+         System.out.print(vEnum.nextElement() + " ");
+      System.out.println();
+   }
+}
+```
+
+### 栈（Stack）
+
+实现了一个后进先出（LIFO）的数据结构。
+
+你可以把栈理解为对象的垂直分布的栈，当你添加一个新元素时，就将新元素放在其他元素的顶部。
+
+当你从栈中取元素的时候，就从栈顶取一个元素。换句话说，最后进栈的元素最先被取出。
+
+```java
+import java.util.*;
+ 
+public class StackDemo {
+ 
+    static void showpush(Stack<Integer> st, int a) {
+        st.push(new Integer(a));
+        System.out.println("push(" + a + ")");
+        System.out.println("stack: " + st);
+    }
+ 
+    static void showpop(Stack<Integer> st) {
+        System.out.print("pop -> ");
+        Integer a = (Integer) st.pop();
+        System.out.println(a);
+        System.out.println("stack: " + st);
+    }
+ 
+    public static void main(String args[]) {
+        Stack<Integer> st = new Stack<Integer>();
+        System.out.println("stack: " + st);
+        showpush(st, 42);
+        showpush(st, 66);
+        showpush(st, 99);
+        showpop(st);
+        showpop(st);
+        showpop(st);
+        try {
+            showpop(st);
+        } catch (EmptyStackException e) {
+            System.out.println("empty stack");
+        }
+    }
+}
+```
+
+### Map接口来获取键/值的存储功能。
+
+* 给定一个键和一个值，你可以将该值存储在一个Map对象. 之后，你可以通过键来访问对应的值。
+* 当访问的值不存在的时候，方法就会抛出一个NoSuchElementException异常.
+* 当对象的类型和Map里元素类型不兼容的时候，就会抛出一个 ClassCastException异常。
+* 当在不允许使用Null对象的Map中使用Null对象，会抛出一个NullPointerException 异常。
+* 当尝试修改一个只读的Map时，会抛出一个UnsupportedOperationException异常。
+
+```java
+import java.util.*;
+
+public class CollectionsDemo {
+
+   public static void main(String[] args) {
+      Map m1 = new HashMap(); 
+      m1.put("Zara", "8");
+      m1.put("Mahnaz", "31");
+      m1.put("Ayan", "12");
+      m1.put("Daisy", "14");
+      System.out.println();
+      System.out.println(" Map Elements");
+      System.out.print("\t" + m1);
+   }
+}
+```
+
+### 哈希表（Hashtable）
+
+Hashtable类提供了一种在用户定义键结构的基础上来组织数据的手段。
+
+例如，在地址列表的哈希表中，你可以根据邮政编码作为键来存储和排序数据，而不是通过人名。
+
+哈希表键的具体含义完全取决于哈希表的使用情景和它包含的数据。
+
+```java
+import java.util.*;
+
+public class HashTableDemo {
+
+   public static void main(String args[]) {
+      // Create a hash map
+      Hashtable balance = new Hashtable();
+      Enumeration names;
+      String str;
+      double bal;
+
+      balance.put("Zara", new Double(3434.34));
+      balance.put("Mahnaz", new Double(123.22));
+      balance.put("Ayan", new Double(1378.00));
+      balance.put("Daisy", new Double(99.22));
+      balance.put("Qadir", new Double(-19.08));
+
+      // Show all balances in hash table.
+      names = balance.keys();
+      while(names.hasMoreElements()) {
+         str = (String) names.nextElement();
+         System.out.println(str + ": " +
+         balance.get(str));
+      }
+      System.out.println();
+      // Deposit 1,000 into Zara's account
+      bal = ((Double)balance.get("Zara")).doubleValue();
+      balance.put("Zara", new Double(bal+1000));
+      System.out.println("Zara's new balance: " +
+      balance.get("Zara"));
+   }
+}
+```
+
+### 属性（Properties）
+
+Properties 继承于 Hashtable.Properties 类表示了一个持久的属性集.属性列表中每个键及其对应值都是一个字符串。
+
+Properties 类被许多Java类使用。例如，在获取环境变量时它就作为System.getProperties()方法的返回值。
+
+```java
+import java.util.*;
+
+public class PropDemo {
+
+   public static void main(String args[]) {
+      Properties capitals = new Properties();
+      Set states;
+      String str;
+      
+      capitals.put("Illinois", "Springfield");
+      capitals.put("Missouri", "Jefferson City");
+      capitals.put("Washington", "Olympia");
+      capitals.put("California", "Sacramento");
+      capitals.put("Indiana", "Indianapolis");
+
+      // Show all states and capitals in hashtable.
+      states = capitals.keySet(); // get set-view of keys
+      Iterator itr = states.iterator();
+      while(itr.hasNext()) {
+         str = (String) itr.next();
+         System.out.println("The capital of " +
+            str + " is " + capitals.getProperty(str) + ".");
+      }
+      System.out.println();
+
+      // look for state not in list -- specify default
+      str = capitals.getProperty("Florida", "Not Found");
+      System.out.println("The capital of Florida is "
+          + str + ".");
+   }
+}
+```
+
+## Java 泛型
+
+泛型提供了编译时类型安全检测机制，该机制允许程序员在编译时检测到非法的类型。
+
+泛型的本质是参数化类型，也就是说所操作的数据类型被指定为一个参数。
+
+> 定义泛型方法的规则：
+
+* 所有泛型方法声明都有一个类型参数声明部分（由尖括号分隔），该类型参数声明部分在方法返回类型之前（在下面例子中的<E>）。
+* 每一个类型参数声明部分包含一个或多个类型参数，参数间用逗号隔开。一个泛型参数，也被称为一个类型变量，是用于指定一个泛型类型名称的标识符。
+* 类型参数能被用来声明返回值类型，并且能作为泛型方法得到的实际参数类型的占位符。
+* 泛型方法体的声明和其他方法一样。注意类型参数只能代表引用型类型，不能是原始类型（像int,double,char的等）。
+
+```java
+//可能有时候，你会想限制那些被允许传递到一个类型参数的类型种类范围。
+//例如，一个操作数字的方法可能只希望接受Number或者Number子类的实例。这就是有界类型参数的目的。
+
+//要声明一个有界的类型参数，首先列出类型参数的名称，后跟extends关键字，最后紧跟它的上界。
+
+public class MaximumTest
+{
+   // 比较三个值并返回最大值
+   public static <T extends Comparable<T>> T maximum(T x, T y, T z)
+   {                     
+      T max = x; // 假设x是初始最大值
+      if ( y.compareTo( max ) > 0 ){
+         max = y; //y 更大
+      }
+      if ( z.compareTo( max ) > 0 ){
+         max = z; // 现在 z 更大           
+      }
+      return max; // 返回最大对象
+   }
+   public static void main( String args[] )
+   {
+      System.out.printf( "%d, %d 和 %d 中最大的数为 %d\n\n",
+                   3, 4, 5, maximum( 3, 4, 5 ) );
+ 
+      System.out.printf( "%.1f, %.1f 和 %.1f 中最大的数为 %.1f\n\n",
+                   6.6, 8.8, 7.7, maximum( 6.6, 8.8, 7.7 ) );
+ 
+      System.out.printf( "%s, %s 和 %s 中最大的数为 %s\n","pear",
+         "apple", "orange", maximum( "pear", "apple", "orange" ) );
+   }
+}
+```
+
+```java
+// 定义一个泛型类
+public class Box<T> {
+   
+  private T t;
+ 
+  public void add(T t) {
+    this.t = t;
+  }
+ 
+  public T get() {
+    return t;
+  }
+ 
+  public static void main(String[] args) {
+    Box<Integer> integerBox = new Box<Integer>();
+    Box<String> stringBox = new Box<String>();
+ 
+    integerBox.add(new Integer(10));
+    stringBox.add(new String("菜鸟教程"));
+ 
+    System.out.printf("整型值为 :%d\n\n", integerBox.get());
+    System.out.printf("字符串为 :%s\n", stringBox.get());
+  }
+}
+```
+
+## Java 序列化
+
+该机制中，一个对象可以被表示为一个字节序列，该字节序列包括该对象的数据、有关对象的类型的信息和存储在对象中数据的类型。
+
+类 ObjectInputStream 和 ObjectOutputStream 是高层次的数据流，它们包含序列化和反序列化对象的方法。
+
+```java
+public class Employee implements java.io.Serializable
+{
+   public String name;
+   public String address;
+   public transient int SSN;
+   public int number;
+   public void mailCheck()
+   {
+      System.out.println("Mailing a check to " + name
+                           + " " + address);
+   }
+}
+```
+* __请注意__，一个类的对象要想序列化成功，必须满足两个条件：
+
+> 该类必须实现 __java.io.Serializable__ 对象。
+
+> 该类的所有属性必须是可序列化的。如果有一个属性不是可序列化的，则该属性必须注明是短暂的。
+
+> 如果你想知道一个 Java 标准类是否是可序列化的，请查看该类的文档。检验一个类的实例是否能序列化十分简单， 只需要查看该类有没有实现 java.io.Serializable接口。
+
+```java
+import java.io.*;
+ 
+public class SerializeDemo
+{
+   public static void main(String [] args)
+   {
+      Employee e = new Employee();
+      e.name = "Reyan Ali";
+      e.address = "Phokka Kuan, Ambehta Peer";
+      e.SSN = 11122333;
+      e.number = 101;
+      try
+      {
+         FileOutputStream fileOut =
+         new FileOutputStream("/tmp/employee.ser");
+         ObjectOutputStream out = new ObjectOutputStream(fileOut);
+         out.writeObject(e);
+         out.close();
+         fileOut.close();
+         System.out.printf("Serialized data is saved in /tmp/employee.ser");
+      }catch(IOException i)
+      {
+          i.printStackTrace();
+      }
+   }
+}
+```
+
 ## Java关键字
 
 > 下面列出了Java保留字。这些保留字不能用于常量、变量、和任何标识符的名称。
@@ -873,3 +1283,218 @@ public class InsufficientFundsException extends Exception
   }
 }
 ```
+
+## Java 网络编程
+
+java.net 包中提供了两种常见的网络协议的支持：
+
+* TCP：TCP 是传输控制协议的缩写，它保障了两个应用程序之间的可靠通信。通常用于互联网协议，被称 TCP / IP。
+
+* UDP：UDP 是用户数据报协议的缩写，一个无连接的协议。提供了应用程序之间要发送的数据的数据包。
+
+### Socket 编程
+
+java.net.Socket 类代表一个套接字，并且 java.net.ServerSocket 类为服务器程序提供了一种来监听客户端，并与他们建立连接的机制。
+
+> 以下步骤在两台计算机之间使用套接字建立TCP连接时会出现：
+
++ 服务器实例化一个 ServerSocket 对象，表示通过服务器上的端口通信。
+
++ 服务器调用 ServerSocket 类的 accept() 方法，该方法将一直等待，直到客户端连接到服务器上给定的端口。
+
++ 服务器正在等待时，一个客户端实例化一个 Socket 对象，指定服务器名称和端口号来请求连接。
+
++ Socket 类的构造函数试图将客户端连接到指定的服务器和端口号。如果通信被建立，则在客户端创建一个 Socket 对象能够与服务器进行通信。
+
++ 在服务器端，accept() 方法返回服务器上一个新的 socket 引用，该 socket 连接到客户端的 socket。
+
+连接建立后，通过使用 I/O 流在进行通信，每一个socket都有一个输出流和一个输入流，客户端的输出流连接到服务器端的输入流，而客户端的输入流连接到服务器端的输出流。
+
+TCP 是一个双向的通信协议，因此数据可以通过两个数据流在同一时间发送.以下是一些类提供的一套完整的有用的方法来实现 socket。
+
+## Java 多线程编程
+
+> 创建一个线程，Java 提供了三种创建线程的方法
+
+* 通过实现 Runnable 接口；
+
+```java
+class RunnableDemo implements Runnable {
+   private Thread t;
+   private String threadName;
+   
+   RunnableDemo( String name) {
+      threadName = name;
+      System.out.println("Creating " +  threadName );
+   }
+   
+   public void run() {
+      System.out.println("Running " +  threadName );
+      try {
+         for(int i = 4; i > 0; i--) {
+            System.out.println("Thread: " + threadName + ", " + i);
+            // 让线程睡眠一会
+            Thread.sleep(50);
+         }
+      }catch (InterruptedException e) {
+         System.out.println("Thread " +  threadName + " interrupted.");
+      }
+      System.out.println("Thread " +  threadName + " exiting.");
+   }
+   
+   public void start () {
+      System.out.println("Starting " +  threadName );
+      if (t == null) {
+         t = new Thread (this, threadName);
+         t.start ();
+      }
+   }
+}
+ 
+public class TestThread {
+ 
+   public static void main(String args[]) {
+      RunnableDemo R1 = new RunnableDemo( "Thread-1");
+      R1.start();
+      
+      RunnableDemo R2 = new RunnableDemo( "Thread-2");
+      R2.start();
+   }   
+}
+```
+
+* 通过继承 Thread 类本身；
+
+```java
+class ThreadDemo extends Thread {
+   private Thread t;
+   private String threadName;
+   
+   ThreadDemo( String name) {
+      threadName = name;
+      System.out.println("Creating " +  threadName );
+   }
+   
+   public void run() {
+      System.out.println("Running " +  threadName );
+      try {
+         for(int i = 4; i > 0; i--) {
+            System.out.println("Thread: " + threadName + ", " + i);
+            // 让线程睡眠一会
+            Thread.sleep(50);
+         }
+      }catch (InterruptedException e) {
+         System.out.println("Thread " +  threadName + " interrupted.");
+      }
+      System.out.println("Thread " +  threadName + " exiting.");
+   }
+   
+   public void start () {
+      System.out.println("Starting " +  threadName );
+      if (t == null) {
+         t = new Thread (this, threadName);
+         t.start ();
+      }
+   }
+}
+ 
+public class TestThread {
+ 
+   public static void main(String args[]) {
+      ThreadDemo T1 = new ThreadDemo( "Thread-1");
+      T1.start();
+      
+      ThreadDemo T2 = new ThreadDemo( "Thread-2");
+      T2.start();
+   }   
+}
+```
+
+* 通过 Callable 和 Future 创建线程。
+
+```java
+public class CallableThreadTest implements Callable<Integer> {
+    public static void main(String[] args)  
+    {  
+        CallableThreadTest ctt = new CallableThreadTest();  
+        FutureTask<Integer> ft = new FutureTask<>(ctt);  
+        for(int i = 0;i < 100;i++)  
+        {  
+            System.out.println(Thread.currentThread().getName()+" 的循环变量i的值"+i);  
+            if(i==20)  
+            {  
+                new Thread(ft,"有返回值的线程").start();  
+            }  
+        }  
+        try  
+        {  
+            System.out.println("子线程的返回值："+ft.get());  
+        } catch (InterruptedException e)  
+        {  
+            e.printStackTrace();  
+        } catch (ExecutionException e)  
+        {  
+            e.printStackTrace();  
+        }  
+  
+    }
+    @Override  
+    public Integer call() throws Exception  
+    {  
+        int i = 0;  
+        for(;i<100;i++)  
+        {  
+            System.out.println(Thread.currentThread().getName()+" "+i);  
+        }  
+        return i;  
+    }  
+}
+```
+
+创建线程的三种方式的对比
+
+1. 采用实现 Runnable、Callable 接口的方式创见多线程时，线程类只是实现了 Runnable 接口或 Callable 接口，还可以继承其他类。
+
+2. 使用继承 Thread 类的方式创建多线程时，编写简单，如果需要访问当前线程，则无需使用 Thread.currentThread() 方法，直接使用 this 即可获得当前线程。
+
+* 线程的几个主要概念： 线程同步；线程间通信；线程死锁；线程控制（挂起、停止和恢复）。
+
+## Java 文档注释
+
+|标签	|描述	|示例|
+|-------|----------------|------------------|
+|@author	|标识一个类的作者|	@author description|
+|@deprecated	|指名一个过期的类或成员|	@deprecated description|
+|{@docRoot}	|指明当前文档根目录的路径	|Directory Path|
+|@exception	|标志一个类抛出的异常	|@exception exception-name explanation|
+|{@inheritDoc}	|从直接父类继承的注释|	Inherits a comment from the immediate surperclass.|
+|{@link}	|插入一个到另一个主题的链接|	{@link name text}|
+|{@linkplain}	|插入一个到另一个主题的链接，但是该链接显示纯文本字体|	Inserts an in-line link to another topic.|
+|@param	|说明一个方法的参数|	@param parameter-name explanation|
+|@return	|说明返回值类型|	@return explanation|
+|@see	|指定一个到另一个主题的链接|	@see anchor|
+|@serial	|说明一个序列化属性|	@serial description|
+|@serialData	|说明通过writeObject( ) 和 writeExternal( )方法写的数据|	@serialData description|
+|@serialField	|说明一个ObjectStreamField组件|	@serialField name type description|
+|@since	|标记当引入一个特定的变化时|	@since release|
+|@throws	|和 @exception标签一样.|	The @throws tag has the same meaning as the @exception tag.|
+|{@value}	|显示常量的值，该常量必须是static属性。|	Displays the value of a constant, which must be a static field.|
+|@version	|指定类的版本	|@version info|
+
+## Java8 新增了非常多的特性，我们主要讨论以下几个：
+
+* __Lambda 表达式__ − Lambda允许把函数作为一个方法的参数（函数作为参数传递进方法中。
+
+* __方法引用__ − 方法引用提供了非常有用的语法，可以直接引用已有Java类或对象（实例）的方法或构造器。与lambda联合使用，方法引用可以使语言的构造更紧凑简洁，减少冗余代码。
+
+* __默认方法__ − 默认方法就是一个在接口里面有了一个实现的方法。
+
+* __新工具__ − 新的编译工具，如：Nashorn引擎 jjs、 类依赖分析器jdeps。
+
+* __Stream API__ −新添加的Stream API（java.util.stream） 把真正的函数式编程风格引入到Java中。
+
+* __Date Time API__ − 加强对日期与时间的处理。
+
+* __Optional 类__ − Optional 类已经成为 Java 8 类库的一部分，用来解决空指针异常。
+
+* __Nashorn, JavaScript 引擎__ − Java 8提供了一个新的Nashorn javascript引擎，它允许我们在JVM上运行特定的javascript应用。
