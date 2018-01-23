@@ -686,3 +686,189 @@ print (KelvinToFahrenheit(-5))
 ```
 
 ## Python3异常处理
+
+|标准异常名称|描述|
+|-------------|-------------------------------------------|
+|Exception|所有异常的基类|
+|StopIteration|当一个迭代器的 next()方法不指向任何对象时引发|
+|SystemExit|由 sys.exit()函数引发|
+|StandardError|除了StopIteration异常和SystemExit，所有内置异常的基类|
+|ArithmeticError|数值计算所发生的所有错误的基类|
+|OverflowError|当数字类型计算超过最高限额引发|
+|FloatingPointError|当一个浮点运算失败时触发|
+|ZeroDivisonError|当除运算或模零在所有数值类型运算时引发|
+|AssertionError|断言语句失败的情况下引发|
+|AttributeError|属性引用或赋值失败的情况下引发|
+|EOFError|当从 raw_input() 与 input() 函数输入，到达文件末尾时触发|
+|ImportError|当一个 import 语句失败时触发|
+|KeyboardInterrupt|当用户中断程序执行，通常是通过按 Ctrl+c 引发|
+|LookupError|所有查找错误基类|
+|IndexError|当在一个序列中没有找到一个索引时引发|
+| KeyError|当指定的键没有在字典中找到引发|
+|NameError|当在局部或全局命名空间中找不到的标识引发|
+|UnboundLocalError|试图访问在函数或方法的局部变量时引发，但没有值分配给它。|
+|EnvironmentError|Python环境之外发生的所有异常的基类。|
+|IOError|当一个输入/输出操作失败，如打印语句或 open()函数试图打开不存在的文件时引发操作系统相关的错误时引发|
+|SyntaxError|当在Python语法错误引发；|
+|IndentationError|没有正确指定缩进引发。|
+|SystemError|当解释器发现一个内部问题，但遇到此错误时，Python解释器不退出引发|
+|SystemExit	|当Python解释器不使用sys.exit()函数引发。如果代码没有被处理，解释器会退出。当操作或函数在指定数据类型无效时引发|
+|ValueError	|在内置函数对于数据类型，参数的有效类型时引发，但是参数指定了无效值|
+|RuntimeError|当生成的错误不属于任何类别时引发|
+|NotImplementedError|当要在继承的类来实现，抽象方法实际上没有实现时引发此异常|
+
+### 处理异常
+
+```py
+try:
+   You do your operations here
+   ......................
+except ExceptionI:
+   If there is ExceptionI, then execute this block.
+except ExceptionII:
+   If there is ExceptionII, then execute this block.
+   ......................
+else:
+   If there is no exception then execute this block.
+```
+
+实例
+
+```py
+#!/usr/bin/python3
+
+try:
+   fh = open("testfile", "r")
+   fh.write("This is my test file for exception handling!!")
+except IOError:
+   print ("Error: can\'t find file or read data")
+else:
+   print ("Written content in the file successfully")
+```
+
+### except子句与多个异常
+
+```py
+try:
+   You do your operations here
+   ......................
+except(Exception1[, Exception2[,...ExceptionN]]]):
+   If there is any exception from the given exception list, 
+   then execute this block.
+   ......................
+else:
+   If there is no exception then execute this block.
+```
+
+### try-finally子句
+
+```py
+try:
+   You do your operations here
+   ......................
+   Due to any exception, this may be skipped.
+finally:
+   This would always be executed.
+   ......................
+```
+
+实例
+
+```py
+#!/usr/bin/python3
+
+try:
+   fh = open("testfile", "w")
+   try:
+      fh.write("This is my test file for exception handling!!")
+   finally:
+      print ("Going to close the file")
+      fh.close()
+except IOError:
+   print ("Error: can\'t find file or read data")
+```
+
+### 异常的参数
+
+如果写代码来处理一个异常，可以使用一个变量按照异常的名称在 except 语句中。 如果要捕捉多个异常，可以使用一个变量后跟一个异常的元组。
+
+该变量接收大多含有异常的原因各种值。变量可以在一个元组的形式以接收一个或多个值。这个元组通常包含错误字符串，错误编号，以及错误位置。
+
+```py
+try:
+   You do your operations here
+   ......................
+except ExceptionType as Argument:
+   You can print value of Argument here...
+```
+
+实例
+
+```py
+#!/usr/bin/python3
+
+# Define a function here.
+def temp_convert(var):
+   try:
+      return int(var)
+   except ValueError, as Argument:
+      print ("The argument does not contain numbers\n", Argument)
+
+# Call above function here.
+temp_convert("xyz")
+```
+
+### 引发异常
+
+```py
+raise [Exception [, args [, traceback]]]
+```
+
+这里，Exception 是异常的类型(例如，NameError)argument 为异常的参数值。该参数是可选的;如果没有提供，异常的参数是None。
+最后一个参数 traceback，也可选的(并在实践中很少使用)，并且如果存在的话，是用于异常的回溯对象。
+
+```py
+def functionName( level ):
+    if level <1:
+        raise Exception(level)
+        # The code below to this would not be executed
+        # if we raise the exception
+    return level
+```
+
+实例
+
+```py
+#!/usr/bin/python3
+def functionName( level ):
+    if level <1:
+        raise Exception(level)
+        # The code below to this would not be executed
+        # if we raise the exception
+    return level
+
+try:
+    l=functionName(-10)
+    print ("level=",l)
+except Exception as e:
+    print ("error in level argument",e.args[0])
+```
+
+### 用户定义的异常
+
+在try块，用户定义的异常将引发，并夹在 except 块中。 变量e是用来创建网络错误 Networkerror 类的实例。
+
+```py
+class Networkerror(RuntimeError):
+   def __init__(self, arg):
+      self.args = arg
+```
+
+所以上面的类定义后，可以引发异常如下
+
+```py
+try:
+   raise Networkerror("Bad hostname")
+except Networkerror,e:
+   print e.args
+```
