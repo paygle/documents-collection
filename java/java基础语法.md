@@ -1,5 +1,46 @@
 # Java 基础语法
 
+* [Java 包](#golang)
+* [枚举 Enumeration](#enumeration)
+* [位集合 BitSet](#bitset)
+* [向量 Vector ](#vector)
+* [栈 Stack ](#stack)
+* [Map接口来获取键/值的存储功能](#map)
+* [哈希表 Hashtable](#hashtable)
+* [属性 Properties](#property)
+* [泛型](#genericity)
+* [序列化](#serialize)
+* [Java关键字](#keywords)
+* [标识符](#identifier)
+* [修饰符](#modifier)
+* [变量](#variable)
+* [对象和类](#objclass)
+* [接口 interface](#interface)
+* [接口的实现 implements](#implements)
+* [接口的继承 extends](#extends)
+* [基本数据类型](#basetype)
+* [变量类型](#vartype)
+* [访问控制修饰符](#ctrlmodifier)
+* [static 修饰符](#static)
+* [final 修饰符](#final)
+* [abstract 修饰符](#abstract)
+* [synchronized 修饰符](#synchronized)
+* [transient 修饰符](#transient)
+* [volatile 修饰符](#volatile)
+* [java运算符](#operator)
+* [while/do...while/for 循环](#dowhilefor)
+* [分支语句结构](#ifswitch)
+* [类型包装器](#decorator)
+* [数组](#array)
+* [Java 异常处理](#exception)
+* [throws/throw 关键字](#throws)
+* [声明自定义异常](#customexc)
+* [Socket 编程](#socket)
+* [Java 多线程编程](#multithread)
+* [Java 文档注释](#doccomment)
+* [Java8 新增特性](#java8new)
+
+
 * 一个Java程序可以认为是一系列对象的集合，而这些对象通过调用彼此的方法来协同工作。下面简要介绍下类、对象、方法和实例变量的概念。
 
 * 对象：对象是类的一个实例，有状态和行为。例如，一条狗是一个对象，它的状态有：颜色、名字、品种；行为有：摇尾巴、叫、吃等。
@@ -39,7 +80,7 @@ public class HelloWorld {
 public static void main(String []args){}
 ```
 
-## Java 包(package)
+## <a name="golang"></a>Java 包(package)
 
 1. 把功能相似或相关的类或接口组织在同一个包中，方便类的查找和使用。
 
@@ -62,7 +103,7 @@ public class Something{
 
 ## Java 数据结构
 
-### 枚举（Enumeration）
+### <a name="enumeration"></a>枚举（Enumeration）
 
 虽然它本身不属于数据结构,但它在其他数据结构的范畴里应用很广。 枚举（The Enumeration）接口定义了一种从数据结构中取回连续元素的方式。
 
@@ -90,7 +131,7 @@ public class EnumerationTester {
 }
 ```
 
-### 位集合（BitSet）
+### <a name="bitset"></a>位集合（BitSet）
 
 Bitset类创建一种特殊类型的数组来保存位值。BitSet中数组大小会随需要增加。这和位向量（vector of bits）比较类似。
 
@@ -131,7 +172,7 @@ public class BitSetDemo {
 }
 ```
 
-### 向量（Vector）
+### <a name="vector"></a>向量（Vector）
 
 向量（Vector）类和传统数组非常相似，但是Vector的大小能根据需要动态的变化。
 
@@ -186,7 +227,7 @@ public class VectorDemo {
 }
 ```
 
-### 栈（Stack）
+### <a name="stack"></a>栈（Stack）
 
 实现了一个后进先出（LIFO）的数据结构。
 
@@ -230,7 +271,7 @@ public class StackDemo {
 }
 ```
 
-### Map接口来获取键/值的存储功能。
+### <a name="map"></a>Map接口来获取键/值的存储功能。
 
 * 给定一个键和一个值，你可以将该值存储在一个Map对象. 之后，你可以通过键来访问对应的值。
 * 当访问的值不存在的时候，方法就会抛出一个NoSuchElementException异常.
@@ -256,7 +297,7 @@ public class CollectionsDemo {
 }
 ```
 
-### 哈希表（Hashtable）
+### <a name="hashtable"></a>哈希表（Hashtable）
 
 Hashtable类提供了一种在用户定义键结构的基础上来组织数据的手段。
 
@@ -299,7 +340,7 @@ public class HashTableDemo {
 }
 ```
 
-### 属性（Properties）
+### <a name="property"></a>属性（Properties）
 
 Properties 继承于 Hashtable.Properties 类表示了一个持久的属性集.属性列表中每个键及其对应值都是一个字符串。
 
@@ -339,7 +380,7 @@ public class PropDemo {
 }
 ```
 
-## Java 泛型
+## <a name="genericity"></a>Java 泛型
 
 泛型提供了编译时类型安全检测机制，该机制允许程序员在编译时检测到非法的类型。
 
@@ -413,7 +454,7 @@ public class Box<T> {
 }
 ```
 
-## Java 序列化
+## <a name="serialize"></a>Java 序列化
 
 该机制中，一个对象可以被表示为一个字节序列，该字节序列包括该对象的数据、有关对象的类型的信息和存储在对象中数据的类型。
 
@@ -470,7 +511,7 @@ public class SerializeDemo
 }
 ```
 
-## Java关键字
+## <a name="keywords"></a>Java关键字
 
 > 下面列出了Java保留字。这些保留字不能用于常量、变量、和任何标识符的名称。
 
@@ -527,7 +568,7 @@ public class SerializeDemo
 |保留关键字	|goto	|是关键字，但不能使用|
 |  |const	|是关键字，但不能使用|
 
-### Java标识符
+### <a name="identifier"></a>Java标识符
 
 Java所有的组成部分都需要名字。类名、变量名以及方法名都被称为标识符。
 
@@ -545,7 +586,7 @@ Java所有的组成部分都需要名字。类名、变量名以及方法名都�
 
 * 非法标识符举例：123abc、-salary
 
-### Java修饰符
+### <a name="modifier"></a>Java修饰符
 
 > 像其他语言一样，Java可以使用修饰符来修饰类中方法和属性。主要有两类修饰符：
 
@@ -553,7 +594,7 @@ Java所有的组成部分都需要名字。类名、变量名以及方法名都�
 
 * 非访问控制修饰符 : final, abstract, strictfp
 
-### Java变量
+### <a name="variable"></a>Java变量
 
 > Java中主要有如下几种类型的变量
 
@@ -585,7 +626,7 @@ public class  ClassName{
 }
 ```
 
-## Java 对象和类
+## <a name="objclass"></a>Java 对象和类
 
 * 相关概念：多态、继承、封装、抽象、类、对象、实例、方法、重载
 
@@ -652,7 +693,7 @@ public class EmployeeTest{
 
 * java因强制要求类名（唯一的public类）和文件名统一，因此在引用其它类时无需显式声明。在编译时，编译器会根据类名去寻找同名文件。
 
-## Java 接口 interface
+## <a name="interface"></a>Java 接口 interface
 
 * 接口是隐式抽象的，当声明一个接口的时候，不必使用abstract关键字。
 * 接口中每一个方法也是隐式抽象的，声明时同样不需要abstract关键字。
@@ -679,7 +720,7 @@ public interface NameOfInterface
 }
 ```
 
-### 接口的实现 implements
+### <a name="implements"></a>接口的实现 implements
 
 ```java
 // ...implements 接口名称[, 其他接口, 其他接口..., ...] ...
@@ -722,7 +763,7 @@ public class MammalInt implements Animal{
 一个接口能继承另一个接口，这和类之间的继承比较相似。
 ```
 
-### 接口的继承 extends
+### <a name="extends"></a>接口的继承 extends
 
 ```java
 // public interface Hockey extends Sports, Event
@@ -751,7 +792,7 @@ public interface Hockey extends Sports
 }
 ```
 
-## Java 基本数据类型
+## <a name="basetype"></a>Java 基本数据类型
 
 * Java语言提供了八种基本类型。六种数字类型（四个整数型，两个浮点型），一种字符类型，还有一种布尔型。
 
@@ -838,7 +879,7 @@ char 数据类型可以储存任何字符；
 例子：char letter = 'A';。
 ```
 
-## Java 变量类型
+## <a name="vartype"></a>Java 变量类型
 
 * 所有的变量在使用前必须声明。声明变量的基本格式如下：
 
@@ -848,7 +889,7 @@ type identifier [ = value][, identifier [= value] ...] ;
 
 ## Java 修饰符
 
-### 访问控制修饰符
+### <a name="ctrlmodifier"></a>访问控制修饰符
 
 * default (即缺省，什么也不写）: 在同一包内可见，不使用任何修饰符。使用对象：类、接口、变量、方法。
 
@@ -867,7 +908,7 @@ type identifier [ = value][, identifier [= value] ...] ;
 
 ### 非访问修饰符
 
-#### static 修饰符
+#### <a name="static"></a>static 修饰符
 
 * 静态变量：
 
@@ -883,7 +924,7 @@ classname.variablename
 classname.methodname
 ```
 
-#### final 修饰符
+#### <a name="final"></a>final 修饰符
 
 * final 变量：
 
@@ -925,7 +966,7 @@ public final class Test {
 }
 ```
 
-#### abstract 修饰符
+#### <a name="abstract"></a>abstract 修饰符
 
 * 抽象类：
 
@@ -970,7 +1011,7 @@ class SubClass extends SuperClass{
 }
 ```
 
-#### synchronized 修饰符
+#### <a name="synchronized"></a>synchronized 修饰符
 
 该关键字声明的方法同一时间只能被一个线程访问。synchronized 修饰符可以应用于四个访问修饰符。
 
@@ -980,7 +1021,7 @@ public synchronized void showDetails(){
 }
 ```
 
-#### transient 修饰符
+#### <a name="transient"></a>transient 修饰符
 
 序列化的对象包含被 transient 修饰的实例变量时，java 虚拟机(JVM)跳过该特定的变量。
 
@@ -991,7 +1032,7 @@ public transient int limit = 55;   // 不会持久化
 public int b; // 持久化
 ```
 
-#### volatile 修饰符
+#### <a name="volatile"></a>volatile 修饰符
 
 volatile 修饰的成员变量在每次被线程访问时，都强制从共享内存中重新读取该成员变量的值。而且，当成员变量发生变化时，会强制线程将变化值回写到共享内存。这样在任何时刻，两个不同的线程总是看到某个成员变量的同一个值。
 
@@ -1016,7 +1057,7 @@ public class MyRunnable implements Runnable
 }
 ```
 
-## Java 运算符
+## <a name="operator"></a>Java 运算符
 
 * 算术运算符
 
@@ -1091,7 +1132,7 @@ public class MyRunnable implements Runnable
 ( Object reference variable ) instanceof  (class/interface type)
 ```
 
-## Java 循环结构
+## <a name="dowhilefor"></a>Java 循环结构
 
 * while 循环
 
@@ -1156,7 +1197,7 @@ public class Test {
 
 在 while 或者 do…while 循环中，程序立即跳转到布尔表达式的判断语句。
 
-## Java 分支结构
+## <a name="ifswitch"></a>Java 分支结构
 
 * if...else...
 
@@ -1184,7 +1225,7 @@ switch(expression){
 }
 ```
 
-## java 类型包装器
+## <a name="decorator"></a>java 类型包装器
 
 * 所有的包装类（Integer、Long、Byte、Double、Float、Short）都是抽象类 Number 的子类
 
@@ -1198,7 +1239,7 @@ switch(expression){
 
 * Scanner 类 来获取用户的输入
 
-## Java 数组
+## <a name="array"></a>Java 数组
 
 * 注意：建议使用 dataType[] arrayRefVar 的声明风格声明数组变量。 dataType arrayRefVar[] 风格是来自 C/C++ 语言 ，在Java中采用是为了让 C/C++ 程序员能够快速理解java语言。
 
@@ -1213,7 +1254,7 @@ double[] myList;
 double myList[];
 ```
 
-## Java 异常处理
+## <a name="exception"></a>Java 异常处理
 
 所有的异常类是从 java.lang.Exception 类继承的子类。
 
@@ -1239,7 +1280,7 @@ try {
 }
 ```
 
-### throws/throw 关键字
+### <a name="throws"></a>throws/throw 关键字
 
 如果一个方法没有捕获一个检查性异常，那么该方法必须使用 throws 关键字来声明。throws 关键字放在方法签名的尾部。
 
@@ -1259,7 +1300,7 @@ public class className
 }
 ```
 
-#### 声明自定义异常
+#### <a name="customexc"></a>声明自定义异常
 
 * 所有异常都必须是 Throwable 的子类。
 * 如果希望写一个检查性异常类，则需要继承 Exception 类。
@@ -1292,7 +1333,7 @@ java.net 包中提供了两种常见的网络协议的支持：
 
 * UDP：UDP 是用户数据报协议的缩写，一个无连接的协议。提供了应用程序之间要发送的数据的数据包。
 
-### Socket 编程
+### <a name="socket"></a>Socket 编程
 
 java.net.Socket 类代表一个套接字，并且 java.net.ServerSocket 类为服务器程序提供了一种来监听客户端，并与他们建立连接的机制。
 
@@ -1312,7 +1353,7 @@ java.net.Socket 类代表一个套接字，并且 java.net.ServerSocket 类为�
 
 TCP 是一个双向的通信协议，因此数据可以通过两个数据流在同一时间发送.以下是一些类提供的一套完整的有用的方法来实现 socket。
 
-## Java 多线程编程
+## <a name="multithread"></a>Java 多线程编程
 
 > 创建一个线程，Java 提供了三种创建线程的方法
 
@@ -1459,7 +1500,7 @@ public class CallableThreadTest implements Callable<Integer> {
 
 * 线程的几个主要概念： 线程同步；线程间通信；线程死锁；线程控制（挂起、停止和恢复）。
 
-## Java 文档注释
+## <a name="doccomment"></a>Java 文档注释
 
 |标签	|描述	|示例|
 |-------|----------------|------------------|
@@ -1481,7 +1522,7 @@ public class CallableThreadTest implements Callable<Integer> {
 |{@value}	|显示常量的值，该常量必须是static属性。|	Displays the value of a constant, which must be a static field.|
 |@version	|指定类的版本	|@version info|
 
-## Java8 新增了非常多的特性，我们主要讨论以下几个：
+## <a name="java8new"></a>Java8 新增了非常多的特性，我们主要讨论以下几个：
 
 * __Lambda 表达式__ − Lambda允许把函数作为一个方法的参数（函数作为参数传递进方法中。
 
