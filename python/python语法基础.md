@@ -1,25 +1,74 @@
 # python3 语法基础
 
-## Python标识符
+* [标识符](#identifier)
+* [命名的约定](#naming)
+* [行和缩进](#tabindent)
+* [多行语句](#multistatement)
+* [引号](#quotation)
+* [注释](#annotation)
+* [一行多条语句](#statements)
+* [多重声明组为套件](#declarations)
+* [Python保留字](#keywords)
+* [变量类型](#vartype)
+* [数字](#number)
+* [字符串](#string)
+* [列表](#pylist)
+* [元组](#pytuple)
+* [字典](#pydict)
+* [数据类型转换](#dataconversion)
+* [算术运算符](#arithmetic)
+* [比较运算符](#compare)
+* [赋值运算符](#assigning)
+* [位运算符](#pybit)
+* [逻辑运算符](#pylogic)
+* [成员运算符](#membership)
+* [标识运算符](#identifyoper)
+* [运算符优先级](#precedence)
+* [if...elseif...else语句](#ifelseif)
+* [while循环](#pywhile)
+* [for循环](#pyfor)
+* [for循环使用else语句](#pyforelse)
+* [break语句](#pybreak)
+* [continue语句](#pycontinue)
+* [pass语句](#pypass)
+* [Python 函数](#pyfunc)
+* [匿名函数](#anonyfunc)
+* [import 语句](#pyimport)
+* [from...import 语句](#pyfrom)
+* [作为执行模块脚本](#executive)
+* [变量](#pyvar)
+* [dir 函数](#dirfunc)
+* [globals 和 locals 函数](#globalslocals)
+* [reload 函数](#reloadfunc)
+* [Python 包](#package)
+* [断言](#pyassert)
+* [异常处理](#exception)
+* [except子句与多个异常](#except)
+* [try-finally子句](#tryfinally)
+* [异常的参数](#exceptargs)
+* [引发异常](#raisexcept)
+* [用户定义的异常](#customexcept)
+
+## <a name="identifier"></a>Python标识符
 
 Python标识符是用来标识变量，函数，类，模块或其他对象的名称。标识符是以字母A到Z开始或a〜z或后跟零个或多个字母下划线(_)，下划线和数字(0〜9)。
 
 Python标识符范围内的不容许有如：@, $ 和 % 符号。Python是一种区分大小写的编程语言。因此，Manpower 和 manpower 在Python中是两种不同的标识符。
 
-### Python 标识符命名的约定
+### <a name="naming"></a>Python 标识符命名的约定
 
 * 类名称使用大写字母。所有其它标识符开始使用小写字母。
 * 开头使用一个下划线的标识符表示该标识符是私有的。
 * 开始以两个前导下划线的标识符表示强烈私有的标识符。
 * 如果标识符使用两个下划线作为结束时，所述标识符是语言定义的特殊的名字。
 
-## 行和缩进
+## <a name="tabindent"></a>行和缩进
 
 * Python不使用大括号({})来表示的代码块类和函数定义或流程控制。代码块由行缩进，这是严格执行表示。因此，Python中所有连续不换行，同样数量的空格缩进将形成一个块。
 
 * 在缩进位的数目是可变的，但该块内的所有语句的缩进量必须相同。
 
-### 多行语句
+### <a name="multistatement"></a>多行语句
 
 ```py
 # 许使用续行字符(\)表示让行可以连续下去
@@ -33,7 +82,7 @@ days = ['Monday', 'Tuesday', 'Wednesday',
 
 ```
 
-## 在Python的引号
+## <a name="quotation"></a>在Python的引号
 
 * Python接受单引号(')，双引号(“)和三('''或”“”)引用来表示字符串，只要是同一类型的引号开始和结束。
 * 三重引号可用于跨越多个行字符串。例如，下面所有的都是合法的
@@ -45,7 +94,7 @@ paragraph = """This is a paragraph. It is
 made up of multiple lines and sentences."""
 ```
 
-## Python中的注释
+## <a name="annotation"></a>Python中的注释
 
 哈希符号(＃)这是一个字符作为注释的开头。在#之后到行末的所有字符都是注释的一部分，Python解释器会忽略它们。Python没有多行注释功能
 
@@ -56,7 +105,7 @@ made up of multiple lines and sentences."""
 print ("Hello, Python!") # second comment
 ```
 
-## 在一行多条语句
+## <a name="statements"></a>在一行多条语句
 
 分号(;)允许给在单行有多条语句，而不管语句开始一个新的代码块。
 
@@ -64,7 +113,7 @@ print ("Hello, Python!") # second comment
 import sys; x = 'foo'; sys.stdout.write(x + '\n')
 ```
 
-## 多重声明组为套件
+## <a name="declarations"></a>多重声明组为套件
 
 
 头部行开始的语句(以关键字)，并用冒号终止(：)，后面跟一行或多行组成套件。例如
@@ -78,7 +127,7 @@ else :
    suite
 ```
 
-## Python保留字
+## <a name="keywords"></a>Python保留字
 
 |所有|Python|的关键字|仅包含|小写|字母|
 |---|---|---|---|---|---|
@@ -89,7 +138,7 @@ else :
 |elif	|is	|with |else	|lambda	|yield|
 |except|
 
-## Python3变量类型
+## <a name="vartype"></a>Python3变量类型
 
 * 赋值给变量
 
@@ -121,7 +170,7 @@ a, b, c = 1, 2, "john"
 
 ## 标准数据类型
 
-### Python数字
+### <a name="number"></a>Python数字
 
 ```py
 # 数字数据类型存储数值。当分配一个值给创建数值对象。
@@ -149,7 +198,7 @@ del var_a, var_b
 
 > 复数由一对有序组成，通过 x + yj 来表示实浮点数， 其中 x 和 y 是实数并且 j 是虚数单位
 
-### Python字符串
+### <a name="string"></a>Python字符串
 
 字符串子集可以用切片操作符 ([ ] and [:] ) ：字符串的索引从0开始，并以-1结束。加号(+)号是字符串连接运算符和星号(*)是重复操作符。
 
@@ -166,7 +215,7 @@ print (str * 2)      # Prints string two times
 print (str + "TEST") # Prints concatenated string
 ```
 
-### Python列表
+### <a name="pylist"></a>Python列表
 
 列表是最通用的Python复合数据类型。列表中包含用逗号分隔并使用方括号[]来包含项目。从某种程度上讲，列表类似于C语言中的数组。一个较大的区别是，所有在一个列表中的项目可以是不同的数据类型。
 
@@ -186,7 +235,7 @@ print (tinylist * 2)  # Prints list two times
 print (list + tinylist) # Prints concatenated lists
 ```
 
-### Python元组
+### <a name="pytuple"></a>Python元组
 
 元组是另一个序列数据类型，它类似于列表。元组中使用单个逗号来分隔每个值。不像列表，元组的值是放列在圆括号中。
 
@@ -206,7 +255,7 @@ print (tinytuple * 2)   # Prints tuple two times
 print (tuple + tinytuple) # Prints concatenated tuple
 ```
 
-### Python字典
+### <a name="pydict"></a>Python字典
 
 字典是一种哈希表类型。它们工作的方式就类似在Perl中关联数组或哈希、键-值对。字典的键可以是几乎任何Python类型，但通常是数字或字符串。另一方面，它的值可以是任意Python对象。
 
@@ -229,7 +278,7 @@ print (tinydict.keys())   # Prints all the keys
 print (tinydict.values()) # Prints all the values
 ```
 
-### 数据类型转换
+### <a name="dataconversion"></a>数据类型转换
 
 |函数	|描述|
 |----------------------|--------------------------|
@@ -250,7 +299,7 @@ print (tinydict.values()) # Prints all the values
 |hex(x)|十六进制字符串转换为整数|
 |oct(x)|转换整数成为八进制字符串|
 
-## Python算术运算符
+## <a name="arithmetic"></a>Python算术运算符
 
 |操作符	|描述（变量 a=10 和 变量b=20）	|示例|
 |-----|-------------------------|--------------------|
@@ -262,7 +311,7 @@ print (tinydict.values()) # Prints all the values
 | ** |执行指数(幂)计算 | a ** b 就是10 的20 次幂|
 |//| 地板除 - 除法不管操作数为何种数值类型，总是会舍去小数部分，返回数字序列中比真正的商小的最接近的数字 |9//2 = 4 以及 9.0//2.0 = 4.0|
 
-## Python3比较运算符
+## <a name="compare"></a>Python3比较运算符
 
 |操作符	|描述（变量 a=10 和 变量b=20）	|示例|
 |-----|-------------------------|--------------------|
@@ -275,7 +324,7 @@ print (tinydict.values()) # Prints all the values
 |<=|如果左操作数的值小于或等于右操作数的值，则条件为真|(a <= b) 为 true.|
 
 
-## Python3赋值运算符
+## <a name="assigning"></a>Python3赋值运算符
 
 |操作符	|描述（变量 a=10 和 变量b=20）	|示例|
 |-----|-------------------------|--------------------|
@@ -289,7 +338,7 @@ print (tinydict.values()) # Prints all the values
 |//=|这对操作符两侧的操作数进行地板除并赋值给左操作数|c //= a 相当于 c = c // a|
 
 
-## Python3位运算符
+## <a name="pybit"></a>Python3位运算符
 
 |操作符	|描 	|示例|
 |-----|-------------------------|--------------------|
@@ -301,7 +350,7 @@ print (tinydict.values()) # Prints all the values
 |>>|二进制右移|a >> = 15 (二进制表示为 0000 1111)|
 
 
-## Python3逻辑运算符
+## <a name="pylogic"></a>Python3逻辑运算符
 
 |操作符	|描述（变量a=True和变量b=False）|	示例|
 |-----|-------------------------|--------------------|
@@ -309,21 +358,21 @@ print (tinydict.values()) # Prints all the values
 | or |如果两个操作数为非零，条件变为true|(a or b) 结果 True.|
 | not |用来扭转操作数的逻辑状态|not(a 且b) 结果 True.|
 
-## Python3成员运算符
+## <a name="membership"></a>Python3成员运算符
 
 |操作符	|描述）|	示例|
 |-----|-------------------------|--------------------|
 |in	|如果在指定的顺序找到则计算结果为true，否则变量结果值为false| x in y，这里在一个1的结果，如果 x 是序列 y 的成员|
 |not in|如果不能在指定的顺序找到则计算结果为true，否则变量为 false|x not in y，这里在一个1的结果，如果 x 不是序列 y 成员|
 
-## Python3标识运算符
+## <a name="identifyoper"></a>Python3标识运算符
 
 |操作符	|描述）|	示例|
 |-----|-------------------------|--------------------|
 |is|如果操作符两侧的变量是相同的对象计算结果为true，否则返回 false|x is y,如果 id(x) 等于 id(y) ，则结果为1|
 |is not	|如果操作符两侧的变量不是相同的对象计算结果为true，否则返回 false	|x is y,如果 id(x) 不等于 id(y) ，则结果为1|
 
-## Python3运算符优先级
+## <a name="precedence"></a>Python3运算符优先级
 
 |操作符|	描述(从高到低）|
 |-----|-------------------------|
@@ -341,7 +390,7 @@ print (tinydict.values()) # Prints all the values
 |in not in|	成员操作符|
 |not or and	|逻辑运算符|
 
-## if...elseif...else语句
+## <a name="ifelseif"></a>if...elseif...else语句
 
 ```py
 if expression:
@@ -381,7 +430,7 @@ else:
 print ("Net payable:",amount-discount)
 ```
 
-## while循环语句
+## <a name="pywhile"></a>while循环语句
 
 ```py
 while expression:
@@ -399,7 +448,7 @@ while (count < 9):
 print ("Good bye!")
 ```
 
-## for循环语句
+## <a name="pyfor"></a>for循环语句
 
 ```py
 for iterating_var in sequence:
@@ -423,7 +472,7 @@ for index in range(len(fruits)):
 print ("Good bye!")
 ```
 
-### for循环使用else语句
+### <a name="pyforelse"></a>for循环使用else语句
 
 如果else语句和for循环语句一起使用，else块只在 for 循环正常终止时执行(而不是遇到break语句)。
 
@@ -442,17 +491,17 @@ else:
     print ('the list doesnot contain even number')
 ```
 
-## break语句
+## <a name="pybreak"></a>break语句
 
 用于提前终止当前循环。 抛弃循环后，重新开始执行下一个语句。break语句可以在 while 和for 这两个循环使用。
 
 如果您使用嵌套循环，break语句停止内部循环的执行，并开始执行块之后下一行代码段。
 
-## continue语句
+## <a name="pycontinue"></a>continue语句
 
 返回控制到当前循环的开始。遇到 continue 时，循环不会再执行当前迭代剩余的语句，而是开始下一次迭代。continue语句可以在while和for循环中使用。
 
-## pass语句
+## <a name="pypass"></a>pass语句
 
 它在语法上是用来作必须声明，但又不希望执行任何命令或代码。pass语句是个空操作;在执行时没有任何反应。
 
@@ -468,7 +517,7 @@ for letter in 'Python':
 print ("Good bye!")
 ```
 
-## Python3函数
+## <a name="pyfunc"></a>Python3函数
 
 * 函数模块使用 def 关键字开头，后跟函数名以及括号( ( ) ).
 * 任何输入参数或参数都应该放在这些括号内。 还可以定义这些括号内的参数。
@@ -511,7 +560,7 @@ printinfo( 10 )
 printinfo( 70, 60, 50 )
 ```
 
-### 匿名函数
+### <a name="anonyfunc"></a>匿名函数
 
 * lambda形式可以使用任何数量的参数，但在表现形式上只返回一个值。 它们不能包含命令或多个表达式。
 * 匿名函数不能直接调用打印，因为lambda需要表达式。
@@ -537,13 +586,13 @@ print ("Value of total : ", sum( 20, 20 ))
 
 一个模块是 Python 代码的文件。 一个模块可以定义函数，类和变量。一个模块也可以包括可运行的代码。
 
-### import 语句
+### <a name="pyimport"></a>import 语句
 
 ```py
 import module1[, module2[,... moduleN]
 ```
 
-### from...import 语句
+### <a name="pyfrom"></a>from...import 语句
 
 ```py
 # 从一个模块中导入特定的属性到当前的命名空间
@@ -553,7 +602,7 @@ from modname import name1[, name2[, ... nameN]]
 from modname import *
 ```
 
-### 执行模块作为脚本
+### <a name="executive"></a>作为执行模块脚本
 
 在一个模块，模块名(做为一个字符串)可以作为全局变量__name__的值。该模块中的代码会被执行，就好像导入它一样，但设定为__main__的__name__。这意味着，通过在模块的末尾添加以下代码：
 
@@ -574,7 +623,7 @@ if __name__ == "__main__":
     print(f)
 ```
 
-#### PYTHONPATH 变量
+#### <a name="pyvar"></a>PYTHONPATH 变量
 
 下面是 Windows系统中一个典型的 PYTHONPATH ：
 ```cmd
@@ -586,7 +635,7 @@ set PYTHONPATH=c:\python34\lib;
 set PYTHONPATH=/usr/local/lib/python
 ```
 
-#### dir( ) 函数
+#### <a name="dirfunc"></a>dir() 函数
 
 使用 dir()内置函数返回一个包含由模块定义的名称字符串的排序列表。
 该列表包含一个模块中定义的所有的模块，变量和函数的名称。
@@ -602,7 +651,7 @@ content = dir(math)
 print (content)
 ```
 
-#### globals() 和 locals() 函数
+#### <a name="globalslocals"></a>globals() 和 locals() 函数
 
 globals() 和 locals()函数可用于在全局和局部名字空间返回名称，取决于从哪里调用它们。
 如果 locals() 从函数中调用， 它会返回所有可以从函数访问的名字。
@@ -610,7 +659,7 @@ globals() 和 locals()函数可用于在全局和局部名字空间返回名称�
 如果 globals() 可以在一个函数中调用，它将返回所有可以在全局范围内，可从函数访问的名字。
 两种这些函数的返回类型是字典。因此，名称可以使用 keys() 函数来提取。
 
-#### reload() 函数
+#### <a name="reloadfunc"></a>reload() 函数
 
 当模块被导入到一个脚本，在模块的顶层部的代码只执行一次。
 因此，如果你希望模块重新执行的顶层代码， 可以使用 reload()函数。在reload()函数会再次导入先前导入模块。
@@ -619,7 +668,7 @@ globals() 和 locals()函数可用于在全局和局部名字空间返回名称�
 reload(module_name)
 ```
 
-### Python包
+### <a name="package"></a>Python包
 
 包是一个分层文件目录结构，定义由模块和子包和子子包等一个单一的Python应用环境。
 
@@ -666,7 +715,7 @@ Phone.Isdn()
 Phone.G3()
 ```
 
-## Python3断言
+## <a name="pyassert"></a>Python3断言
 
 当它遇到一个断言语句，Python评估计算之后的表达式，希望是 true 值。如果表达式为 false，Python 触发 AssertionError 异常。
 
@@ -685,7 +734,7 @@ print (int(KelvinToFahrenheit(505.78)))
 print (KelvinToFahrenheit(-5))
 ```
 
-## Python3异常处理
+## <a name="exception"></a>Python3异常处理
 
 |标准异常名称|描述|
 |-------------|-------------------------------------------|
@@ -746,21 +795,21 @@ else:
    print ("Written content in the file successfully")
 ```
 
-### except子句与多个异常
+### <a name="except"></a>except子句与多个异常
 
 ```py
 try:
    You do your operations here
    ......................
 except(Exception1[, Exception2[,...ExceptionN]]]):
-   If there is any exception from the given exception list, 
+   If there is any exception from the given exception list,
    then execute this block.
    ......................
 else:
    If there is no exception then execute this block.
 ```
 
-### try-finally子句
+### <a name="tryfinally"></a>try-finally子句
 
 ```py
 try:
@@ -788,7 +837,7 @@ except IOError:
    print ("Error: can\'t find file or read data")
 ```
 
-### 异常的参数
+### <a name="exceptargs"></a>异常的参数
 
 如果写代码来处理一个异常，可以使用一个变量按照异常的名称在 except 语句中。 如果要捕捉多个异常，可以使用一个变量后跟一个异常的元组。
 
@@ -818,7 +867,7 @@ def temp_convert(var):
 temp_convert("xyz")
 ```
 
-### 引发异常
+### <a name="raisexcept"></a>引发异常
 
 ```py
 raise [Exception [, args [, traceback]]]
@@ -854,7 +903,7 @@ except Exception as e:
     print ("error in level argument",e.args[0])
 ```
 
-### 用户定义的异常
+### <a name="customexcept"></a>用户定义的异常
 
 在try块，用户定义的异常将引发，并夹在 except 块中。 变量e是用来创建网络错误 Networkerror 类的实例。
 
