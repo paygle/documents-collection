@@ -1,5 +1,35 @@
 # Go 语言基础
 
+
+* [变量](#govar)
+* [常量](#goconst)
+* [iota常量](#gospconst)
+* [算术运算符](#arithmetic)
+* [关系运算符](#relation)
+* [逻辑运算符](#gologic)
+* [位运算符](#gobit)
+* [赋值运算符](#assignment)
+* [其他运算符](#gother)
+* [条件语句](#condition)
+* [循环语句](#circulation)
+* [函数](#gofunction)
+* [变量作用域](#varscope)
+* [数组](#goarray)
+* [指针](#pointer)
+* [结构体](#structure)
+* [切片 Slice](#section)
+* [范围 Range](#gorange)
+* [Map 集合](#gomap)
+* [递归函数](#gorecursive)
+* [类型转换](#goconversion)
+* [接口 interface ](#gointerface)
+* [错误处理](#goerror)
+* [Go关键字](#gokeywords)
+* [数据类型](#gotypes)
+* [数字类型](#gonumber)
+* [浮点型](#gofloat)
+* [其他数字类型](#gothernum)
+
 ## Go 语言结构
 
 ```go
@@ -13,7 +43,7 @@ func main() {
 }
 ```
 
-## Go 语言变量
+## <a name="govar"></a>Go 语言变量
 
 * 声明变量的一般形式是使用 var 关键字
 
@@ -59,7 +89,7 @@ var (
 )
 ```
 
-## Go 语言常量
+## <a name="goconst"></a>Go 语言常量
 
 * 常量的定义格式：
 
@@ -92,7 +122,7 @@ func main() {
 }
 ```
 
-### iota 特殊常量
+### <a name="gospconst"></a>iota 特殊常量
 
 > 可以认为是一个可以被编译器修改的常量。
 
@@ -118,7 +148,7 @@ const (
 
 ## Go 语言运算符
 
-### 算术运算符
+### <a name="arithmetic"></a>算术运算符
 
 |运算符|	描述|	实例(假定 A 值为 10，B 值为 20。)|
 |-----|------|----------------------------|
@@ -130,7 +160,7 @@ const (
 |++	|自增|	A++ 输出结果 11|
 |--	|自减|	A-- 输出结果 9|
 
-### 关系运算符
+### <a name="relation"></a>关系运算符
 
 |运算符	|描述(假定 A 值为 10，B 值为 20。)	|实例|
 |-----|------|----------------------------|
@@ -141,7 +171,7 @@ const (
 |>=	|检查左边值是否大于等于右边值，如果是返回 True 否则返回 False。	|(A >= B) 为 False|
 |<=	|检查左边值是否小于等于右边值，如果是返回 True 否则返回 False。	|(A <= B) 为 True|
 
-### 逻辑运算符
+### <a name="gologic"></a>逻辑运算符
 
 |运算符|	描述|	实例|
 |-----|------|----------------------------|
@@ -149,7 +179,7 @@ const (
 |&brvbar;&brvbar;|	逻辑 OR 运算符。 如果两边的操作数有一个 True，则条件 True，否则为 False。	|(A &brvbar;&brvbar; B) 为 True|
 |!	|逻辑 NOT 运算符。 如果条件为 True，则逻辑 NOT 条件 False，否则为 True。	|!(A && B) 为 True|
 
-### 位运算符
+### <a name="gobit"></a>位运算符
 
 对整数在内存中的二进制位进行操作。
 
@@ -168,7 +198,7 @@ const (
 |1	|1	|1	|1	|0|
 |1	|0	|0	|1	|1|
 
-### 赋值运算符
+### <a name="assignment"></a>赋值运算符
 
 |运算符	|描述	|实例|
 |-----|--------------|--------------|
@@ -185,14 +215,14 @@ const (
 |&brvbar;=	|按位或后赋值	|C &brvbar;= 2 等于 C = C &brvbar; 2|
 
 
-### 其他运算符
+### <a name="gother"></a>其他运算符
 
 |运算符	|描述	|实例|
 |-----|--------------|--------------|
 |&	|返回变量存储地址	|&a， 将给出变量的实际地址。|
 |*	|指针变量。	|*a， 是一个指针变量|
 
-## Go 语言条件语句
+## <a name="condition"></a>Go 语言条件语句
 
 |语句	|描述|
 |-----|--------------|
@@ -202,7 +232,7 @@ const (
 |switch 语句|	switch 语句用于基于不同条件执行不同动作。|
 |select 语句|	select 语句类似于 switch 语句，但是select会随机执行一个可运行的case。如果没有case可运行，它将阻塞，直到有case可运行。|
 
-## Go 语言循环语句
+## <a name="circulation"></a>Go 语言循环语句
 
 |循环类型	|描述|
 |-----|--------------|
@@ -241,7 +271,7 @@ func main() {
 }
 ```
 
-## Go 语言函数
+## <a name="gofunction"></a>Go 语言函数
 
 Go 语言最少有个 main() 函数。
 
@@ -290,7 +320,7 @@ func main() {
 |闭包	|闭包是匿名函数，可在动态编程中使用|
 |方法	|方法就是一个包含了接受者的函数|
 
-## Go 语言变量作用域
+## <a name="varscope"></a>Go 语言变量作用域
 
 * 函数内定义的变量称为局部变量
 * 函数外定义的变量称为全局变量
@@ -330,7 +360,7 @@ func sum(a, b int) int {
 }
 ```
 
-## Go 语言数组
+## <a name="goarray"></a>Go 语言数组
 
 * 声明数组
 
@@ -373,7 +403,7 @@ void myFunction(param [10]int){}
 void myFunction(param []int){}
 ```
 
-## Go 语言指针
+## <a name="pointer"></a>Go 语言指针
 
 一个指针变量可以指向任何一个值的内存地址它指向那个值的内存地址。类似于变量和常量，在使用指针前你需要声明指针。
 
@@ -409,7 +439,7 @@ func main() {
 }
 ```
 
-## Go 语言结构体
+## <a name="structure"></a>Go 语言结构体
 
 结构体是由一系列具有相同类型或不同类型的数据构成的数据集合。
 
@@ -467,7 +497,7 @@ func main() {
 }
 ```
 
-## Go 语言切片(Slice)
+## <a name="section"></a>Go 语言切片(Slice)
 
 Go 语言切片是对数组的抽象。Go 数组的长度不可改变，在特定场景中这样的集合就不太适用，Go中提供了一种灵活，功能强悍的内置类型切片("动态数组"),与数组相比切片的长度是不固定的，可以追加元素，在追加时可能使切片的容量增大。
 
@@ -512,7 +542,7 @@ s :=make([]int,len,cap)
 * append() 向切片追加新元素
 * copy() 拷贝切片函数
 
-## Go 语言范围(Range)
+## <a name="gorange"></a>Go 语言范围(Range)
 
 range 关键字用于for循环中迭代数组(array)、切片(slice)、通道(channel)或集合(map)的元素。在数组和切片中它返回元素的索引值，在集合中返回 key-value 对的 key 值。
 
@@ -545,7 +575,7 @@ func main() {
 }
 ```
 
-## Go 语言Map(集合)
+## <a name="gomap"></a>Go 语言Map(集合)
 
 Map 是一种无序的键值对的集合。Map 最重要的一点是通过 key 来快速检索数据，key 类似于索引，指向数据的值。
 
@@ -594,7 +624,7 @@ func main() {
 
 * delete() 函数用于删除集合的元素, 参数为 map 和其对应的 key。
 
-## Go 语言递归函数
+## <a name="gorecursive"></a>Go 语言递归函数
 
 递归，就是在运行的过程中调用自己。
 我们在使用递归时，开发者需要设置退出条件，否则递归将陷入无限循环中。
@@ -609,7 +639,7 @@ func main() {
 }
 ```
 
-## Go 语言类型转换
+## <a name="goconversion"></a>Go 语言类型转换
 
 ```go
 // 类型转换基本格式如下
@@ -630,7 +660,7 @@ func main() {
 }
 ```
 
-## Go 语言接口
+## <a name="gointerface"></a>Go 语言接口
 
 ```go
 /* 定义接口 */
@@ -657,7 +687,7 @@ func (struct_name_variable struct_name) method_namen() [return_type] {
 }
 ```
 
-## Go 错误处理
+## <a name="goerror"></a>Go 错误处理
 
 error类型是一个接口类型，这是它的定义
 
@@ -738,7 +768,7 @@ func main() {
 }
 ```
 
-## 关键字
+## <a name="gokeywords"></a>关键字
 
 |25 个|关键字|或|保留字|:|
 |-----|------|-------|------|------|
@@ -755,7 +785,7 @@ func main() {
 |int32	|int64	|iota	|len	|make	|new	|nil	|panic|	uint64|
 |print	|println	|real	|recover	|string|	true|	uint|	uint8|	uintptr|
 
-## Go 语言数据类型
+## <a name="gotypes"></a>Go 语言数据类型
 
 |序号	|类型和描述|
 |---|---------------------------------------|
@@ -764,7 +794,7 @@ func main() {
 |3	|__字符串类型__， 字符串就是一串固定长度的字符连接起来的字符序列。Go的字符串是由单个字节连接起来的。Go语言的字符串的字节使用UTF-8编码标识Unicode文本。|
 |4	|__派生类型__， 包括：(a) 指针类型（Pointer）、(b) 数组类型、(c) 结构化类型(struct)、(d) Channel 类型、(e) 函数类型、(f) 切片类型、(g) 接口类型（interface）、(h) Map 类型|
 
-### 数字类型
+### <a name="gonumber"></a>数字类型
 
 |序号	|类型和描述|
 |---|-----------------------|
@@ -777,7 +807,7 @@ func main() {
 |7	|__int32__，有符号 32 位整型 (-2147483648 到 2147483647)|
 |8	|__int64__，有符号 64 位整型 (-9223372036854775808 到 9223372036854775807)|
 
-#### 浮点型
+#### <a name="gofloat"></a>浮点型
 
 |序号	|类型和描述|
 |---|-----------------------|
@@ -786,7 +816,7 @@ func main() {
 |3	|__complex64__，32 位实数和虚数|
 |4	|__complex128__，64 位实数和虚数|
 
-#### 其他数字类型
+#### <a name="gothernum"></a>其他数字类型
 
 |序号	|类型和描述|
 |---|-----------------------|
