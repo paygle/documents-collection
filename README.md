@@ -1,5 +1,6 @@
 # 帮助文档
 
+* [Mathematics 文档](#mathematics)
 * [go 文档](#golang)
 * [java 文档](#java)
 * [kotlin 基础](#kotlin)
@@ -9,6 +10,13 @@
 * [移动端文档](#mobile)
 * [C and C++ 文档](#cclang)
 * [Command script 文档](#command)
+
+## <a name="golang"></a> Mathematics 文档
+
+```txt
+1. Matlab 基础
+2. Matlab 命令
+```
 
 ## <a name="golang"></a> go 文档
 
