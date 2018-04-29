@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>占赞效果</title>
+    <style>
+        #vote{
+            margin: 10% auto auto auto;
+            text-align: center;
+        }
+
+        .x-shape {
+          position: fixed;
+          display: none;
+          border-radius: 50%;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="vote">
+        <button>点赞</button>
+    </div>
+    <script>
+    window.onload = function(e) {
+
+      var isJet = false, ani;
+      var btn = document.querySelector('button');
+
+      function getPos(el) {
+        var X, Y, brt;
+        if (el) {
+          brt = el.getBoundingClientRect();
+          X = brt.left;
+          Y = brt.top;
+        }
+        return {x: X, y: Y};
+      }
+
+      // 图形
+      function shape(x, y, rad, color, d) {
+        this.clr = null;
+        this.rad = rad;
+        this.direct = d;
+        this.ox = x;
+        this.oy = y;
+        this.x =  x;
+        this.y =  y;
+        this.color = color || '#fff';
+        var dom = document.createElement('span');
+        dom.setAttribute('class', 'x-shape');
+        dom.style.backgroundColor = this.color;
+        dom.style.width = (Math.random() * 50) + 'px';
+        dom.style.height = (Math.random() * 50) + 'px';
+        this.dom = dom;
+      }
+
+      shape.prototype.step = function(x, y) {
+        var _this = this;
+        x = x - this.ox;
+        y = y - this.oy;
+
+        x = x + 1;
+        y = Math.sin(Math.PI/180 * this.rad) * x;
+
+        x = x + this.ox;
+        y = y + this.oy;
+        this.x = x;
+        this.y = y;
+
+        this.dom.style.left = x + 'px';
+        this.dom.style.top = y + 'px';
+        this.dom.style.display = 'block';
+
+        if (y > this.oy + 100 || x > this.ox + 120) {
+          cancelAnimationFrame(this.clr);
+          document.body.removeChild(this.dom);
+        } else {
+          this.clr = requestAnimationFrame(function(t) { _this.step(x, y); })
+        }
+      }
+
+      shape.prototype.run = function() {
+        var _this = this;
+        this.clr = requestAnimationFrame(function(t) { _this.step(_this.x, _this.y); })
+      }
+
+      // 喷射器
+      function shapeJet(ox, oy) {
+
+        cancelAnimationFrame(ani);
+
+        function create() {
+          var R = Math.round(255 * Math.random());
+          var G = Math.round(255 * Math.random());
+          var B = Math.round(255 * Math.random());
+          var rad = Math.random() * 360;
+          var direct = rad > 180  ? -1 : 1;
+          var sp = new shape(ox, oy, rad, 'rgba(' + R + ','+ G + ','+ B + ','+ Math.random() + ')', direct);
+          document.body.appendChild(sp.dom);
+          sp.run();
+          ani = requestAnimationFrame(create);
+        }
+
+        ani = requestAnimationFrame(create);
+      }
+
+
+
+      // 按下赞
+      function voteDown(e) {
+        var pos = getPos(e.target);
+        shapeJet(pos.x, pos.y)
+      }
+
+
+      // 放开赞
+      function voteUp(e) {
+        cancelAnimationFrame(ani);
+      }
+
+      btn.addEventListener('mousedown', voteDown);
+      document.body.addEventListener('mouseup', voteUp);
+
+    }
+    </script>
+</body>
+</html>
