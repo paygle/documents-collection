@@ -8,6 +8,10 @@
 * [向量，矩阵和数组命令](#vector)
 * [绘图命令](#plot)
 
+## 常用命令
+
+* grid on   % 显示网格线
+* hold on   % 冻结当前坐标图
 
 ## <a name="conversation"></a>管理会话命令
 
