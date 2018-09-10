@@ -45,6 +45,41 @@
   <i class="y" title="y轴"></i>
   <script>
 
+  /*
+    关于Parabola:
+
+    直接执行funParabola方法是不会产生运动的。因为，实际上funParabola执行返回的是一个对象。包含如下四个方法：
+
+    1. mark 在目标元素以及移动元素上通过data-center自定义属性标记当前的中心坐标，如-234, -345. 此方法主要用在demo中，方便测试与预览用的。实际可能用途不大。
+
+    2. position 重新获取元素的位置。在元素相对位置改变的时候，此方法很有用。否则会出现计算误差的情况。例如，页面布局是自适应或者响应式的，浏览器宽度变小了，两元素之间的距离变化了，此时需要执行下position，存储新的坐标位置。
+
+    3. move 触发抛物线运动。
+
+    4. init 初始化方法。实际上就是连续调用position, mark, move3个方法。
+
+
+    参数说明：
+
+    1. element表示移动的元素，例如demo中的小球球。原生DOM节点
+
+    2. target表示目标元素。例如demo中的椭圆形的大便池。原生DOM节点
+
+    3. options为可选参数。各个API名称以及含义如下：
+      3.1 speed 表示每帧移动的像素大小，每帧（对于大部分显示屏）大约16~17毫秒。默认大小是166.67。也就是默认10px/ms.
+      3.2 curvature 可以近似理解为抛物线的开头大小，也就是曲率。正数表示开口向下。默认大小是0.001. 数值越大，开头越小，弧度越高。因为web页面动辄大小几百像素，因此，曲率值较小。
+      3.3 progress 表示抛物线运动过程中的回调，支持两个参数，x, y，表示当前的坐标，您可以根据这些坐标值做一些特殊的处理。
+      3.4 complete 表示抛物线运动结束后的回调。
+
+
+    其他说明：
+
+    1. 可选参数speed不是指x轴的位移，也不是y轴位移，而是抛物线特定坐标的切线距离。利用切线公式：y'=2ax+b就可以计算出x轴这一帧应该移动的距离。形成奔向目的地的运动效果。
+
+    2. funParabola方法不依赖任何JS框架。您可以大胆使用。对了，funParabola使用了requestAnimationFrame方法。关于requestAnimationFrame身世、工作等私密信息可以参考我之前的“CSS3动画那么强，requestAnimationFrame还有毛线用？”一文。上面压缩的JS包含了requestAnimationFrame相关的兼容处理，因此IE6浏览器也是可以使用滴！
+
+  */
+
     var funParabola = function (element, target, options) {
       /*
        * 网页模拟现实需要一个比例尺
