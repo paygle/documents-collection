@@ -1,6 +1,7 @@
 # ECMAScript 5 基础语法
 
 * [复用和继承模式](#inherit-reuse)
+* [DOM脚本性能优化](#dom-optimize)
 
 
 ## <a name="inherit-reuse"></a>复用和继承模式
@@ -191,5 +192,48 @@ function myFun() {
 // 借用和绑定 bind(), 把函数永远的绑定到给定的对象上，无法改变
 var newFunc = obj.someFunc.bind(myobj, 1, 2, 3);
 
+
+```
+
+
+## <a name="dom-optimize"></a>DOM脚本性能优化
+
+  * DOM 的访问代价是昂贵的，它是制约javascript性能的主要瓶颈
+
+  * 避免在循环中使用DOM访问，尽量减少DOM的操作
+
+  * 将DOM引用分配给局部变量，并使用这些局部变量
+
+  * 在可能的情况下尽量使用 document.querySelector API
+
+```js
+
+// 创建文档碎片来离线升级节点
+var p, t, frag;
+
+frag = document.createDocumentFragment();
+
+p = document.createElement('p');
+t = document.createTextNode('first paragraph');
+p.appendChild(t);
+frag.appendChild(p);
+
+// 挂载到 DOM 结点上更新并渲染
+document.body.appendChild(frag);
+
+```
+
+
+  * 批处理现有DOM的部分，建立一个克隆镜像然后处理
+
+```js
+
+var oldnode = document.getElementById('result'),
+    clone = oldnode.CloneNode(true);
+
+// 处理克隆对象 ...
+
+// 完成后
+oldnode.parentNode.replaceChild(clone, oldnode);
 
 ```
