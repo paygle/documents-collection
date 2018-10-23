@@ -1,0 +1,34 @@
+/* 常用样式集合 */
+
+/* 滚动条样式	                  描述
+-webkit-scrollbar	             滚动条整体部分，其中的属性有width,height,background,border（就和一个块级元素一样）等
+-webkit-scrollbar-button	     滚动条两端的按钮；可以用display:none让其不显示，也可以添加背景图片，颜色改变显示效果
+-webkit-scrollbar-track	       外层轨道；可以用display:none让其不显示，也可以添加背景图片，颜色改变显示效果
+-webkit-scrollbar-track-piece	 内层轨道，滚动条中间部分（除去）
+-webkit-scrollbar-thumb	       滚动条里面可以拖动的那部分
+-webkit-scrollbar-corner	     边角
+-webkit-resizer	               定义右下角拖动块的样式
+*/
+
+/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/  
+::-webkit-scrollbar  
+{  
+    width: 16px;  /*滚动条宽度*/
+    height: 16px;  /*滚动条高度*/
+}  
+  
+/*定义滚动条轨道 内阴影+圆角*/  
+::-webkit-scrollbar-track  
+{  
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);  
+    border-radius: 10px;  /*滚动条的背景区域的圆角*/
+    background-color: red;/*滚动条的背景颜色*/  
+}  
+  
+/*定义滑块 内阴影+圆角*/  
+::-webkit-scrollbar-thumb  
+{  
+    border-radius: 10px;  /*滚动条的圆角*/
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);  
+    background-color: green;  /*滚动条的背景颜色*/
+}

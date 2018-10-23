@@ -1,0 +1,34 @@
+/* DIV 标签宽高比CSS 代码实现 */
+
+/*
+  宽度为固定的像素
+  那高度可以直接通过比例计算获得。
+
+  宽度为父元素的百分比
+  假设宽度为父元素的 80%，宽高比为2:1，则可设置style为：
+  style=“width:80%; height:auto; padding-top: 40%;”
+
+  当高度固定时
+  高度为固定的像素
+  直接通过比例计算获得宽度
+
+  高度为父元素的百分比
+  暂时还不知道用什么办法，目前只能通过 js 来动态的设置宽高。
+*/
+
+/*
+  <div class="parent">
+    <div class="children"></div>
+  </div>
+*/
+
+.parent{
+  width:200px;
+  height:100px;
+}
+
+.children{
+  width:100%;
+  height:0;
+  padding-bottom:50%;  // 或 padding-top: 50%;
+}
