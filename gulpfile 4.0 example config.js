@@ -135,3 +135,5 @@ exports.clean = clean;
 exports.build = build;
 exports.watch = watch;
 exports.default = build;
+
+// gulp watch 命令
