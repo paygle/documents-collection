@@ -1,6 +1,6 @@
 # Go 语言基础
 
-
+* [命令行](#cmd)
 * [变量](#govar)
 * [常量](#goconst)
 * [iota常量](#gospconst)
@@ -32,14 +32,62 @@
 
 ## Go 语言结构
 
+## <a name="cmd"></a>Go 命令行
+
+```bash
+
+# 命令行 go 语言环境变量配置查看
+$ go env  
+
+# 直接运行程序
+$ go run
+
+# 测试编译，检查是否有编译错误
+$ go build
+
+# 格式化源码
+$ go fmt
+
+# 编译包文件并编译整个程序
+$ go install
+
+# 运行测试文件
+$ go test
+
+# 查看文档
+$ go doc
+
+# 打开本地官网文档
+$ godoc -http=:8080
+
+```
+
+## 要点
+   * GO 程序是通过 package  来组织的（与 python 类似）
+   * 只有 package 名称为 main 的包可以包含 main 函数 （即程序入口）
+   * 一个可执行程序 有且仅有一个 main 包
+
+   * 通过 import 关键字 -> 导入其他非 main 包
+   * 通过 const 关键字 -> 常量的定义
+   * 通过在函数体外使用 var 关键字 -> 全局变量的声明与赋值
+   * 类型零值，在声明变量时未赋值的变量是零值，它不等于空值而是类型的默认值
+   * 通过 type 关键字 -> 结构（ struct ）或接口（ interface ）的声明
+   * 通过 func 关键字 -> 函数声明
+
+   * 使用大小写来决定该常量、变量、类型、接口、结构或函数是否可以被外部包访问
+   * 约定函数名首字母（小写/private；大写/public）
+
+
 ```go
+// 包为 main 为，有一个 方法为 main() 的文件是程序的入口
+
 package main
 
-import "fmt"
+import aliasFmt "fmt"  // 引入别名
 
 func main() {
    /* 这是我的第一个简单的程序 */
-   fmt.Println("Hello, World!")
+   aliasFmt.Println("Hello, World!")
 }
 ```
 
