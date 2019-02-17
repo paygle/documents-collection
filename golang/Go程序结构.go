@@ -3,6 +3,10 @@ package main
 
 // 导入其他的包
 import std "fmt"
+import "reflect"
+import "runtime"
+import "sync"
+
 /*
 import (
 	"math"
@@ -163,7 +167,7 @@ type (
 	5. 匿名结构也可以用于Map的值；
 	6. 可以使用字面值对结构进行初始化；
 	7. 允许直接通过指针来读写结构成员；
-	8. 相同类型的成员可进行直接拷贝赋值；
+	8. 相同类型的成员(即，结构名称相同，字段内容也相同）可进行直接拷贝赋值；
 	9. 支持 == 与 != 比较运算符，但不支持 > 或 <；
 	10. 支持匿名字段，本质上是定义了以某个类型名为名称的字段；
 	11. 嵌入结构作为匿名字段看起来像继承，但不是继承；
@@ -171,11 +175,228 @@ type (
 
 */
 
+type parent struct {
+	Sex int
+}
+
 // 结构的声明
-type gopher struct {}
+type person struct {
+	parent              // 嵌入结构，把字段给结构和自身都可以访问
+	Name string
+	Age int
+	Contact struct {   // 匿名结构
+		Phone, City string
+	}
+}
+
+// 结构的使用
+func useStruct() {
+	// 匿名结构声明及初始化
+	nm := struct {
+		Name string
+		Age int
+	} {
+		Name: "lxp",
+		Age: 12 }
+
+	st := &person{ //声明一个指向结构的指针，直接修改原数据
+			Name: "Joe",
+			Age: 10,
+			parent: parent{Sex: 1}}
+	
+	st.Sex = 2
+	st.Contact.Phone = "123456789"
+	st.Contact.City = "bejing"
+
+	std.Println(nm)
+	std.Println(st)
+}
+
+/*
+	【接口 interface】
+	1. 接口是一个或多个方法签名的集合；
+	2. 只要某个类型拥有该接口的所有方法签名，即算实现该接口，无需显示声明实现了哪个接口， 这称为 Structural Typing；
+	3. 接口只有方法声明，没有实现，没有数据字段；
+	4. 接口可以匿名嵌入其它接口，或嵌入到结构中；
+	5. 将对象赋值给接口时，会发生拷贝，而接口内部存储的是指向这个复制品的指针，即无法修改复制品的状态，也无法获取指针；
+	6. 只有当接口存储的类型和对象都为 nil 时，接口才等于 nil；
+	7. 接口调用不会做 receiver 的自动转换；
+	8. 接口同样支持匿名字段方法；
+	9. 接口也可实现类似OOP中的多态；
+	10. 空接口可以作为任何类型数据的容器；
+	11. 接口转换：可以将拥有超集的接口转换为子集的接口
+*/
 
 // 接口的声明
-type golang interface {}
+type USB interface {
+	Name() string
+	Connecter    // 嵌入接口
+}
+
+type Connecter interface {
+	Connect()
+}
+
+// 接口字段实现
+type PhoneConnector struct {
+	name string
+}
+
+// 接口方法实现
+func (pc PhoneConnector) Name() string {
+	return pc.name
+}
+
+func (pc PhoneConnector) Connect() {
+	std.Println("Connected:", pc.name)
+}
+
+// 空接口可以接收任何接口
+func DisConnect(usb interface{}) {
+
+	// 通过类型断言的 ok pattern 可以判断接口中的数据类型
+	if pc, ok := usb.(PhoneConnector); ok {
+		std.Println("DisConnected:", pc.name)
+		return
+	}
+
+	// 使用 type switch 可以针对空接口进行比较全面的类型判断
+	switch v := usb.(type) {
+		case PhoneConnector:
+			std.Println("DisConnected:", v.name)
+		default:
+			std.Println("Unknown decive:")
+	}
+}
+
+func useInterface() {
+	var u USB
+	u = PhoneConnector{ "PhoneConnector" }
+	u.Connect()
+	DisConnect(u)
+}
+
+
+/*
+	【方法 Method】
+	1. Go 中虽没有class，但依旧有method；
+	2. 通过显示说明 接收参数来实现与某个类型的组合；
+	3. 只能为同一个包中的类型定义方法；
+	4. 接收参数 可以是类型的值或者指针；
+	5. 不存在方法重载；
+	6. 可以使用值或指针调用方法，编译器会自动完成转换；
+	7. 从某种意义上来说，方法是函数的语法糖，因为 reciver 其实就是方法所接收的第1个参数；
+	8. 如果外部结构和嵌入结构存在同名方法，则优先调用外部结构的方法；
+	9. 类型的别名不会拥有底层类型所附带的方法；
+	10. 方法可以调用结构中的非公开字段
+*/
+
+type ABC struct {
+	Name string
+}
+
+// 定义该函数为，结构 ABC 的一个方法
+func (abc *ABC) Print() {
+	var t TZ
+	t.Increase(1)         // 调用方法
+	(*TZ).Increase(&t, 1)   // 动态调用方法
+
+	abc.Name = "ABCC"
+	std.Println("ABC")
+}
+
+// 可以给任意自定义类型，添加方法
+type TZ int
+func (tz *TZ) Increase(num int) {
+	*tz += TZ(num)
+	std.Println("TZ")
+}
+
+/*
+	【反射 reflection】
+	1. 反射可大大提高程序的灵活性，使得 interface{} 有更大的发挥余地
+	2. 反射使用 TypoOf 和 ValueOf 函数从接口中获取目标对象信息
+	3. 反射会将匿名字段作为独立字段（匿名字段本质）
+	4. 想要利用反射修改对象状态，前提是 interface.data 是 settable,即 pointer-interface
+	5. 通过反射可以“动态”调用方法
+*/
+
+type User struct {
+	Id int
+	Name string
+	Age int
+}
+
+type Manager struct {
+	User
+	title string
+}
+
+func (u User) Hello() {
+	std.Println("Hello world.")
+}
+
+// 反射处理方法
+func Info(o interface{}) {
+	t := reflect.TypeOf(o)
+	std.Println("Type:", t.Name())
+
+	if k := t.Kind(); k != reflect.Struct {
+		std.Println("error:")
+		return
+	}
+
+	v := reflect.ValueOf(o)
+	std.Println("Fields:")
+
+	// 取出反射对象的 field value
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+		val := v.Field(i).Interface()
+		std.Println("%v = %v\n", f.Name, f.Type, val)
+	}
+	// 获取方法
+	for j := 0; j < t.NumField(); j++ {
+		m := t.Method(j)
+		std.Println("%v\n", m.Name, m.Type)
+	}
+}
+
+// 反射设置值
+func Set(o interface{}) {
+	v := reflect.ValueOf(o)
+	if v.Kind() == reflect.Ptr && !v.Elem().CanSet() {
+		std.Println("error")
+		return
+	} else {
+		v = v.Elem()
+	}
+
+	f := v.FieldByName("Name")
+	if !f.IsValid() {
+		std.Println("BAD")
+		return
+	}
+	if f.Kind() == reflect.String {
+		f.SetString("BYEBYE")
+	}
+}
+
+func ReflectMain() {
+	u := User{1, "OK", 12}
+	Info(u)
+
+	// 获取子结构
+	m := Manager{User: User{1, "OK", 12}, title: "12345"}
+	t := reflect.TypeOf(m)
+	std.Println(t.FieldByIndex([]int{0, 0}))
+
+	// 反射方法调用
+	v := reflect.ValueOf(u)
+	mv := v.MethodByName("Hello")
+	args := []reflect.Value{reflect.ValueOf("Join")}
+	mv.Call(args)
+}
 
 // switch 语句例子
 func switchGo() {
@@ -203,6 +424,7 @@ func switchGo() {
 	【函数 Function】
 	1. Go 函数 “不支持” 嵌套、重载和默认参数；可以作为一种类型作用
 	2. Go 函数无需声明原型、不定长度变参、多返回值、命名返回值参数、匿名函数、闭包；
+	3. Go 函数所有的传参都是复制，如果要修改原数据必须使用指针形参，如 f(age *int)
 */
 
 func examFunc1(param1 int, param2 string) int {
@@ -331,4 +553,111 @@ func main() {
 	std.Println(f(1))
 	std.Println("Hello world! 你好！")
 	deferFunExam()
+
+	// 并发 channel 处理
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	cco := make(chan bool, 10)
+	for i := 0; i < 10; i++ {
+		go Go(cco, i)
+	}
+	for i := 0; i < 10; i++ {
+		<-cco
+	}
+
+	// 并发 sync 包处理
+	wg := sync.WaitGroup{}
+	for i := 0; i < 10; i++ {
+		go GoWait(&wg, i)
+	}
+
+	// select 并发
+	cc1, cc2 := make(chan int), make(chan string)
+	o := make(chan bool, 2)
+	go func() {
+		a, b := false, false
+		for {
+			select {
+			case v, ok := <-cc1:
+				if !ok {
+					if !a {
+						o <- true
+					}
+					break
+				}
+				std.Println("cc1", v)
+			case v, ok := <-cc2:
+				if !ok {
+					if !b {
+						o <- true
+					}
+					break
+				}
+				std.Println("cc1", v)
+			}
+		}
+	}()
+
+	cc1 <- 1
+	cc2 <- "hi"
+	cc1 <- 3
+	cc2 <- "hello"
+
+	close(cc1)
+	for i := 0; i < 2; i++ {
+		<-o
+	}
+
+	// 发送
+	cs := make(chan int)
+	go func(){
+		for v := range cs {
+			std.Println(v)
+		}
+	}()
+
+	for {
+		select {
+		case cs <- 0:
+		case cs <- 1:
+		}
+	}
+
+}
+
+/*
+	【并发 concurrency】
+	goroutine 只是由官方实现的超级“线程池”；每个实例 4-5KB的栈内存占用和由于实现机制而大幅减少的创建和销毁开销，是GO高并发的根本原因；
+	并发不是并行，并发主要由切换时间片来实现“同时”运行，在并行则是直接利用多核实现多线程的运行，但GO可以设置使用核数，以发挥多核能力；
+	goroutine 奉行通过通信来共享内存，而不是共享内存来通信；
+
+	【Channel】
+	1. Channel 是 goroutine 沟通的桥梁，大都是阻塞同步的
+	2. 通过 make 创建， close 关闭
+	3. Channel 是引用类型
+	4. 可以使用 for range 来迭代不断操作 Channel
+	5. 可以设置缓存大小，在未被填满前不会发生阻塞
+	
+	【Select】
+	1. 可处理一个或多个 channel 的发送与接收
+	2. 同时有多个可用 channel 时按随机顺序处理
+	3. 可用空的 select 来阻塞 main 函数
+	4. 可设置超时
+*/
+
+func Go(c chan bool, index int) {
+	a := 1
+	for i := 0; i < 1000000; i++ {
+		a += i
+	}
+	std.Println(index, a)
+	c <- true
+}
+
+func GoWait(wg *sync.WaitGroup, index int) {
+	a := 1
+	for i := 0; i < 1000000; i++ {
+		a += i
+	}
+	std.Println(index, a)
+	wg.Done()
 }
