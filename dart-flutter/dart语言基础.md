@@ -19,6 +19,11 @@
 |class  | extends  | is	 | switch	 | yield  |
 |const  | factory  | library  | sync*  | yield*  |
 
+### 语言特性
+
+  * 使用 import 来指定一个库如何使用另外 一个库，以下划线 (_) 开头的标识符只有在库 内部可见。
+  
+
  #### Hello world
 ```dart
 import 'dart:math';
