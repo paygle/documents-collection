@@ -2,6 +2,8 @@
 
 * [Dart 关键字](#keywords)
 
+* [Flutter 开发](#flutter)
+
 
 ## <a name="keywords"></a> Dart 关键字
 
@@ -65,3 +67,8 @@ void main() {
   print('Hello, World!');
 }
 ```
+
+
+##  <a name="flutter"></a> Flutter 开发
+
+  * 不要使用pub get或pub upgrade命令来管理你的依赖关系。相反，应该使用flutter packages get 或 flutter packages upgrade。如果您想手动使用pub，则可以通过设置FLUTTER_ROOT环境变量来直接运行它。
