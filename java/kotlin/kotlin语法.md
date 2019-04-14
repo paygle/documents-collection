@@ -140,6 +140,7 @@
  * 十六进制:  0x0F
  * 二进制:  0b00001011
  * 注意: 不支持八进制
+ * 类型不同的值是无法进行相等比较的（需要显示转换为相同的类型）
 
 ### 数字字面值中的下划线（使用下划线使数字常量更易读）
 
@@ -151,15 +152,54 @@ val hexBytes = 0xFF_EC_DE_5E
 val bytes = 0b11010010_01101001_10010100_10010010
 ```
 
+### 字符串字面值
+
+```kotlin
+/*
+* 原始字符串 使用三个引号（ """ ）分界符括起来，内部没有转义并且可以包含换行以及任何其他字符
+* 通过  trimMargin()  函数去除前导空格
+*/
+
+val text = """
+ |Tell me and I forget.
+ |Teach me and I remember.  
+ |Involve me and I learn.  
+ |(Benjamin Franklin)  """.trimMargin()
+
+/*
+* 字符串模板 以美元符（ $ ）开头，由一个简单的名字构成或者用花括号括起来的任意表达式
+*/
+
+val i = 10
+println("$s.length is ${s.length}")  //  输出“abc.length is 3”
+```
 
 ## <a name="kotlin"></a>Kotlin 简单示例
+
+  * 语法 while  与  do .. while  照常使用
+
+  默认导入
+  * kotlin.*
+  * kotlin.annotation.*
+  * kotlin.collections.*
+  * kotlin.comparisons.* （自 1.1 起） 
+  * kotlin.io.*
+  * kotlin.ranges.*
+  * kotlin.sequences.*
+  * kotlin.text.*
+
+  根据目标平台还会导入额外的包：
+  * java.lang.*     （JVM）
+  * kotlin.jvm.*    （JVM）
+  * kotlin.js.*      (JS)
+
 
 ```kotlin
 /*
 * 定义包: 目录与包的结构无需匹配：源代码可以在文件系统的任意位置
 */
 package my.demo 
-import java.util.*
+import java.util.*  as jutil
 
 /*
 * 定义函数: 带有两个  Int  参数、返回  Int  的函数
@@ -173,5 +213,297 @@ fun main() {
    println(sum(3, 5))
 }
 
+/*
+* If 表达式
+*/
+val max = if (a > b) a else b
+
+/*
+* if 的分支可以是代码块，最后的表达式作为该块的值：
+*/
+val max = if (a > b) {
+  print("Choose a")   
+  a
+} else {
+  print("Choose b")  
+  b
+}
+
+/*
+* When 表达式
+*/
+when (x) {
+  1 -> print("x == 1")  
+  2, 3 -> print("x == 2or3")  
+  else -> { // 注意这个块
+    print("x is neither 1 nor 2")
+  }
+}
+
+/*
+* When 检测一个值在（ in ）或者不在（ !in ）一个区间或者集合中
+*/
+when (x) {
+  in 1..10 -> print("x is in the range")  
+  in validNumbers -> print("x is valid")
+  !in 10..20 -> print("x is outside the range") 
+  else -> print("none of the above")
+}
+
+/*
+* 另一种可能性是检测一个值是（ is ）或者不是（ !is ）一个特定类型的值。
+* 注意： 由于智能转换，你可以访问该类型的方法与属性而无需任何额外的检测。
+*/
+fun hasPrefix(x: Any) = when(x) {
+  is String -> x.startsWith("prefix")  
+  else -> false
+}
+
+/*
+* when  也可以用来取代  if - else   if 链。 
+* 如果不提供参数，所有的分支条件都是简单的布尔表达式，而当一个分支的条件为真时则执行该分支
+*/
+when {
+  x.isOdd() -> print("x is odd")
+  x.isEven() -> print("x is even") 
+  else -> print("x is funny")
+}
+
+/**
+* for  循环可以对任何提供迭代器（iterator）的对象进行遍历
+*/
+for (item: Int in ints) {
+  // ...
+}
+
+for (i in 6 downTo 0 step 2) {
+  println(i)
+}
+
+/**
+* 可以用标签限制  break  或者 continue 
+*/
+loop@ for (i in 1..100) {
+  for (j in 1..100) {
+    if (……) break@loop
+  }
+}
+
 ```
 
+## 类与对象
+
+  类声明由类名、类头（指定其类型参数、主构造函数等）以及由花括号包围的类体构成。类头与类体都是可选的； 如果一个类没有类体，可以省略花括号。
+
+  * 幕后字段 field 标识符只能用在属性的访问器内。
+  * 接口与 Java 8 类似，既包含抽象方法的声明，也包含实现。与抽象类不同的是，接口无法保存状态。它可以有属性但必须声明为抽象或提供访问器实现。
+  * 伴生对象，在 Kotlin 中类没有静态方法，你可以把它写成该类内对象声明中的一员。
+
+#### 在包顶层声明，访问限制符
+
+  * 如果你不指定任何可见性修饰符，默认为  public ，这意味着你的声明将随处可见；
+  * 如果你声明为  private ，它只会在声明它的文件内可见；
+  * 如果你声明为  internal ，它会在相同模块内随处可见；
+  * protected  不适用于顶层声明。
+  * 注意：要使用另一包中可见的顶层声明，仍需将其导入进来。
+  
+
+```kotlin
+// 文件名：example.kt 
+package foo
+
+private fun foo() { …… }  // 在 example.kt 内可见
+public var bar: Int = 5   // 该属性随处可见
+private set               // setter 只在 example.kt 内可见
+internal val baz = 6      // 相同模块内可见
+
+```
+
+#### 对于类内部声明的成员：
+
+  * private  意味着只在这个类内部（包含其所有成员）可见；
+  * protected —— 和  private 一样 + 在子类中可见。
+  * internal  —— 能见到类声明的 本模块内 的任何客户端都可见其  internal  成员；
+  * public  —— 能见到类声明的任何客户端都可见其  public  成员。
+
+  注意 对于Java用户：Kotlin 中外部类不能访问内部类的 private 成员。
+  如果你覆盖一个  protected  成员并且没有显式指定其可见性，该成员还会是  protected  可见性。
+
+```kotlin
+open class Outer {
+  private val a = 1  
+  protected open val b = 2  
+  internal val c = 3
+  val d = 4  // 默认 public
+
+  protected class Nested {
+    public val e: Int = 5
+  }
+}
+
+class Subclass : Outer() {
+  // a 不可见
+  // b、c、d 可见
+  // Nested 和 e 可见
+  override val b = 5   // “b”为 protected
+}
+
+class Unrelated(o: Outer) {
+  // o.a、o.b 不可见
+  // o.c 和 o.d 可见（相同模块）
+  // Outer.Nested 不可见，Nested::e 也不可见
+}
+
+```
+
+
+### 构造函数
+
+  * 在 Kotlin 中的一个类可以有一个主构造函数以及一个或多个次构造函数。主构造函数是类头的一部分：它跟在类名（与可选的类型参数）后。
+  * 主构造函数不能包含任何的代码。初始化的代码可以放到以  init  关键字作为前缀的初始化块（initializer blocks）中。
+  * 请注意，主构造的参数可以在初始化块中使用。它们也可以在类体内声明的属性初始化器中使用
+  * 在 Kotlin 中所有类都有一个共同的超类  Any ，这对于没有超类型声明的类是默认超类; 注意： Any  并不是  java.lang.Object ；尤其是，它除了  equals() 、 hashCode()  与 toString()  外没有任何成员。
+
+```kotlin
+
+  class Person constructor(firstName: String) { ... }
+
+  // 如果主构造函数没有任何注解或者可见性修饰符，可以省略这个  constructor  关键字。
+
+  class Person(firstName: String) { ... }
+
+  /**
+  * 声明属性以及从主构造函数初始化属性, Kotlin 简洁语法
+  */
+  class Person(val firstName: String, val lastName: String, var age: Int) { …… }
+
+  /**
+   * 如果构造函数有注解或可见性修饰符，这个  constructor  关键字是必需的，并且这些修饰符在它前面
+   */
+  class Customer public @Inject constructor(name: String) { …… }
+
+  /**
+  * 类也可以声明前缀有  constructor 的次构造函数：
+  */
+  class Constructors {
+
+    var street: String = ……
+
+    init {
+      println("Init block")
+    }
+
+    constructor(i: Int) {
+      println("Constructor")
+    }
+
+    constructor(ctx: Context, attrs: AttributeSet) : super(ctx, attrs)
+
+  }
+
+  fun main() {
+    Constructors(1)
+  }
+
+  /**
+  * 在一个内部类中访问外部类的超类，可以通过由外部类名限定的  super  关键字来实现： super@Outer 
+  */
+  class Bar : Foo() {
+    override fun f() { /* …… */ }
+    override val x: Int get() = 0
+
+    inner class Baz {
+      fun g() {
+        super@Bar.f() // 调用 Foo 实现的 f()
+        println(super@Bar.x) // 使用 Foo 实现的 x 的 getter
+      }
+    }
+  }
+
+```
+
+### 类覆盖规则
+
+  * 如果一个类从它的直接超类继承相同成员的多个实现， 它必须覆盖这个成员并提供其自己的实现（也许用继承来的其中之一）
+
+```kotlin
+open class A {
+  open fun f() { print("A") }  
+  fun a() { print("a") }
+}
+
+interface B {
+  fun f() { print("B") } // 接口成员默认就是“open”的  
+  fun b() { print("b") }
+}
+
+class C() : A(), B {
+  // 编译器要求覆盖 f()：  
+  override fun f() {
+    super<A>.f() // 调用 A.f()  
+    super<B>.f() // 调用 B.f()
+  }
+}
+```
+ 
+### 扩展函数 (需要用一个 接收者类型 也就是被扩展的类型来作为他的前缀)
+
+  * 扩展不能真正的修改他们所扩展的类。通过定义一个扩展，你并没有在一个类中插入新成员， 仅仅是可以通过该类型的变量用点表达式去调用这个新函数。
+
+```kotlin
+fun MutableList<Int>.swap(index1: Int, index2: Int) {
+  val tmp = this[index1] // “this”对应该列表  
+  this[index1] = this[index2]
+  this[index2] = tmp
+}
+
+// 泛化写法
+fun <T> MutableList<T>.swap(index1: Int, index2: Int) {
+  val tmp = this[index1] // “this”对应该列表  
+  this[index1] = this[index2]
+  this[index2] = tmp
+}
+
+/*
+* 注意可以为可空的接收者类型定义扩展。
+* 这样的扩展可以在对象变量上调用， 即使其值为
+null，并且可以在函数体内检测  this == null ，这能让你在没有检测 null 的时候调用 Kotlin中的toString()：检测发生在扩展函数的内部。
+*/
+fun Any?.toString(): String {
+  if (this == null) return "null"
+  // 空检测之后，“this”会自动转换为非空类型，所以下面的 toString()  
+  // 解析为 Any 类的成员函数
+  return toString()
+}
+
+/*
+* 扩展属性
+*/
+val <T> List<T>.lastIndex: Int
+  get() = size - 1
+
+/*
+* 注意：由于扩展没有实际的将成员插入类中，因此对扩展属性来说幕后字段是无效的。这就是为什么扩展属性不能有初始化器。他们的行为只能由显式提供的 getters/setters 定义。
+*/
+val Foo.bar = 1 // 错误：扩展属性不能有初始化器
+
+/*
+* 伴生对象的扩展
+*/
+class MyClass {
+  companion object { } 
+}
+
+fun MyClass.Companion.foo() { …… }
+
+```
+
+## 数据类 （一些只保存数据的类）
+
+  * 数据类可以扩展其他类
+
+```kotlin
+
+  data class User(val name: String = "", val age: Int = 0)
+
+```
