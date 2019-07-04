@@ -34,7 +34,31 @@
 * [使用闭包](#clozeuse)
 
 
-Groovy是一门基于JVM的动态语言，很多语法和Java类似。大部分Java代码也同时是合法的Groovy代码。本文是快速入门，所以针对语法并不会做非常详细的介绍。如果需要详细语法，请直接查看Groovy官方文档。另外为了省事，本文中的大部分代码例子直接引用了Groovy文档。
+Groovy是一门基于JVM的动态语言，很多语法和Java类似。大部分Java代码也同时是合法的Groovy代码。本文是快速入门，所以针对语法并不会做非常详细的介绍。如果需要详细语法，请直接查看Groovy官方文档。另外为了省事，本文中的大部分代码例子直接引用了Groovy文档。由于其运行在 JVM 上的特性，Groovy 可以使用其他 Java 语言编写的库。
+
+Groovy 会默认导入下面这些包、类，不需要使用import语句显式导入。
+
+```groovy
+import java.io.*
+import java.lang.*
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.net.*
+import java.util.*
+import groovy.lang.*
+import groovy.util.*
+```
+
+## Groovy类和java类比较
+
+    1. 不需public修饰符， 默认访问修饰符就是public
+    2. 不需要类型说明， 不关心变量和方法参数的具体类型
+    3. 不需要getter/setter方法， 
+    4. 不需要构造函数， 因为实际上只需要两个构造函数（1个不带参数的默认构造函数，1个只带一个map参数的构造函数--由于是map类型，通过这个参数可以构造对象时任意初始化它的成员变量）。
+    5. 不需要return 来返回值。
+    6. 方法调用可以省略（）（构造函数除外）。
+    7. 额外的关键字: def、as、in、trait都是关键字
+
 
 ## 基本内容
 
