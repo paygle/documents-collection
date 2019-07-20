@@ -209,6 +209,83 @@ public class Test {
 
 ```
 	
+## 享元模式，复用对象 （Hashmap实现共享池）
+
+	提供了减少对象数量从而改善应用所需的对象结构的方式
+	运用共享技术有效地支持大量细粒度的对象
+	
+	常常应用于系统底层的开发，以便解决系统的性能问题
+	系统有大量的相似对象，需要缓冲池的场景
+	
+	要关注内部（不变）/外部（可变）状态，关注线程安全问题，系统逻辑复杂化
+	
+```java
+public interface Employee {
+	void report();
+}
+
+public class Manager implements Employee {
+	@Override
+	void report(){
+		System.out.println(reportContent);
+	};
+	
+	// 不变的内部状态
+	private String title = "部门经理";
+	
+	// 外部传入的状态
+	private String department;
+	private String reportContent;
+	
+	public void setReportContent(String reportContent) {
+		this.reportContent = reportContent;
+	}
+	
+	public Manager(String department) {
+		this.department = department;
+	}
+}
+
+public class EmployeeFactory {
+	private static final Map<String, Employee> EMPLOYE_MAP = new HashMap<>();
+	
+	public static Employee getManager(String department) {
+		Manager manager = (Manager) EMPLOYE_MAP.get(department);
+		
+		if (manager == null) {
+			manager = new Manager(department);
+			System.out.println("创建部门经理: " + department);
+			String reportContent = department + "部门汇报: 此次报告内容......";
+			manager.setReportContent(reportContent);
+			System.out.println("创建报告: " + reportContent);
+			EMPLOYE_MAP.put(department, manager);
+		}
+		return manager;
+	}
+}
+
+public class Test {
+
+	private static final String departments[] = {"RD", "QA", "PM"};
+	
+	public static void main(String[] args) {
+		for(int i=0; i<10; i++) {
+			String department = departments[(int)(Math.random)];
+			Manager manager = (Manager) EmployeeFactory.getManager(department);
+			manager.report();
+		}
+	}
+
+}
+
+
+```
+	
+	
+	
+	
+	
+	
 	
 	
 	
