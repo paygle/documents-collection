@@ -33,10 +33,25 @@
 * [调用闭包](#clozecall)
 * [使用闭包](#clozeuse)
 
-
 Groovy是一门基于JVM的动态语言，很多语法和Java类似。大部分Java代码也同时是合法的Groovy代码。本文是快速入门，所以针对语法并不会做非常详细的介绍。如果需要详细语法，请直接查看Groovy官方文档。另外为了省事，本文中的大部分代码例子直接引用了Groovy文档。由于其运行在 JVM 上的特性，Groovy 可以使用其他 Java 语言编写的库。
 
-Groovy 会默认导入下面这些包、类，不需要使用import语句显式导入。
+
+
+## Goovy 关键字(在Java的基础上多四个)
+
+| 关键字    | as        | def        | in           | trait      |          |
+| --------- | --------- | ---------- | ------------ | ---------- | -------- |
+| abstract  | boolean   | break      | byte         | case       | catch    |
+| char      | class     | const      | continue     | default    | do       |
+| double    | else      | extends    | final        | finally    | float    |
+| for       | if        | implements | import       | instanceof | int      |
+| interface | long      | goto       | new          | native     | package  |
+| private   | protected | public     | return       | short      | strictfp |
+| super     | switch    | static     | synchronized | this       | throw    |
+| throws    | transient | try        | void         | volatile   | while    |
+
+
+* Groovy 会默认导入下面这些包、类，不需要使用import语句显式导入。
 
 ```groovy
 import java.io.*
