@@ -41,6 +41,21 @@
 * [Java8 新增特性](#java8new)
 
 
+BO：bussiness object，业务对象。封装业务逻辑的java对象，通过调用DAO方法，结合PO，VO进行业务操作。一个BO可以由多个PO组成。
+
+DO: domain object, 领域对象，抽象出来的有形或无形的业务实体。一般和数据中的表结构对应。
+
+DAO: data access object, 数据访问对象，包含了各种数据库操作方法夹在业务BO和数据库资源之间。用于访问数据库。通常和PO结合使用。
+
+DTO/TO: data transfer object, 数据传输对象。主要用于远程调用等，需要大量传输对象的地方。
+
+POJO: plain ordinary java object, 简单无规则纯Java对象，传统意义上的Java对象。
+
+PO: persistent object, 持久对象。与数据库里的字段一一对应，一个表对应一个PO。
+
+VO: view object, 表现层对象。通常用于业务层之间的数据传递，和PO一样仅含数据而已。
+
+
 > 一个Java程序可以认为是一系列对象的集合，而这些对象通过调用彼此的方法来协同工作。下面简要介绍下类、对象、方法和实例变量的概念。
 
 > 对象：对象是类的一个实例，有状态和行为。例如，一条狗是一个对象，它的状态有：颜色、名字、品种；行为有：摇尾巴、叫、吃等。
