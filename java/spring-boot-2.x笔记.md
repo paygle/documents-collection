@@ -510,38 +510,353 @@ public class DatabaseConditional implements Condition {
 
 ```
 
-## 8. 部署环境的切换 @Profile
+## 8. 部署环境的切换， @Profile 定义配置环境
 
-62
+	启动Profile机制参数: JAVA_OPTS="-Dspring.profiles.active=dev"
+	若不配置启动参数，被@Profile 标注的Bean 将不会被Spring 装配到 IoC 容器中。
+	Spring 优先先判定 spring.profiles.active 配置后， 不存在再去查找spring.profiles.default 的配置
 
+	按照 Spring Boot 的规则，假设把选项 -Dspring.profiles.active 配置的值记为 {profile}
+	则它会用 application-{profile}.properties 文件去代替原来默认的 application.properties 文件
 
+```java
+// 配置开发环境
+@Bean(name="dataSource", destroyMethod="close")
+@Profile("dev")
+public DataSource getDevDataSource() {
+	Properties props = new Properties();
+	props.setProperty("driver"，"com.mysql.jdbc.Driver");
+	props.setProperty("url","jdbc:mysql://localhost:3306/dev_example");
+	props.setProperty("username","root");
+	props.setProperty("password","123456");
+	DataSourcedataSource = null;
 
+	try{
+		dataSource = BasicDataSourceFactory.createDataSource(props);
+	}catch(Exceptione){
+		e.printStackTrace();
+	}
+	return dataSource;
+}
 
+// 配置测试环境
+@Bean(name="dataSource", destroyMethod="close")
+@Profile("test")
+public DataSource getTestDataSource() {
+	// ......
+	return dataSource;
+}
+```
 
+## 9. 引入 XML 配置Bean
 
+	使用的是注解 @ImportResource ，通过它可以引入对应的XML 文件，用以加载Bean。
 
+	使用XML配置的Bean，要求所在的包并不在 @ComponentScan 定义的扫描包范围内，而且没有标注 @Component
 
+	* 被配置到 Bean XML 上的 Bean 类
 
+```java
+package com.my.pojo;
+public class MyHelloWord { /* ...... */ }
+```
 
+	* 扫描 XML Beans 配置
 
+```xml
+<!-- spring-beans.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- 自定义配置bean，首字母小写  -->
+    <bean id="myHelloWord" class="com.my.pojo.MyHelloWord"/>
+</beans>
+```
+	* 使用注解 @ImportResource 装配定义 Beans 的 XML文件
 
+```java
+package com.my;
 
+@Configuration
+@ComponentScan(basePackages="com.my.*")
+@ImportResource(value={"classpath:spring-beans.xml"})
+public class AppConfig {
+	// ......
+}
+```
 
+## 10. 使用 Spring EL 表达式 #{...} 内计算
 
+  数字型的可以使用 == 比较符，如果是字符串型的可以使用 eq 比较符
 
+```java
+// ${...} 代表占位符，会读取上下文的属性值装配到属性中
+@Value("${database.driverName}")
 
+// beanName 是Spring IoC 容器Bean 的名称
+@Value ("#{beanName.str}" )
 
+// 采用#{...}代表启用Spring 表达式，它将具有运算的功能
+// T(...）代表的是引入类，System 是默认加载的包，可以不必写全名，如果是其他包，则需要写出全名才能引用类
+@Value("#{T(System).currentTimeMillis()}")
 
+// ? 表达式，判断这个属性是否为空。不为空才会执行toUppercase方法，并把属性转换为大写，赋予当前属性。
+@Value("#{beanName.str?.toUpperCase()}" )
 
+```
 
+## 11. Spring AOP 约定编程
 
+	任何AOP编程，首先要确定的是在什么地方需要AOP ，也就是需要确定连接点（在Spring 中就是什么类的什么方法）的问题。
 
+```java
+// 简易接口 HelloService
+package com.mytest.service;
+public interface HelloService {
+	public void sayHello(String name);
+}
 
+// HelloService 实现类 HelloServiceImpl
+package com.mytest.service.impl;
+public class HelloServiceImpl implements HelloService {
+	@Override
+	public void sayHello(String name){
+		if (name == null || name.trim() == "") {
+			throw new RuntimeException("parameter is null");
+		}
+		System.out.println("hello " + name);
+	}
+}
+```
 
+	* 拦截器接口
 
+```java
+package com.mytest.intercept;
+import java.lang.reflect.InvocationTargetException;
+import com.mytest.invoke.Invocation;
+
+public interface Interceptor {
+	// 事前方法
+	public boolean before() ;
+	// 事后方法
+	public void after ();
+	/**
+	* 取代原有事件方法
+	* @param invocation 回调参数，可以通过它的 proceed 方法， 回调原有事件
+	* @return 原有事件返回对象
+	* @throws InvocationTargetException
+	* @throws IllegalAccessException
+	*/
+	public Object around(Invocation invocation) throws InvocationTargetException, IllegalAccessException;
+	// 是否返回方法。事件没有发生异常执行
+	public void afterReturning() ;
+	// 事后异常方法， 当事件发生异常后执行
+	public void afterThrowing ();
+	// 是否使用 around 方法取代原有方法
+	boolean useAround() ;
+}
+```
+	* Invocation 类
+
+```java
+package com.mytest.invoke;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+public class Invocation {
+	private Object[] params;
+	private Method method ;
+	private Object target ;
+
+	public Invocation(Object target, Method method,Object[] params) {
+		this.target=target;
+		this.method=method;
+		this.params=params;
+	}
+	// 反射方法
+	public Object proceed() throws InvocationTargetException , IllegalAccessException {
+		return method.invoke(target, params);
+	}
+	/**** setter and getter ****/
+}
+```
+
+	* 开发自己的拦截器
+
+```java
+package com.mytest.intercept;
+import java.lang.reflect.InvocationTargetException;
+import com.mytest.invoke.Invocation;
+
+public class MyInterceptor implements Interceptor {
+	@Override // 事前方法
+	public boolean before() {
+		System.out.println("before ......");
+		return true;
+	}
+
+	@Override // 事后方法
+	public void after () {
+		System.out.println("after ......");
+	}
+
+	@Override 
+	public Object around(Invocation invocation) throws InvocationTargetException, IllegalAccessException {
+		System.out.println("around before ......");
+		Object obj = invocation.proceed();
+		System.out.println("around after ......");
+		return obj;
+	}
+
+	@Override 
+	public void afterReturning() {
+		System.out.println("afterReturning ......");
+	}
+
+	@Override 
+	public void afterThrowing () {
+		System.out.println("afterThrowing ......");
+	}
+
+	@Override 
+	public boolean useAround() {
+		return true;
+	}
+}
+
+```
+
+### ProxyBean 的实现
+
+	如何将服务类和拦截方法织入对应的流程，是ProxyBean 要实现的功能。首先要理解动态代理模式。
+
+```java
+// 在JDK 中，提供了类Proxy 的静态方法 newProxyInstance，其内容具体如下：
+public static Object newProxyInstance(ClassLoader classLoader,
+		Class <?>[] interfaces, InvocationHandler invocationHandler) throws IllegalArguπ1entException;
+
+/*
+	生成一个代理对象（proxy），它有3 个参数：
+	• classLoader  我加载器;
+	• interfaces 绑定的接口，也就是把代理对象绑定到哪些接口下， 可以是多个；
+	• invocationHandler  绑定代理对象逻辑实现。
+*/
+```
+```java
+// ProxyBean 的实现
+package com.mytest.proxy;
+
+public class ProxyBean implements invocationHandler {
+
+	private Object target = null;
+	private Interceptor interceptor = null
+
+	/**
+	 * 绑定代理对象
+	 * @param target 被代理的对象
+	 * @param interceptor 拦截器
+	 * @return 代理的对象
+	 */
+	 public static Object getProxyBean(Object target, Interceptor interceptor) {
+		 ProxyBean proxyBean = new ProxyBean();
+		 // 保存被代理对象
+		 proxyBean.target = target;
+		 // 保存拦截器
+		 proxyBean.interceptor = interceptor;
+		 // 生成代理对象
+		 Object proxy = Proxy.newProxyInstance(
+						target.getClass().getClassLoader(), 
+						target.getClass().getInterfaces(),
+						ProxyBean
+					);
+		// 返回代理对象
+		return proxy;
+	 }
+
+	/**
+	 * 处理代理对象方法逻辑
+	 * @param proxy 代理对象
+	 * @param method 当前方法
+	 * @param args 运行参数
+	 * @return 方法调用结果
+	 * @throws Throwable 异常
+	 */
+	 @Override
+	 public Object invoke(Object proxy, Method method, Object[] args) {
+		 // 异常标识
+		 boolean exceptionFlag = false;
+		 Invocation invocation = new Invocation(target, method, args);
+		 Object retObj = null;
+		 try {
+			 if (this.interceptor.before()) {
+				 retObj = this.interceptor.around(invocation);
+			 } else {
+				 retObj = method.invoke(target, args);
+			 }
+		 } catch(Exception ex) {
+			 // 产生异常
+			 exceptionFlag = true;
+		 }
+		 this.interceptor.after();
+		 if (exceptionFlag) {
+			 this.interceptor.afterThrowing();
+		 } else {
+			 this.interceptor.afterReturning();
+			 return retObj;
+		 }
+		 return null;
+	 }
+}
+
+```
+
+	* 测试约定流程
+
+```java
+private static void testProxy() {
+	HelloService helloService = new HelloServiceImpl();
+	// 按约定获取 proxy
+	HellowService proxy = (HelloService) ProxyBean.getProxyBean(helloService, new MyInterceptor());
+	prox.sayHello("ZhangSan");
+}
+
+```
+
+### AOP 的概念，使用 @AspectJ 注解，只能对方法进行拦截
+
+	使用Spring AOP 可以处理一些无法使用OOP 实现的业务逻辑。
+	其次，通过约定，可以将一些业务逻辑织入流程中，并且可以将一些通用的逻辑抽取出来，然后给予默认实现，这样你只需要完成部分的功能就可以了
+	这样做可以使得开发者的代码更加简短，同时可维护性也得到提高
+
+	AOP 最为典型的应用实际就是数据库事务的管控。例如， 当我们需要保存一个用户时，可能要连同它的角色信息一并保存到数据库中。
+
+	@Transactional 注解，表明该方法需要事务运行，实现了数据库资源的打开和关闭、事务的回漆和提交。
+
+#### AOP 术语和流程
 	
+	1. 连接点（joinpoint）：对应的是具体被拦截的对象，因为Spring只能支持方法，所以被拦截的对象往往就是指特定的方法。
+		例如，我们前面提到的HelloServiceimpl的sayHello方法就是一个连接点，AOP将通过动态代理技术把它织入对应的流程中。
+
+	2. 切点（point cut）：有时候，我们的切面不单单应用于单个方法，也可能是多个类的不同方法，这时，可以通过正则式和指示器的规则去定义，从而适配连接点。切点就是提供这样一个功能的概念。
+
+	3. 通知（advice）：就是按照约定的流程下的方法，分为前置通知（before advice）、后置通知（after advice）、环绕通知（around advice）、事后返回通知（afterRetuming advice）和异常通知（afterThrowing advice），它会根据约定织入流程中，需要弄明白它们在流程中的顺序和运行的条件。
+
+	4. 目标对象（target）：即被代理对象，例如，约定编程中的 HelloServiceImpl 实例就是一个目标对象，它被代理了。
+
+	5. 引入（introduction）：是指引入新的类和其方法，增强现有Bean的功能。
+
+	6. 织入（weaving）：它是一个通过动态代理技术，为原有服务对象生成代理对象，然后将与切点定义匹配的连接点拦截，并按约定将各类通知织入约定流程的过程。
+
+	7. 切面（aspect）：是一个可以定义切点、各类通知和引入的内容，Spring AOP将通过它的信息来增强Bean的功能或者将对应的方法织入流程。
 	
+#### AOP 开发详解
+
+```java
+// 确定连接点
+
+```
 	
-	
+	79
 	
 	
