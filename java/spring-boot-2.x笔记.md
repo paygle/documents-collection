@@ -8,7 +8,8 @@
 
 	Spring Boot并不建议使用XML，而是通过注解的描述生成对象。
 	
-	在Spring 中把每一个需要管理的对象称为Spring Bean（简称Bean ），而Spring 管理这些Bean 的容器，被我们称为SpringIoC 容器（或者简称IoC 容器）。IoC 容器需要具备两个基本的功能：
+	在Spring 中把每一个需要管理的对象称为Spring Bean（简称Bean ），而Spring 管理这些Bean 的容器
+	被我们称为SpringIoC 容器（或者简称IoC 容器）。IoC 容器需要具备两个基本的功能：
 	
 		* 通过描述管理Bean ， 包括发布和获取Bean; 
 		
@@ -20,7 +21,7 @@
 
 	是最为重要的接口设计，大部分Spring IoC 容器是 ApplicationContext 接口的实现类。
 	
-### org.springframework.context.annotation.AnnotationConfigApplicationContext 是一个基于注解的IoC 容器。
+### AnnotationConfigApplicationContext 是一个基于注解的IoC 容器。
 	
 	* @Configuration 和 @Bean 注解例子
 	
@@ -35,7 +36,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AppConfig {
 
-	// @Bean 代表将initUser 方法返回的POJO 装配到IoC 容器中，而其属性name 定义这个Bean 的名称，
+	// @Bean 代表将initUser 方法返回的POJO 装配到IoC 容器中，而其属性name 定义这个Bean 的名称
 	// 如果没有配置它，则将方法名称“initUser”作为Bean的名称保存到Spring IoC容器中。
 	
 	@Bean(name = "user")
@@ -98,7 +99,8 @@ public class User {
 	/**setter and getter **/
 }
 ```
-	其中配置的“user＂则是作为 Bean 的名称，当然你也可以不配置这个字符串，那么IoC 容器就会把类名第一个字母作为小写，其他不变作为Bean 名称放入到IoC 容器中；
+	其中配置的“user＂则是作为 Bean 的名称，当然你也可以不配置这个字符串
+	那么IoC 容器就会把类名第一个字母作为小写，其他不变作为Bean 名称放入到IoC 容器中
 	注解@Value 则是指定具体的值，使得Spring IoC 给予对应的属性注入对应的值。
 	
 ### 为了让Spring IoC 容器装配这个 @Component 注解类， 需要改造配置类 AppConfig
@@ -166,7 +168,8 @@ public DataSource getDataSource () {
 	
 ## 3. 依赖注入： @Autowired
 
-	例如，人类（Person）有时候利用 <---- 动物(Animal）去完成一些事情，比方说狗（Dog）是用来看门的，猫（Cat）是用来抓老鼠的，鹦鹉（Parrot)是用来迎客的…
+	例如，人类（Person）有时候利用 <---- 动物(Animal）去完成一些事情，
+	比方说狗（Dog）是用来看门的，猫（Cat）是用来抓老鼠的，鹦鹉（Parrot)是用来迎客的…
 
 ```java
 /* 人类接口 */
@@ -235,7 +238,8 @@ public class Dog implements Animal {
 	BussinessPerson 类只是定义了一个动物属性（Animal） ，而我们却有两个动物， 一个狗， 一个猫？
 
 ```java
-// 	@Primary，它是一个修改优先权的注解，当我们有猫有狗的时候，假设这次需要使用猫， 那么只需要在猫类的定义上加入@Primarγ 就可以了。
+// @Primary，它是一个修改优先权的注解，当我们有猫有狗的时候，假设这次需要使用猫， 
+// 那么只需要在猫类的定义上加入@Primarγ 就可以了。
 @Component
 @Primary
 public class Cat implements Animal {
@@ -297,8 +301,8 @@ package com.xyz,pojo;
 
 // 实现生命周期中单个Bean 可以实现的所有接口，
 @Component
-public class BussinessPerson implements Person, 
-				BeanNameAware, BeanFactoryAware, ApplicationContextAware, InitializingBean, DisposableBean {
+public class BussinessPerson implements Person, BeanNameAware, 
+		BeanFactoryAware, ApplicationContextAware, InitializingBean, DisposableBean {
 
 	private Animal animal = null;
 
@@ -362,13 +366,15 @@ package com.xyz.life;
 public class BeanPostProcessorExample implements BeanPostProcessor {
 	@Override
 	public Object postProcessBeforeInitialization(Object bean , String beanName) throws BeansException {
-			System.out.println("BeanPostProcessor 调用 postProcessBeforeinitialization 方法，参数【" + bean.getClas().getSimpleName() + "】【" + beanName + "】");
+			System.out.println("BeanPostProcessor 调用 postProcessBeforeinitialization 方法，参数【" 
+			                  + bean.getClas().getSimpleName() + "】【" + beanName + "】");
 			retur bean;
 	}
 
 	@Override
 	public Object postProcessAfterInitializatiion(Object bean, String beanName) throw BeansException {
-		System.out.println("BeanPostProcessor 调用 postProcessAfterInitializatiion 方法，参数【" + bean.getClass().getSimpleName() + "】【" + beanName + "】");
+		System.out.println("BeanPostProcessor 调用 postProcessAfterInitializatiion 方法，参数【" 
+		                    + bean.getClass().getSimpleName() + "】【" + beanName + "】");
 		retur bean ;
 	}
 }
@@ -394,9 +400,11 @@ public class BeanPostProcessorExample implements BeanPostProcessor {
 package com.xyz.pojo ;
 
 /*
-	可以通过@Value 注解， 使用 ${...} 这样的占位符读取配置在属性文件的内容。这里的 @Value 注解，既可以加载属性， 也可以加在方法上。
+	可以通过@Value 注解， 使用 ${...} 这样的占位符读取配置在属性文件的内容。
+	这里的 @Value 注解，既可以加载属性， 也可以加在方法上。
 	使用 @ConfigurationProperties 通过它使得配置上有所减少，去掉 @Value 的配置。
-	注解 @ConfigurationProperties 中配置的字符串 database ，将与POJO 的属性名称组成属性的全限定名去配置文件里查找，这样就能将对应的属性读入到POJO 当中。
+	注解 @ConfigurationProperties 中配置的字符串 database ，
+	将与POJO 的属性名称组成属性的全限定名去配置文件里查找，这样就能将对应的属性读入到POJO 当中。
 */
 @Component
 @ConfigurationProperties("database")  // 使用它需要去掉 @Value 注解
@@ -826,7 +834,8 @@ private static void testProxy() {
 ### AOP 的概念，使用 @AspectJ 注解，只能对方法进行拦截
 
 	使用Spring AOP 可以处理一些无法使用OOP 实现的业务逻辑。
-	其次，通过约定，可以将一些业务逻辑织入流程中，并且可以将一些通用的逻辑抽取出来，然后给予默认实现，这样你只需要完成部分的功能就可以了
+	其次，通过约定，可以将一些业务逻辑织入流程中，并且可以将一些通用的逻辑抽取出来，
+	然后给予默认实现，这样你只需要完成部分的功能就可以了,
 	这样做可以使得开发者的代码更加简短，同时可维护性也得到提高
 
 	AOP 最为典型的应用实际就是数据库事务的管控。例如， 当我们需要保存一个用户时，可能要连同它的角色信息一并保存到数据库中。
@@ -850,13 +859,224 @@ private static void testProxy() {
 
 	7. 切面（aspect）：是一个可以定义切点、各类通知和引入的内容，Spring AOP将通过它的信息来增强Bean的功能或者将对应的方法织入流程。
 	
-#### AOP 开发详解
+### AOP 开发详解
+
+	1. 确定连接点
 
 ```java
-// 确定连接点
+// 用户服务接口
+package com.xyz.aspect.service;
+import com.xyz.pojo.User;
+public interface UserService{
+	public void printUser(User user);
+}
 
+// 用户服务接口实现类
+package com.xyz.aspect.service.impl;
+@Service
+public class UserServiceImpl implements UserService{
+	@Override
+	public void printUser(User user){    // 以此方法为连接点
+		if (user == null){
+			throw new RuntimeException("检查用户参数是否为空......");
+		}
+		System.out.println("Id = " + user.getId());
+		System.out.println("\tusername = " + user.getUsername());
+	}
+}
 ```
 	
-	79
+	2. 开发切面
+
+```java
+// 定义切面
+package com.xyz.aspect;
+@Aspect
+public class MyAspect {
+
+	/*
+		注解 @Pointcut 来定义切点，它标注在方法pointCut 上，
+		则在后面的通知注解中就可以使用方法名称来定义了。
+	*/
+	@Pointcut("execution(* com.xyz.aspect.service.impl.UserServiceImpl.printUser(..))")
+	public void pointCut() { }
+
+	@Before("pointCut() && args(user)")  // 获取通知参数
+	public boolean before(JoinPoint point, User user) {
+		Object[] args = point.getArgs();
+		System.out.println("before ......");
+		return true;
+	}
+
+	@After("pointCut()")
+	public void after () {
+		System.out.println("after ......");
+	}
+
+	@Around("pointCut()")  // 环境通知
+	public void around(ProceedingJoinPoint jp) throws Throwable {
+		// ProceedingJoinPoint 对象有一个proceed 方法，可以回调原有目标对象的方法。
+		System.out.println("around before ......");
+		// 回调目标对象的原有方法
+		jp.proceed();
+		System.out.println("around after ......");
+	}
+
+	@AfterReturning("pointCut()") 
+	public void afterReturning() {
+		System.out.println("afterReturning ......");
+	}
+
+	@AfterThrowing("pointCut()")
+	public void afterThrowing () {
+		System.out.println("afterThrowing ......");
+	}
+}
+/**
+• execution 表示在执行的时候，拦截里面的正则匹配的方法;
+• * 号, 表示任意返回类型的方法;
+• com.xyz.aspect.service.impl.UserServiceImpl 指定目标对象的全限定名称;
+• printUser 指定目标对象的方法;
+• (..) 表示任意参数进行匹配;
+*/
+```
+
+
+	* 环绕通知（Around） 是所有通知中最为强大的通知，强大也意味着难以控制。
+
+	* 使用它的场景是在你需要大幅度修改原有目标对象的服务逻辑时， 否则都尽量使用其他的通知。
+
+	* 环绕通知是一个取代原有目标对象方法的通知， 当然它也提供了回调原有目标对象方法的能力。
+
 	
+#### AspectJ 关于Spring AOP 切点的指示器
+
+|项目类型|描述|
+|-------|------------------------------------|
+|arg()  |  限定连接点方法参数 |
+|@args()  |  通过连接点方法参数上的注解进行限定|
+|execution()  |  用于匹配是连接点的执行方法|
+|this()  |  限制连接点匹配AOP 代理Bean 引用为指定的类型|
+|target  |  目标对象（即被代理对象）|
+|@target()  |  限制目标对象的配置了指定的注解|
+|within  |  限制连接点匹配指定的类型|
+|@within()  |  限定连接点带有匹配注解类型|
+|@annotation()  |  限定带有指定注解的连接点|
+
+表达式： execution(* com.*.UserServiceImpl.printUser(..) && bean('userServiceImpl'))
+
+表达式中的&&代表“并且”的意思，而bean中定义代表对Spring Bean 容器名称的限定，这样就限定具体的类了
+
+
+	3. AOP使用
+
+```java
+// 用户控制器
+package com.xyz.aspect.controller;
+
+@Controller  // 定义控制器
+@RequestMapping("/user") // 定义请求路径
+public class UserController {
 	
+	@Autowired  // 注入用户服务
+	private UserService userService = null;
+
+	@RequestMapping("/print") // 定义请求路径
+	@ResponseBody  // 转换为JSON
+	public User printUser(Long id, String userName, String note) {
+		User user = new User();
+		user.setId(id);
+		user.setUserName(userName);
+		user.setNote(note);
+		userService.printUser(user); // 若 user == null, 则执行 afterthrowing 方法
+		return user; // 加入断点
+	}
+}
+
+// Spring Boot 配置启动文件
+package com.xyz.main;
+
+// 指定扫描包
+@SpringBootApplication(scanBasePackage="com.xyz.aspect")
+public class MainApplication {
+	// 定义切面
+	@Bean(name="myAspect")
+	public MyAspect initMyAspect() {
+		return new MyAspect();
+	}
+
+	// 启动切面
+	public static void main(String[] args){
+		SpringApplication.run(MainApplication.class, args);
+	}
+}
+```
+
+	4. AOP 引入, Spring 允许增强接口的功能
+
+```java
+// 用户检测的接口UserValidator
+package com.xyz.aspect.validator;
+import com.xyz.pojo.User;
+
+public interface UserValidator {
+	// 检测用户对象是否为空
+	public boolean validate(User user);
+}
+
+/*
+  UserValidator 的实现类
+*/
+package com.xyz.aspect.validator.impl;
+
+public class UserValidatorImpl implements UserValidator {
+	@Override
+	public boolean validate(User user) {
+		System.out.println("引入新的接口" + UserValidator.class.getsSmpleName());
+		return user != null;
+	}
+}
+```
+```java
+/*
+	在JDK 动态代理中下挂的两个接口， 于是我们可以将这个代理对象通过这两个接口相互转换， 
+	然后调度其对应的方法， 这就是引入的原理。
+
+	注解 @DeclareParents， 它的作用是引入新的类来增强服务， 
+	它有两个必须配置的属性value 和defaultlmpl 。
+*/
+@Aspect  // 在 MyAspect引入新的接口
+public class MyAspect {
+	@DeclareParents(value= "com.xyz.aspect.service.impl.UserServiceImpl+",
+		        defaultImpl=UserValidatorImpl.class)
+	public UserValidator userValidator;
+	// ......
+}
+/*
+• value：指向你要增强功能的目标对象， 这里是要增强UserServicelmpl 对象， 
+	因此可以看到配置为com.xyz.aspect.service.impl.UserServiceImpl+。
+
+• defaultImpl：引入增强功能的类， 这里配置为UserValid ator lmpl ，
+	用来提供校验用户是否为空的功能。
+*/
+```
+```java
+// 测试引入的验证器
+@RequestMapping("/vp") // 定义请求
+@ResponseBody    // 返回JSON
+public User validateAndPrint(Long id, String userName, String note) {
+	User user = new User();
+	user.setId(id);
+	user.setUserName(userName);
+	user.setNote(note);
+	// 强制转换
+	UserValidator userValidator = (UserValidator)userService;
+	// 验证用户是否为空
+	if (userValidator.validate(user)) {
+		userService.printUser(user);
+	}
+	return user;
+}
+```
+
+90
