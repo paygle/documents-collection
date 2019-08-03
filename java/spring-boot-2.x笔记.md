@@ -3,6 +3,18 @@
 ### Spring Boot 的依赖和自动配置
 
 	org.springframework.boot.autoconfigure.web.servlet
+
+	@Component以及他的特殊化(@Controller, @Service 和 @Repository)允许在通过类路径扫描自动发现。
+
+	@Bean却只能在配置类中明确的声明一个单例的bean。
+
+|注解|说明|
+|-----------|--------------------------------------|
+|@Component  |  加到类路径自动扫描 |
+|@Controller  |  一个web的控制层，在Spring MVC中使用 |
+|@Repository  |  数据管理/存储,企业级应用使用(Dao, DDD) |
+|@Service  |  提供一个商业逻辑 - 一个无状态的切面 |
+
 	
 ### Spring 中是通过注解描述来创建IoC对象。
 
@@ -77,10 +89,12 @@ public class IoCTest {
 	
 ## 1. 装配你的Bean
 
-	如果一个个的Bean 使用注解＠Bean 注入Spring loC 容器中，那将是一件很麻烦的事情。
+	如果一个个的Bean 使用注解 @Bean 注入Spring loC 容器中，那将是一件很麻烦的事情。
 	对于扫描装配而言使用的注解是 @Component 和 @ComponentScan。
 
-	> @Component 是标明哪个类被扫描进入Spring IoC 容器
+	> @Bean 是标明“哪个方法”的返回值被扫描进入Spring IoC 容器
+
+	> @Component 是标明“哪个类”被扫描进入Spring IoC 容器
 
 	> @ComponentScan 是标明采用何种策略去扫描装配Bean。
 
@@ -710,7 +724,8 @@ public class MyInterceptor implements Interceptor {
 	}
 
 	@Override 
-	public Object around(Invocation invocation) throws InvocationTargetException, IllegalAccessException {
+	public Object around(Invocation invocation) throws 
+			InvocationTargetException, IllegalAccessException {
 		System.out.println("around before ......");
 		Object obj = invocation.proceed();
 		System.out.println("around after ......");
@@ -892,7 +907,14 @@ public class UserServiceImpl implements UserService{
 // 定义切面
 package com.xyz.aspect;
 @Aspect
-public class MyAspect {
+@Order(1)  // 定义多切面执行顺序，或者实现 Ordered 接口
+public class MyAspect implements Ordered {
+
+	// 使用 @Order 或者 Ordered 实现，任选一种来确定多切面执行顺序
+	@Override
+	public int getOrder() {
+		return 1;
+	}
 
 	/*
 		注解 @Pointcut 来定义切点，它标注在方法pointCut 上，
@@ -1005,6 +1027,12 @@ public class MainApplication {
 		return new MyAspect();
 	}
 
+	// 同一个点的多切面引入
+	@Bean(name="myAspect2")
+	public MyAspect2 initMyAspect() {
+		return new MyAspect2();
+	}
+
 	// 启动切面
 	public static void main(String[] args){
 		SpringApplication.run(MainApplication.class, args);
@@ -1079,4 +1107,413 @@ public User validateAndPrint(Long id, String userName, String note) {
 }
 ```
 
-90
+	5. AOP 织入是一个生成动态代理对象并且将切面和目标对象方法编织成为约定流程的过程。
+		
+	我们都是采用接口＋实现类的模式， 这是Spring 推荐的方式。
+	但是对于是否拥有接口则不是Spring AOP 的强制要求， 对于动态代理的也有多种实现方式， 我业界比较流行的还有CGLIB 、Javassist 、ASM 等。Spring 采用了JDK 和CGLIB ， 对于JDK 而言，它是要求被代理的目标对象必须拥有接口， 而对于CGLIB 则不做要求。因此在默认的情况下， Spring 会按照这样的一条规则处理，即当你需要使用AOP 的类拥有接口时， 它会以JDK 动态代理运行，否则以CGLIB 运行。
+
+
+## 访问数据库
+
+	* POM.XML中添加 DBCP 数据源依赖，commons-dbcp2
+
+```conf
+# application.properties 文件中数据源连接参数
+spring.datasource.url=jdbc:mysql://localhost:3306/mydatabase
+spring.datasource.username=root
+spring.datasource.password=l23456
+#spring .datasource.driver-class-name=com.mysql . jdbc Driver
+# 指定数据库连接池的类型
+spring.datasource.type=org.apache.commonsdbcp2.BasicDataSource
+```
+
+	* 监测数据库连接池类型
+
+```java
+package com.xyz.db;
+
+@Component
+// 实现 Sprint Bean 生命周期接口 ApplicationContextAware 
+public class DataSourceShow implements ApplicationContextAware {
+	ApplicationContext applicationContext = null;
+
+	// Sprint 容器会自动调用这个方法，注入 Spring IoC 容器
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext)
+			throws BeanException {
+		this.applicationContext = applicationContext;
+		DataSource dataSource = applicationContext.getBean(DataSource.class);
+		System.out.println(dataSource.getClass().getName());		
+	}
+}
+```
+
+### JPA (Java Persistence API) 用 (Hibernate）操作数据
+
+```java
+package com.xyz.pojo;
+
+@Entity(name="user")  // 标明一个实体类
+@Table(name="t_user")  // 定义映射的表
+public class User {
+	@Id   // 标明主键
+	@GenerateValue(strategy=GenerationType.IDENTITY) // 主键策略，递增
+	private Long id = null;
+
+	@Column(name="user_name") // 定义属性和表的映射关系
+	private String userName = null;
+
+	private Strint note = null;
+
+	@Convert(converter=SexConverter.class) // 定义转换器
+	private SexEnum sex = null;
+	/** setter and getter **/
+}
+
+/*------------- 性别转换器 ---------------*/
+public class SexConverter implements AttributeConverter<SexEnum, Integer> {
+	// 将枚举转换为数据库列
+	@Override
+	public Integer converterToDatabaseColumn(SexEnum sex) {
+		return sex.getId();
+	}
+	// 将数据库列转换为枚举
+	@Override
+	public SexEnum converterToEntityAttibute(Integer id){
+		return SexEnum.getEnumById(id);
+	}
+}
+
+/* --------- Spring Boot 启动文件配置 -------- */
+// 定义 Spring boot 扫描路径
+@SpringBootApplication(scanBasePackage="com.xyz.example")
+// 定义JPA 接口扫描包路径
+@EnableJpaRepositories(basePackage="com.xyz.example.dao")
+// 定义实体 Bean 扫描包路径
+@EntityScan(basePackages="com.xyz.example.pojo")
+public class MainApplication {
+	public static void main(String[] args) {
+		SpringApplication.run(MainApplication.class, args);
+	}
+}
+```
+
+### 整合 MyBatis 框架
+
+	My Batis 的配置文件包括两个大的部分， 一是基础配置文件， 一个是映射文件。
+	
+	My Batis 是一个基于 SqlSessionFactory 构建的框架。在MyBatis 应用的生命周期中理当只存在一个 SqlSessionFactory 对象，并且往往会使用单例模式。而构建 SqlSessionFactory 是通过配置类（Configuration）来完成的，因此对于mybatis-spring-boot-starter ，它会给予我们在配置文件（application.properties）进行 Configuration 配置的相关内容。
+
+```xml
+<!-- 引入 MyBatis 的 starter -->
+<dependency>
+	<groupId>org.mybatis.spring.boot</groupId>
+	<artifactId>mybatis-spring-boot-starter</artifactId>
+	<version>2.1.0</version>
+</dependency>
+```
+
+#### MyBatis 可配置的内容
+
+	•  properties （属性）： 属性文件在实际应用中一般采用Spring 进行配置，而不是MyBatis
+
+	• settings（设置）：它的配置将改变MyBatis 的底层行为，可以配置映射规则，如自动映射和驼峰映射、执行器（Executor ）类型、缓存等内容，比较复杂，具体配置项可看 MyBatis在线参考。
+
+	• typeAliases（类型别名）：使用类全限定名会比较长，所以MyBatis 会对常用的类提供默认的别名，此外还允许我们通过typeAliases 配置自定义的别名。
+
+	• typeHandlers（类型处理器）： 这是MyBatis 的重要配置之一，在MyBatis 写入和读取数据库的过程中对于不同类型的数据（对于Java 是JavaType，对于数据库则是JdbcType ）进行自定义转换，在大部分的情况下我们不需要使用自定义的typeHandler ，因为在MyBatis 自身就已经定义了比较多的typeHandler, MyBatis 会自动识别javaTyp巳和jdbcType ，从而实现各种类型的转换。一般来说， typeHandler的使用集中在枚举类型上。
+
+	• objectFactory（对象工厂）：这是一个在MyBatis 生成返回的POJO 时会调用的工厂类。一般我们使用MyBatis 默认提供的对象工厂类（DefaultObjectFactory）就可以了，而不需要任何配置。
+
+	• mappers（映射器）： 最核心的组件，它提供SQL和POJO 映射关系， 这是MyBatis开发的核心。
+
+	• plugins（插件）：有时候也称为拦截器， 是MyBatis 最强大也是最危险的组件，它通过动态代理和责任链模式来完成，可以修改MyBatis 底层的实现功能。掌握它需要比较多的MyBatis知识。
+
+	• environments（数据库环境）： 可以配置数据库连接内容和事务。一般这些交由Spring托管。
+
+	• databaseIdProvider（数据库厂商标识）：允许MyBatis 配置多类型数据库支持， 不常用。
+
+```java
+/* ---------   在用户类使用MyBatis 别名  ---------- */
+package com.xyz.example.pojo;
+
+@Alias(value="user")  // Mybatis 指定别名
+public class User {
+	private Long id = null;
+	private String userName = null;
+	private String note = null;
+	// 性别枚举，这里需要使用 typeHandler 进行转换
+	private SexEnum sex = null;
+
+	public User() { }
+	/*** setter and getter ***/
+}
+```
+```java
+/* ---------   性别 typeHandler  ---------- */
+package com.xyz.example.typehandler;
+// 声明 JdbcType　为整数
+@MappedJdbcTypes(JdbcType.INTEGER)
+// 声明 JavaType 为 SexEnum
+@MappedType(value=SexEnum.class)
+public class SexTypeHandler extends BaseTypeHandler<SexEnum> {
+	// 通过列名读取性别
+	@Overrde
+	public SexEnum getNullableResult(ResultSet rs, String col) throws SQLException {
+		int sex = rs.getInt(col);
+		if (sex != 1 && sex != 2) {
+			return null;
+		}
+		return SexEnum.getEnumById(sex);
+	}
+	// 通过下标读取性别
+	@Overrde
+	public SexEnum getNullableResult(ResultSet rs, int idx) throws SQLException {
+		int sex = rs.getInt(idx);
+		if (sex != 1 && sex != 2) {
+			return null;
+		}
+		return SexEnum.getEnumById(idx);
+	}
+	// 通过存储过程读取性别
+	@Overrde
+	public SexEnum getNullableResult(CallableStatement cs, int idx) throws SQLException {
+		int sex = cs.getInt(idx);
+		if (sex != 1 && sex != 2) {
+			return null;
+		}
+		return SexEnum.getEnumById(idx);
+	}
+	// 设置非空性别参数
+	@Overrde
+	public void setNonNullParameter(PreparedStatement ps, int idx, SexEnum sex, JdbcType jdbcType) 
+			throws SQLException {
+		ps.setInt(idx, sex.getId());
+	}
+
+}
+```
+```xml
+<!-- 用户映射文件 userMapper.xml -->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xyz.example.dao.MyBatisUserDao">
+	<select id="getUser " parameterType="long" resultType="user" >
+		SELECT id, user name AS userName, sex, note FROM t_user where id = #{id}
+	</select>
+</mapper>
+```
+```java
+/* --------- 定义 MyBatis 操作接口 -------- */
+package com.xyz.example.dao;
+// @Repository 注解，扫描在加载 MyBatis 接口Bean 时需要，也可以使用注解 @Mapper
+@Repository
+public interface MyBatisUserDao {
+	public User getUser(Long id);
+}
+```
+```conf
+# 配置 application.properties 中映射文件和扫描别名
+# MyBatis 映射文件通配
+mybatis.mapper-locations=classpath:com/xyz/example/mapper/*.xml
+# MyBatis 扫描别名包，和主解 @Alias 联用
+mybatis.type-aliases-package=com.xyz.example.pojo
+# 配置 typeHandler 的扫描包
+mybatis.type-handlers-package=com.xyz.example.typehandler
+```
+
+### Spring Boot 整合 MyBatis
+
+	• MapperFactoryBean 是针对一个接口配置
+	• MapperScannerConfigurer 提供扫描装配 MyBatis 的接口到 Spring IoC 容器中。
+	• MyBatis 提供了注解 @MapperScan ，也能够所需的对应接口扫描装配到Spring IoC 容器中
+
+```java
+/* --------- 便用 MapperFactoryBean 装配MyBatis 接口 -------- */
+@Autowired
+SqlSessinFactory sqlSessinFactory = null;
+// 定义一个 Mybatis 的 Mapper 接口
+public MapperFactoryBean<MyBatisUserDao> initMyBatisUserDao() {
+	MapperFactoryBean<MyBatisUserDao> bean = new MapperFactoryBean<>();
+	bean.setMapperInterface(MyBatisUserDao.class);
+	bean.setSqlSessionFactory(sqlSessionFactory);
+	return bean;
+}
+```
+
+```java
+/* ------------ 使用MyBatis 接口  ---------- */
+package com.xyz.example.service;
+import com.xyz.example.pojo.User;
+public interface MyBatisUserService {
+	public User getUser(Long id);
+}
+
+/* ------------ 使用MyBatis 接口实现  ---------- */
+package com.xyz.example.service.impl;
+@Service
+public class MyBatisUserServiceImpl implements MyBatisUserService {
+	@Autowired
+	private MyBatisUserDao myBatisUserDao = null;
+	@Override
+	public User getUser(Long id) {
+		return myBatisUserDao.getUser(id);
+	}
+}
+
+/* ------------ 使用控制器测试MyBatis 接口 ---------- */
+package com.xyz.example.controller;
+@Controller
+@RequestMapping("/mybatis")
+public class MyBatisController {
+	@Autowired
+	private MyBatisUserService myBatisUserService = null;
+
+	@RequestMapping("/getUser")
+	@ResponseBody
+	public User getUser(Long id) {
+		return myBatisUserService.getUser(id);
+	}
+
+}
+```
+```java
+/* ------- 使用MapperScannerConfigurer 扫描装配MyBatis 接口 ----- */
+// 配置 Mybatis 接口扫描，返回扫描器
+@Bean
+public MapperScannerConfigurer mapperScannerConfig() {
+	// 定义扫描器实例
+	MapperScannerConfigurer mapperScannerConfigurer = new MapperScannerConfigurer();
+	// 加载 SqlSessionFactory, Spring boot 会自动生产， SqlSessionFactory 实例
+	mapperScannerConfigurer.setSqlSessionFactoryBeanName("sqlSessionFactory");
+	// 定义扫描的包
+	mapperScannerConfigurer.setBasePackage("com.xyz.example.*");
+	// 限定被标注 @Repository 的接口才被扫描
+	mapperScannerConfigurer.setAnnotationClass(Repository.class);
+	// 通过继承某个接口限制扫描，一般使用不多
+	// mapperScannerConfigurer.setMarkerinterface( .. .... );
+	return mapperScannerConfigurer;
+}
+```
+
+#### 使用简单的 @MapperScan 定义扫描
+
+```java
+/* ----------- 定义 MyBatis 插件 ---------- */
+package com.xyz.example.plugin;
+// 定义拦截器签名
+@Intercepts({
+	@Singature(type = StatementHandler.class,
+	method = "prepare",
+	args = { Connection.class, Integer.class})})
+public class MyPlugin implements Interceptor {
+	Properties properties = null;
+	// 拦截方法逻辑
+	@Override
+	public Object intercept(Invocation invocation) throws Throwable {
+		System.out.println("插件拦截方法......");
+		return invocation.proceed();
+	}
+	// 生成 Mybatis拦截器代理对象
+	@Override
+	public Object plugin(Object target) {
+		return Plugin.wrap(target, this);
+	}
+	// 设置插件属性
+	@Override
+	public void setProperties(Properties properties) {
+		return this.properties = properties;
+	}
+}
+
+```
+	在 application.properties 文件中配置
+	mybatis.config location=classpath:mybatis/mybatis-config xml
+
+```xml
+<!-- MyBatis 配置文件C mybatis/mybatis-config .xml ) -->
+<configuration>
+	<plugins>
+		<plugin interceptor= "com.xyz.example.plugin.MyPlugin" >
+		<property name="keyl" value="valuel" />
+		<property name="key2" value="value2" />
+		<property name="key3" value="value3" />
+		</plugiη 〉
+	</plugins>
+</configuration>
+```
+
+```java
+package com.xyz.example;
+// 定义 Spring Boot 扫描包路径
+@SpringBootApplication(scanBasePackages = {"com.xyz.example"})
+// 定义JPA 接口扫描包路径
+@EnableJpaRepositories(basePackages = "com.xyz.example.dao")
+// 定义实体Bean 扫描包路径
+@EntityScan(basePackages = "com.xyz.example.pojo")
+// 定义 MyBatis 的扫描
+@MapperScan(
+	// 指定扫描包
+	basePackages = "com.xyz.example.*",
+	// 指定 SqlSessionFactory，如果 sqlSessionTemplate 被指定,则作废
+	sqlSessionFactoryRef = "sqlSessionFactory",
+	// 指定 sqlSessionTemplate ，将忽略 sqlSessionFactory 的配置
+	sqlSessionTemplateRef = "sqlSessionTemplate",
+	// markerinterface = Class.class,    // 限定扫描接口，不常用
+	annotationClass = Repository.class
+)
+public class MainApplication {
+	// SqlSessionFactory 对象由 Spring Boot 自动配置生成
+	@Autowired
+	SqlSessionFactory sqlSessionFactory = null;
+
+	// 启用Spring Bean 生命周期执行方法， 加入插件
+	@PostConstruct
+	public void initMyBatis() {
+		// 插件实例
+		Interceptor plugin =new MyPlugin();
+		// 设置插件属性
+		Properties properties = new Properties();
+		properties.setProperty("keyl", "valuel");
+		properties.setProperty("key2", "value2");
+		properties.setProperty("key3", "value3");
+		plugin.setProperties(properties);
+		// 在sqlSessionFactory 中添加插件
+		sqlSessionFactory . getConfiguration() .addinterceptor(plugin);
+	}
+	// ......
+}
+```
+
+121
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
