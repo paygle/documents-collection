@@ -1485,7 +1485,288 @@ public class MainApplication {
 }
 ```
 
-121
+## 数据库事务处理
+
+	在Spring 中，数据库事务是通过AOP 技术来提供服务的。
+
+	如一个批处理，它将处理多个交易，但是在一些交易中发生了异常， 这个时候则不能将所有的交易都回滚。如果所有的交易都回渎，那么那些本能够正常处理的业务也无端地被回滚了，这显然不是我们所期待的结果。通过Spring 的数据库事务传播行为，可以很方便地处理这样的场景。
+
+### JDBC 的数据库事务
+
+```java
+package com.xyz.example.service.impl;
+@Service
+public class JdbcServiceImpl implements JdbcService {
+	@Autowired
+	private DataSource dataSource = null;
+	@Override
+	public int insertUser(String userName, String note) {
+		Connection conn = null;
+		int result = 0;
+		try {
+			// 获取连接
+			conn = dataSource.getConnection();
+			// 开启事务
+			conn.setAutoCommit(false);
+			// 设置隔离级别
+			conn.setTransactionIsolation(TransactionIsolationLevel.READ_COMMITTED.getLevel());
+			// 执行业务SQL代码，其他都属性JDBC功能代码
+			PreparedStatement ps = conn.prepareStatement(
+				"INSERT INTO t_user(user_name, note) VALUES(?, ?)"
+			);
+			ps.setString(1, userName);
+			ps.setString(2, note);
+			result = ps.executeUpdate();
+			// 提交事务
+			conn.commit();
+		} catch (Exception e) {
+			// 回滚事务
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException ex) {
+					ex.printStackTrace();
+				}
+			}
+			e.printStackTrace();
+		} finally {
+			// 关闭数据库连接
+			try {
+				if (conn != null && !conn.isClosed()) {
+					conn.close();
+				}
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return result;
+	}
+}
+```
+
+### Spring 声明式数据库事务约定
+
+	@Transactional 注解可以标注在类或者方法上，当它标注在类上时，代表这个类所有公共（public）非静态的方法都将启用事务功能。在 @Transactional 中，还允许配置许多的属性，如事务的隔离级别和传播行为。
+
+	PlatformTransactionManager 事务管理器类，getTransaction 方法的参数是一个事务定义器，它是依赖于我们配置的 @ Transactional 的配置项生成，且能够设置事务的属性，而提交和回滚事务也就可以通过commit和rollback方法来执行。
+
+```sql
+/* 创建用户表 */
+CREATE TABLE t_user (
+	id int(12) auto_increment,
+	user_name VARCHAR(60) NOT NULL,
+	note VARCHAR(512),
+	PRIMARY KEY(id)
+);
+```
+```java
+/* ------- 用户POJO ------ */
+package com.xyz.example.pojo;
+@Alias("user")    // Mybatis 别名注解
+public class User {
+	private Long id;
+	private String userName;
+	private String note;
+	/* setter and getter */
+}
+```
+```java
+/* ------- MyBatis 接口文件 ------ */
+package com.xyz.example.dao;
+@Repository
+public interface UserDao {
+	User getUser(Long id);
+	int insertUser(User user);
+}
+```
+```xml
+<!--  用户POJO -->
+<mapper namespace="com.xyz.example.dao.UserDao" 〉
+	<select id="getUser" parameterType="long" resultType="user">
+		SELECT id, user_name AS userName, note FROM t_user where id=#{id}
+	</select>
+	<insert id="insertUser" useGeneratedKeys="true" keyProperty="id" >
+		INSERT INTO t_user(user_name, note) value(#{userName}, #{note})
+	</insert>
+</mapper>
+```
+```java
+/* ------- 用户服务接口 ------ */
+package com.xyz.example.service;
+public interface UserService {
+	// 获取用户信息
+	public User getUser(Long id);
+	// 新增用户
+	public int insertUser(User user);
+}
+```
+```java
+/* ------- 用户服务接口实现类 ------ */
+package com.xyz.example.service.impl;
+@Service
+public interface UserService {
+	@Autowired
+	private UserDao userDao = null;
+	// 事务定义
+	@Override
+	@Transactional(isolation=Isolation.READ_COMMITTED, timeout=1)
+	public User getUser(Long id) {
+		return userDao.getUser(id);
+	}
+	// 事务定义
+	@Override
+	@Transactional(isolation=Isolation.READ_COMMITTED, timeout=1)
+	public User insertUser(User user) {
+		return userDao.insertUser(user);
+	}
+}
+```
+```java
+/* ------- 测试数据库事务 ------ */
+package com.xyz.example.controller;
+@Controller
+@RequestMapping("/user")
+public class UserController {
+	// 注入Service
+	@Autowired
+	private UserService userService = null;
+	// 测试获取用户
+	@RequestMapping("/getUser")
+	@ResponseBody
+	public User getUser(Long id) {
+		return userService.getUser(id);
+	}
+	// 测试插入用户
+	@RequestMapping("/insertUser")
+	@ResponseBody
+	public Map<String, Object> insertUser(String userName, String note) {
+		User user = new User();
+		user.setUserName(userName);
+		user.setNote(note);
+		// 结果会回填，返回插入条数
+		int update = userService.insertUser(user);
+		Map<String, Object> result = new HashMap<>();
+		result.put("success", update == 1);
+		result.put("user", user);
+		return result;
+	}
+}
+```
+	配置My Batis
+	mybatis.mapper-locations=classpath:com/xyz/example/mapper/*.xml
+	mybatis.type-aliases-package=com.xyz.example.pojo
+
+```java
+/* ------- Spring Boot 启动文件 ------ */
+package com.xyz.example;
+
+@MapperScan(basePackage="com.xyz.example", annotationClass=Repository.class)
+@SpringBootApplication(scanBasePackages="com.xyz.example")
+public class MainApplication {
+	public static void main(String[] args) throws Exception {
+		SpringApplication.run(MainApplication.class, args);
+	}
+	// 注入事务管理器， 它由Spring Boot 自动生成
+	@Autowired
+	PlatformTransactionManager transactionMananger = null;
+	// 使用后初始化方法，观察自动生成的事务管理器
+	@PostConstruct
+	public void viewTransactionManager() {
+		// 启动前加入断点观测
+		System.out.println(transactionMananger.getClass().getName());
+	}
+}
+```
+
+	多个事务都提交引发的丢失更新称为第二类丢失更新。为了克服这些问题， 数据库提出了事务之间的隔离级别的概念。
+	数据库现有的技术完全可以避免丢失更新，但是这样做的代价， 就是付出锁的代价，在互联网中， 系统不单单要考虑数据的一致性，还要考虑系统的性能。
+
+	1. 未提交读（read uncommitted）是最低的隔离级别，其含义是允许一个事务读取另外一个事务没有提交的数据。
+	未提交读是一种危险的隔离级别，所以一般在我们实际的开发中应用不广， 但是它的优点在于并发能力高，适合那些对数据一致性没有要求而追求高并发的场景，它的最大坏处是出现脏读。
+
+	2. 写提交（read committed）隔离级别， 是指一个事务只能读取另外一个事务已经提交的数据，不能读取未提交的数据。
+
+	3. 可重复读，等待已有事务提交才允许读取数据库。
+
+	4. 串行化（Serializable）是数据库最高的隔离级别，它会要求所有的SQL 都会按照顺序执行，这样就可以克服上述隔离级别出现的各种问题，所以它能够完全保证数据的一致性。
+
+
+	* 隔离级别和可能发生的现象
+
+	Oracle 只能支持读写提交和串行化，默认的隔离级别为读写提交.
+	MySQL 则能够支持4 种，，默认的隔离级别为可重复读。
+
+|隔离级别|脏读|不可重复读|幻读|
+|---------|---|---|---|
+| 未提交读 | √ | √ | √ |
+| 读写提交 | × | √ | √ | 
+| 可重复读 | × | × | √ |  
+| 串行化   | × | × | × | 
+
+```ini
+# application.properties 设置隔离级别数字配置的含义
+#-1 数据库默认隔离级别
+# 1 未提交读
+# 2 读写提交
+# 4 可重复读
+# 8 串行化
+# tomcat 数据源默认隔离级别
+spring.datasource.tomcat.default-transaction-isolation=2
+# dbcp2 数据库连接池默认隔离级别
+#spring.datasource.dbcp2.default-transaction-isolation=2
+```
+
+#### 传播行为， 是方法之间调用事务采取的策略问题
+
+	org.springframework.transaction.annotation.Propagation
+	其中， REQUIRED, REQUIRES_NEW 和 NESTED 这3 种最常用的传播行为。
+
+	在绝大部分的情况下，我们会认为数据库事务要么全部成功， 要么全部失败。但现实中也许会有特殊的情况。
+
+	@Transactional 自调用失效问题, AOP 的原理是动态代理， 在自调用的过程中， 是类自身的调用，而不是代理对象去调用， 那么就不会产生AOP，这样Spring就不能把你的代码织入到约定的流程中， 于是就产生了现在看到的失败场景。 用一个Service 去调用另一个Service ， 这样就是代理对象的调用， Spring才会将你的代码织入事务流程。当然也可以从Spring IoC 容器中获取代理对象去启用AOP。
+
+```java
+package com.xyz.example.service;
+public interface UserBatchService {
+	public int insertUsers(List<User> userList);
+}
+
+/** -------- 批量用户实现类 --------- **/
+package com.xyz.example.service.impl;
+@Service
+public class UserBatchServiceImpl implements UserBatchService /*, ApplicationContextAware */ {
+	@Autowired
+	private UserService userService = null;
+
+	/* 
+	private ApplicationContext applicationContext = null;
+
+	// 实现生命周期方法，设置IoC 容器
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) 
+		throws BeanException {
+		this.applicationContext = applicationContext;
+	}
+	*/
+
+	@Override
+	@Transactional(isolation=Isolation.READ_COMMITTED, propagation=Propagation.REQUIRED)
+	public int insertUsers(List<User> userList) {
+		int count = 0;
+		// 从 IoC 容器中取出代理对象
+		// UserService userService = applicationContext.getBean(UserService.class);
+		for (User user : userList) {
+			// 调用子方法，将使用 @Transactional 定义的传播行为
+			count+= userService.insertUser(user);
+		}
+		return count;
+	}
+}
+```
+
+## 使用性能利器 Redis
+
+148
 
 
 
