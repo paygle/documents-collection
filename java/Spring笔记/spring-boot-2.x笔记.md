@@ -1766,11 +1766,28 @@ public class UserBatchServiceImpl implements UserBatchService /*, ApplicationCon
 
 ## 使用性能利器 Redis
 
-148
+	Redis 支持Lua 语言，而且在Redis 中Lua 语言的执行是原子性的，也就是在Redis 执行Lua 时， 不会被其他命令所打断，这样就能够保证在高并发场景下的一致性。
 
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-data-redis</artifactId>
+	<exclusions>
+		<!-- 不依赖Redis的异步客户端lettuce -->
+		<exclusion>
+			<groupId>io.lettuce</groupId>
+			<artifactId>lettuce-core</artifactId>
+		</exclusion>
+	</exclusions>
+</dependency>
+<!-- 引入Redis的客户端驱动jedis -->
+<dependency>
+	<groupId>redis.clients</groupId>
+	<artifactId>jedis</artifactId>
+</dependency>
+```
 
-
-
+150
 
 
 
