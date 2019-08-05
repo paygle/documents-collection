@@ -1766,7 +1766,13 @@ public class UserBatchServiceImpl implements UserBatchService /*, ApplicationCon
 
 ## 使用性能利器 Redis
 
-	Redis 支持Lua 语言，而且在Redis 中Lua 语言的执行是原子性的，也就是在Redis 执行Lua 时， 不会被其他命令所打断，这样就能够保证在高并发场景下的一致性。
+	Redis 支持Lua 语言，而且在Redis 中Lua 语言的执行是原子性的，也就是在Redis 执行Lua 时， 不会被其他命令所打断，这样就能够保证在高并发场景下的一致性。Redis 除了操作那些数据类型的功能外， 还能支持事务、流水线、发布订阅等功能。
+
+	使用 Spring 缓存注解操作 Redis
+
+	• @CachePut 表放示将方法结果返回存到缓存中。
+	• @Cacheable 表示先从缓存中通过定义的键查询，如果可以查询到数据，则返回，否则执行该方法，返回数据，并且将返回结果保存到缓存中。
+	• @CacheEvict 通过定义的键移除缓存，它有一个Boolean 类型的配置项beforeInvocation，表示在方法之前或者之后移除缓存。因为其默认值为false，所以默认为方法之后将缓存移除。
 
 ```xml
 <dependency>
@@ -1786,25 +1792,357 @@ public class UserBatchServiceImpl implements UserBatchService /*, ApplicationCon
 	<artifactId>jedis</artifactId>
 </dependency>
 ```
+```java
+/* -------- 通过一个连接池的配置创建 RedisConnectionFactory 对象------- */
+package com.xyz.example.config;
+@configuration
+public class RedisConfig {
+	private RedisConnectionFactory connectionFactory = null;
+	@Bean(name = "RedisConnectionFactory")
+	public RedisConnectionFactory initRedisConnectionFactory() {
+		if (this.connectionFactory != null) {
+			return this.connectionFactory;
+		}
+		JedisPoolConfig poolConfig = new JedisPoolConfig();
+		// 最大空闲数
+		poolConfig.setMaxIds(30);
+		// 最大连接数
+		poolConfig.setMaxTotal(50);
+		// 最大等待毫秒数
+		poolConfig.setMaxWaitMillis(2000);
+		// 创建 Jedis 连接工厂
+		JedisConnectionFactory connectionFactory = new JedisConnectionFactory(poolConfig);
+		// 获取单机的Redis配置
+		RedisStandaloneConfiguration rsCfg = connectionFactory.getStandaloneConfiguration();
+		connectionFactory.setHostName("192.168.11.131");
+		connectionFactory.setPort(6379);
+		connectionFactory.setPassword("123456");
+		this.connectionFactory = connectionFactory;
+		return connectionFactory;
+	}
+	/* ...... */
+}
+// Spring 为了简化开发，提供了 RedisTemplate 类管理 Redis
+```
 
-150
+	RedisTemplate 是一个强大的类，它会自动从RedisConnectionFactory 工厂中获取连接，然后执行对应的Redis命令，在最后还会关闭Redis的连接。
+
+	* RedisTemplate 中的序列化器属性
+
+|属性|描述|备注|
+|-----|----------|----------------------|
+|defaultSerializer | 默认序列化器 | 如果没有设置，则使用JdkSerializationRedisSeralizer |
+|keySerializer | Redis 键序列化器 | 如果没有设置，则使用默认序列化器 |
+|valueSerializer | Redis 值序列化器 | 如果没有设置，则使用默认序列化器 |
+|hashKeySerializer | Redis 散列结构field序列化器 | 如果没有设置，则使用默认序列化器 |
+|hashSerializer | Redis 散列结构value序列化器 | 如果没有设置，则使用默认序列化器 |
+|stringSerializer | 字符串序列化器 | RedisTemplate 自动赋值为StringRedisSerializer 对象 |
 
 
+```java
+/* ------- 创建 RedisTemplate -------- */
+@Bean(name="redisTemplate")
+public RedisTemplate<Object, Object> initRedisTemplate() {
+	RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
+	// RedisTemplate 会自动初始化 StringRedisSerializer ，所以这里直接获取
+	RedisSerializer stringRedisSerializer = redisTemplate.getStringSerializer();
+	// 设置字符串序列化器，这样Spring 就会把Redis 的key 当作字符串处理了
+	redisTemplate.setKeySerializer(stringRedisSerializer);
+	redisTemplate.setHashKeySerializer(stringRedisSerializer);
+	redisTemplate.setHashValueSerializer(stringRedisSerializer);
+	redisTemplate.setConnectionFactory(initConnectionFactory());
+	return redisTemplate;
+}
+```
+```java
+/* ------- 测试 RedisTemplate -------- */
+package com.xyz.example.main;
+public class ExampleMain {
+	public static void main(String[] args) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(RedisConfig.class);
+		RedisTemplate redisTemplate = ctx.getBean(RedisTemplate.class);
+		redisTemplate.opsForValue().set("Key1", "value1");
+		redisTemplate.opsForHash().put("hash", "field", "hvalue");
+	}
+}
+```
+
+	* Spring 对Redis 数据类型操作的封装
+
+	Redis 能够支持7 种类型的数据结构，这7 种类型是字符串、散列、列表（链表） 、集合、有序集合、基数和地理位置。
+
+```java
+// 获取地理位置操作接口 GeoOperations
+redisTemplate.opsForGeo();
+// 获取散列操作接口 HashOperations
+redisTemplate.opsForHash();
+// 获取基数操作接口 HyperLogLogOperations
+redisTemplate.opsForHyperLogLog();
+// 获取列表操作接口 ListOperations
+redisTemplate.opsForList();
+// 获取集合操作接口 SetOperations
+redisTemplate.opsForSet();
+// 获取字符串操作接口 ValueOperations
+redisTemplate.opsForValue();
+// 获取有序集合操作接口 ZSertOperations
+redisTemplate.opsForZSet();
+```
+
+	* SessionCallback 和 RedisCallback 接口
+
+	它们的作用是让 RedisTemplate 进行回调，通过它们可以在同一条连接下执行多个Redis 命令。
+
+```java
+/* RedisCallback 接口比较底层， 需要处理的内容也比较多，可读性较差，所以在非必要的时候尽量不选择使用它 */
+public void useRedisCallback(RedisTemplate redisTemplate) {
+	redisTemplate.execute(new RedisCallback() {
+		@Override
+		public Object doInRedis(RedisConnection rc) throws DataAccessException {
+			rc.set("key1".getBytes(), "value1".getBytes());
+			rc.hSet("hash".getBytes(), "field".getBytes(), "hvalue".getBytes());
+			return null;
+		}
+	});
+}
+// 使用 Lambda 表达式
+public void useRedisCallback(RedisTemplate redisTemplate) {
+	redisTemplate.execute((RedisConnection rc) -> {
+			rc.set("key1".getBytes(), "value1".getBytes());
+			rc.hSet("hash".getBytes(), "field".getBytes(), "hvalue".getBytes());
+			return null;
+	});
+}
+
+/* SessionCallback 提供了良好的封装，对于开发者比较友好，因此在实际的开发中应该优先选择使用它 */
+public void useSessionCallback(RedisTemplate redisTemplate) {
+	redisTemplate.execute(new SessionCallback() {
+		@Override
+		public Object execute(RedisConnection ro) throws DataAccessException {
+			ro.opsForValue().set("key1", "value1");
+			ro.opsForHash("hash", "field", "hvalue");
+			return null;
+		}
+	});
+}
+// 使用 Lambda 表达式
+public void useSessionCallback(RedisTemplate redisTemplate) {
+	redisTemplate.execute((RedisConnection ro) -> {
+			ro.opsForValue().set("key1", "value1");
+			ro.opsForHash("hash", "field", "hvalue");
+			return null;
+	});
+}
+```
+
+	* 使用Spring 操作列表(链表)
+
+```java
+@RequestMapping("/list")
+@ResponseBody
+public Map<String, Object> testList() {
+	// 插入两个列表， 注意它们在链表的顺序
+	// 链表从左到右顺序为vl0 , v8 ,v6 , v4,v2
+	stringRedisTemplate.opsForList().leftPushAll("list1","v2","v4","v6","v8","vl0");
+	// 链表从左到右顺序为 v1, v2, v 3, v 4 ,v5, v6
+	stringRedisTemplate.opsForList().rightPushAll("list2","v1","v2","v3","v4","v5","v6");
+	// 绑定list2 链表操作
+	BoundListOperations listOps = stringRedisTemplate.boundListOps("list2");
+	//  从右边弹出一个成员
+	Object resultl = listOps.rightPop();
+	// 获取定位元素, Redis 从0 开始计算, 这里值为v2
+	Object result2 = listOps.index(1) ;
+	// 从左边插入链表
+	listOps.leftPush("v0");
+	// 求链表长度
+	Long size = listOps.size();
+	// 求链表下标区间成员,整个链表下标范围为0 到size-1 ,这里不取最后一个元素
+	List elements = listOps.range(0,size-2);
+	Map<String , Object> map= new HashMap<String , Object>();
+	map.put("success", true);
+	return map;
+}
+```
+
+#### 使用Redis 事务
+
+	Redis 是支持一定事务能力的NoSQL ， 在Redis 中使用事务，通常的命令组合是watch...multi .. . exec，也就是要在一个Redis 连接中执行多个命令，这时我们可以考虑使用S巳ssionCallback 接口来达到这个目的。
+
+	watch 命令是可以监控Redis 的一些键; 
+
+	multi 命令是开始事务，开始事务后， 该客户端的命令不会马上被执行，而是存放在一个队列里，这点是需要注意的地方，也就是在这时我们执行一些返回数据的命令， Redis 也是不会马上执行的，而是把命令放到一个队列里，所以此时调用Redis 的命令，结果都是返回null ，这是初学者容易犯的错误；
+
+	exec 命令的意义在于执行事务，只是它在队列命令执行前会判断被watch 监控的Redis 的键的数据是否发生过变化（即使赋予与之前相同的值也会被认为是变化过)，如果它认为发生了变化，那么Redis 就会取消事务， 否则就会执行事务， Redis 在执行事务时，要么全部执行， 要么全部不执行，而且不会被其他客户端打断，这样就保证了Redis 事务下数据的一致性。
+
+```java
+/* ------ 通过Spring 使用Redis 事务机制 ------ */
+@RequestMapping("/multi")
+@ResponseBody
+public Map<String, Object> testMulti() {
+	redisTemplate.opsForValue().set("key1", "value1");
+	List list = (List) redisTemplate.execute((RedisOperations operations) -> {
+		// 设置要监控key1
+		operations.watch("key1");
+		// 开启事务，在exec 命令执行前，全部都只是进入队列
+		operations.multi();
+		operations.opsForValue().set("key2","value2");
+		// operations.opsForValue().increment("key1", 1);  // 第1步
+		// 获取值将为null ， 因为自由s 只是把命令放入队列
+		Object value2 = operations.opsForValue().get("key2");
+		System.out.println("命令在队列，所以value 为null 【"+ value2 +"】");
+		operations.opsForValue().set("key3","value3");
+		Object value3 = operations.opsForValue().get("key3");
+		System.out.println("命令在队列，所以value 为null 【" + value3 +"】");
+		// 执行exec 命令，将先判别key1 是否在监控后被修改过，如果是则不执行事务，否则就执行事务
+		return operations exec(); // 第2步
+	});
+	System.out.println(list);
+	Map<String, Object> map = new HashMap<String, Object>();
+	map.put("success", true);
+	return map;
+}
+```
+
+	* 使用Redis 流水线
+
+	在默认的情况下， Redis 客户端是一条条命令发送给Redis 服务器的，这样显然性能不高。在关系数据库中我们可以使用批量，也就是只有需要执行SQL 时，才一次性地发送所有的SQL 去执行，这样性能就提高了许多。
+
+```java
+@RequestMapping("/pipeline")
+@ResponseBody
+public Map<String, Object> testPipeline() {
+	Long start = System.currentTimeMillis();
+	List list = (List)redisTemplate.executePipelined((RedisOperations operations) -> {
+		for (int i = 1; i <= 10000; i++) {
+			operations.opsForValue().set("pipeline_" + i, "value_" + i);
+			String value = (String)operations.opsForValue().get("pipelin_" + i);
+			if (i == 10000) {
+				System.out.println("命令只是进入队列，所以值为空【" ＋ value +"】");
+			}
+		}
+		return null;
+	});
+	Long end = System.currentTimeMillis();
+	System.out.println("耗时：" + (end - start) + "毫秒。");
+	Map<String, Object> map = new HashMap<String, Object>();
+	map.put("success", true);
+	return map;
+}
+```
+
+	* Redis 发布订阅
+
+	Redis 提供一个渠道，让消息能够发送到这个渠道上，而多个系统可以监听这个渠道， 如短信、微信和邮件系统都可以监昕这个渠道，当一条消息发送到渠道，渠道就会通知它的监昕者，这样短信、微信和邮件系统就能够得到这个渠道给它们的消息了，这些监听者会根据自己的需要去处理这个消息，于是我们就可以得到各种各样的通知了。
+
+```java
+/* -------- Redis 消息监听器  ------- */
+package com.xyz.example.listener;
+@Component
+public class RedisMessageListener implements MessageListener {
+	@Override
+	public void onMessage(Message message, byte[] pattern) {
+		// 消息体
+		String body = new String(message.getBody());
+		// 渠道名称
+		String topic = new String(pattern);
+		System.out.println(body);
+		System.out.println(topic);
+	}
+}
+```
+```java
+/* -------- 监听Redis 发布的消息  ------- */
+package com.xyz.example.main;
+@SpringBootApplication(scanBasePackages="com.xyz.example")
+@MapperScan(basePackages="com.xyz.example", annotationClass=Repository.class)
+public class TestApplication {
+	/* ...... */
+	@Autowired
+	private RedisTemplate redisTemplate = null;
+	// Redis 连接工厂
+	@Autowired
+	private RedisConnectionFactory connectionFactory = null;
+	// Redis 消息监听器
+	@Autowired
+	private MessageListener redisMsgListener = null;
+	// 任务池
+	private ThreadPoolTaskScheduler taskScheduler = null;
+	// 创建任务池，运行线程等待处理 Redis 的消息
+	@Bean
+	public ThreadPoolTaskScheduler initTaskScheduler() {
+		if (taskScheduler != null) {
+			return taskScheduler;
+		}
+		taskScheduler = new TheadPoolTaskScheduler();
+		taskScheduler.setPoolSize(20);
+		return taskScheduler;
+	}
+	// 定义Redis 的监听容器
+	@Bean
+	public RedisMessageListenerContainer initRedisContainer() {
+		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+		// Redis 连接工厂
+		container.setConnectionFactory(connectionFactory);
+		// 设置运行任务池
+		container.setTaskExecutor(initTaskScheduler());
+		// 定义监听渠道，名称为 topic1
+		Topic topic = new ChannelTopic("topic1");
+		// 使用监听器监听 Redis 消息
+		container.addMessageListener(redisMsgListener, topic);
+		return container;
+	}
+}
+```
+
+	* Redis 使用 Lua 脚本
+
+	一种是直接发送Lua 到Redis 服务器去执行，另一种是先把Lua 发送给Redis, Redis 会对Lua 脚本进行缓存，然后返回一个SHA1 的32 位编码回来，之后只需要发送SHA1 和相关参数给Redis 便可以执行了。
+
+```java
+/* ------ 执行简易Lua 脚本 ------- */
+@RequestMapping("/lua")
+@ResponseBody
+public Map<String, Object> testLua() {
+	DefaultRedisScript<String> rs = new DefaultRedisScript<String>();
+	// 设置脚本
+	rs.setScriptText("return 'Hello Redis'");
+	// 定义返回类型。注意如果没有这个定义， Spring 不会返回结果
+	rs.setResultType(String.class);
+	RedisSerializer<String> stringSerializer = redisTemplate.getStringSerializer();
+	// 执行Lua脚本
+	String str = (String)redisTemplate.execute(rs, stringSerializer, stringSerializer, null);
+	Map<String, Object> map = new HashMap<String, Object>();
+	map.put("str", str);
+	return map;
+}
+```
+
+	* 自定义缓存管理器
+
+```java
+// 注入连接工厂，由Spring Boot 自动配置生成
+@Autowired
+private RedisConnectionFactory connectionFactory = null;
+	// 自定义Redis 缓存管理器
+	@Bean(name ="redisCacheManager")
+	public RedisCacheManager initRedisCacheManager() {
+	// Redis 加锁的写入器
+	RedisCacheWriter writer= RedisCacheWriter.lockiηgRedisCacheWriter(connectionfactory);
+	// 启动Redis 缓存的默认设置
+	RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
+	// 设置JDK 序列化器
+	config = config.serializeValuesWith(SerializationPair.fromSerializer(new JdkSerializationRedisSerializer()));
+	// 禁用前缀
+	config = config.disableKeyPrefix();
+	// 设置 10 min 超时
+	config = config.entryTtl(Duration.ofMinutes(10)) ;
+	// 创建缓Redis 存管理器
+	RedisCacheManager redisCacheManager = new RedisCacheManager(writer , config) ;
+	return redisCacheManager;
+}
+```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+182
 
 
 
