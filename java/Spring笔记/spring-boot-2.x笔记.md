@@ -2141,10 +2141,9 @@ private RedisConnectionFactory connectionFactory = null;
 }
 ```
 
+## Spring MVC （Model-View-Controller) 框架
 
-182
-
-
+	Spring MVC 的流程是围绕 DispatcherServlet 而工作，掌握流程和组件就是Spring MVC开发的基础。
 
 
 
