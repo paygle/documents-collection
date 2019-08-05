@@ -2145,10 +2145,168 @@ private RedisConnectionFactory connectionFactory = null;
 
 	Spring MVC 的流程是围绕 DispatcherServlet 而工作，掌握流程和组件就是Spring MVC开发的基础。
 
+```java
+@RequestMapping("/detailsForJson")
+public ModelAndView detailsForJson(
+		@RequestParam("id", require=false) Long id  // @RequestParam 获取查询参数
+	) {
+	// 访问模型层得到数据
+	User user = userService.getUser(id);
+	// 模型和视图
+	ModelAndView mv = new ModelAndView();
+	// 生成 Json 视图
+	MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
+	mv.setView(jsonView);
+	// 加入模型
+	mv.addObject("user", user);
+	return mv;
+}
+```
 
+	* 处理器获取参数逻辑 HttpMessageConverter 接口的方法对请求体的信息进行转换
 
+```java
+/* --------- 参数验证机制 -------- */
+package com.xyz.example.validator;
+import org.springframework.validation.Validator;
 
+public class UserValidator implements Validator {
+	// 该验证器只支持 User 类验证
+	@Override
+	public boolean supports(Class<?> clazz) {
+		return clazz.equals(User.class);
+	}
 
+	// 验证逻辑
+	@Override
+	public void validate(Object target, Errors errors) {
+		// 对象为空
+		if (target == null) {
+			// 直接在参数处报错，这样就不能进入控制器的方法
+			errors. rejectValue ( "", null, "用户不能为空");
+			return;
+		}
+		// 强制转换
+		User user = (User)target;
+		// 用户名非空串
+		if (StringUtils.isEmpty(user.getUserName())) (
+			// 增加错误，可以进入控制器方法
+			errors.rejectValue("userName", null, "用户名不能为空");
+		}
+	}
+}
+```
+```java
+/* --------- 绑定参数验证器 -------- */
+package com.xyz.example.controller;
+@Controller
+@RequestMapping("/user")
+public class UserController {
+	// 调用控制器前先执行这个方法
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+	 	// 绑定验证器
+		binder.setValidator(new UserValidator()) ;
+		// 定义日期参数格式，参数不再注解 @DateTimeFormat, boolean 参数表示是否允许为空
+		binder.registerCustomEditor(Date.class,
+			new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"), false));
+	}
 
+	/*
+	 * @param user 用户对象用 StringToUserConverter 转换
+	 * @param Errors 验证器返回的错误
+	 * @param date 因为 WebDataBinder 已经绑定了格式，所以不再需要注解
+	 * @return 各类数据
+	 */
+	@GetMapping ("/validator")
+	@ResponseBody
+	public Map<String, Object> validator(@Valid User user, Errors Errors, Date date) (
+		Map<String, Object> map = new HashMap<>();
+		map.put ("user", user);
+		map.put ("date", date);
+		// 判断是否存在错误
+		if (Errors.hasErrors()) {
+			// 获取全部错误
+			List<ObjectError> oes = Errors.getAllErrors();
+			for (ObjectError oe : oes) {
+				// 判定是否字段错误
+				if (oe instanceof FieldError) {
+					// 字段错误
+					FieldError fe = (FieldError) oe;
+					map.put (fe.getField(), fe.getDefaultMessage());
+				} else {
+					// 对象错误
+					map.put (oe.getObjectName(), oe.getDefaultMessage());
+				}
+			}
+		}
+		return map;
+	}
+	/* ...... */
+}
+```
 
+	* 自定义简单拦截器
+
+```java
+package com.xyz.example.interceptor;
+
+public class MyInterceptor extends HandlerInterceptor {
+	@Override
+	public boolean preHandle(HttpServletRequest request,
+			HttpServletResponse response, Object handler) throws Exception {
+		Systern.out.println("处理器前方法");
+		// 返回true，不会拦截后续的处理
+		return true;
+	}
+
+	@Override
+	public void postHandle(HttpServletRequest request,
+			HttpServletResponse response, Object handler,
+			ModelAndView modelAndView) throws Exception {
+		System.out.println("处理器后方法");
+	}
+
+	@Override
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, 
+			Object handler, Exception ex) throws Exception {
+		System.out.println("处理器完成方法");
+	}
+}
+
+/* ------ 拦截控制器  ------- */
+package com.xyz.example.controller;
+@Controller
+@RequestMapping("/interceptor")
+public class InterceptorController {
+	@GetMapping("/start")
+	public String start() {
+		System.out.println("执行处理器逻辑");
+		return "/welcome";
+	}
+}
+
+/* ------ 注册使用拦截器  ------- */
+package com.xyz.example.main;
+// 声明配置类
+@Configuration
+// 定制扫描路径
+@SpringBootApplication(scanBasePackages = "com.xyz.example"）
+	/* 其他注解 */
+public class ExampleApplication implements WebMvcConfigurer {
+	public static void main(String[] args) {
+		SpringApplication.run(ExampleApplication.class, args);
+	}
+
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		// 注册拦截器到Spring MVC 机制， 然后它会返回一个拦截器注册
+		InterceptorRegistration ir = registry.addInterceptor(new MyInterceptor());
+		// 指定拦截匹配模式，限制拦截器拦截请求
+		ir.addPathPatterns("/interceptor/*");
+	}
+}
+```
+
+248
 
