@@ -2308,5 +2308,375 @@ public class ExampleApplication implements WebMvcConfigurer {
 }
 ```
 
-248
+### 国际化消息源
+
+	SpringMVC 提供了 MessageSource 接口体系，在大部分的情况下，是使用JDK 的ResourceBundle 处理国际化信息的，为此这里主要使用 ResourceBundleMessageSource 这个国际化消息源。
+
+	配置 basename 后在 resources 目录中放置 messages.properties 和 messages_zh_CN.properties 等国际化消息文件
+
+```ini
+# 设置国际化消息是否总是采用格式化， 默认为false
+spring.messages.always-use-message-format=false
+# 设置国际化属性名称，如果多个可以使用逗号分隔，默认为messages
+spring.messages.basename=messages
+# 设置国际化消息缓存超时秒数，默认为永远不过期，如果0表示每次都重新加载
+spring.messages.cache-duration=
+# 国际化消息编码
+spring.messages.encoding=UTF-8
+# 如果没有找到特定区域设置的文件，则设置是否返回到系统区域设置
+spring.messages.fallback-to-system-locale=true
+# 是否使用消息编码作为默认的响应消息，而非抛出 NoSuchMessageException 异常，只建议在开发阶段使用
+spring.messages.use-code-as-default-message=false
+# 指定国际化区域，可以覆盖"Accept-Language"头信息
+spring.mvc.locale=
+# 国际化解析器， 可以选择 fixed 或 accept-header
+# fixed 代表固定的国际化， accept-header 代表读取浏览器的"Accept-Language"头信息
+spring.mvc.locale-resolver=accept-header
+```
+
+#### 国际化解析器
+
+	• AcceptHeaderLocaleResolver： 使用浏览器头请求的信息去实现国际化区域，默认使用。
+
+	• FixedLocaleResolver ： 固定的国际化区域。只能选择一种， 不能变化， 所以用处不大
+
+	• CookieLocaleResolver ： 将国际化区域信息设置在浏览器Cookie 中，这样使得系统可以从Cookie 中读取国际化信息来确定用户的国际化区域。
+
+	• SessionLocaleResolver：类似于CookieLocaleResolver，只是将国际化信息设置在Session中，这样就能读取Session 中的信息去确定用户的国际化区域，这是最常用的。
+
+```java
+/* --------- 添加国际化解析器和拦截器 ---------- */
+// 国际化拦截器
+private LocaleChangeInterceptor lci = null;
+
+// 国际化解析器。注意，这个Bean Name 要为localeResolver
+@Bean(name="localeResolver")
+public LocaleResolver initLocaleResolver () {
+	SessionLocaleResolver slr =new SessionLocaleResolver();
+	// 默认国际化区域
+	slr.setDefaultLocale(Locale.SIMPLIFIED_CHINESE);
+	return slr;
+}
+
+// 创建国际化拦截器
+@Bean
+publiC LocaleChangeInterceptor localeChangeInterceptor () (
+	if (lci != null) { return lci; }
+	lci = new LocaleChangeInterceptor();
+	// 设置参数名
+	lci.setParamName ("language");
+	return lci;
+}
+
+// 给处理器增加国际化拦截器
+@Override
+public void addInterceptors(InterceptorRegistry registry) {
+	// 这里将通过国际化拦截器的 preHandle 方法对请求的国际化区域参数进行修改
+	registry.addInterceptor(localeChangeInterceptor());
+}
+```
+```java
+/* ------- 国际化控制器 ------- */
+package com.xyz.example.controller;
+
+@Controller
+@RequestMapping("/il8n")
+public class Il8nController {
+	// 注入国际化消息接口对象
+	@Autowired
+	private MessageSource messageSource;
+
+	// 后台获取国际化信息和打开国际化视图
+	@GetMapping("/page")
+	public String page(HttpServletRequest request) {
+		// 后台获取国际化区域
+		Locale locale = LocaleContextHolder.getLocale();
+		// 获取国际化消息
+		String msg = messageSource.getMessage("msg", null, locale);
+		System.out.println("msg = " + msg);
+		// 返回视图
+		return "il8n/internationalization";
+	}
+}
+```
+
+#### 重定向
+
+```java
+// 显示用户
+// 参数 user 直接从数据模型 RedirectAttributes 对象中取出
+@RequestMapping("/showUser")
+public String showUser(User user, Model model) {
+	System.out.println(user.getid());
+	return "data/user";
+}
+
+// 使用字符串指定跳转
+@RequestMapping("/redirect1")
+public String redirect1(String userName, String note, RedirectAttributes ra) {
+	User user= new User();
+	user.setNote(note);
+	user.setUserName(userName);
+	userService.insertUser(user);
+	// 保存需要传递给重定向的对象
+	ra.addFlashAttribute("user", user);
+	return "redirect:/user/showUser";
+}
+// 使用模型和视图指定跳转
+@RequestMapping("/redirect2")
+public ModelAndView redirect2(String userName, String note, RedirectAttributes ra) {
+	User user= new User();
+	user.setNote(note);
+	user.setUserName(userName);
+	userService.insertUser(user);
+	// 保存需要传递给重定向的对象
+	ra.addFlashAttribute("user", user);
+	ModelAndView mv = new ModelAndView();
+	mv.setViewName("redirect:/user/showUser");
+	return mv;
+}
+```
+
+#### 操作会话对象 使用注解 @SessionAttribute 和 @SessionAttributes
+
+```java
+package com.xyz.example.controller ;
+
+// @SessionAttributes 指定数据模型名称或者属性类型， 保存到Session 中
+@SessionAttributes(names = {"user"}, types = Long.class)
+@Controller
+@RequestMapping("/session")
+public class SessionController {
+	@Autowired
+	private UserService userService = null;
+
+	@GetMapping("/test")
+	// @SessionAttribute 从 HttpSession 中取出数据， 填充控制器方法参数
+	public String test(@SessionAttribute("id") Long id, Model model) {
+		// 根据类型保存到 Session 中
+		model.addAttribute("id_new", id);
+		User user = userService.getUser(id);
+		// 根据名称保存到 Session 中
+		model.addAttribute("user", user);
+		return "session/test";
+	}
+}
+```
+
+#### 给控制器增加通知
+
+	• @ControllerAdvice：定义一个控制器的通知类，允许定义一些关于增强控制器的各类通知和限定增强哪些控制器功能等。
+
+	• @InitBinder：定义控制器参数绑定规则，如转换规则、格式化等，它会在参数转换之前执行。
+
+	• @ExceptionHandler：定义控制器发生异常后的操作。一般来说，发生异常后，可以跳转到指定的友好页面。
+
+	• @ModelAttribute：可以在控制器方法执行之前，对数据模型进行操作。
+
+```java
+package corn.xyz.example.controller.advice;
+
+@ControllerAdvice(
+	// 指定拦截的包
+	basePackages = {"corn.xyz.example.controller.advice.test.*"},
+	// 限定被标注为 @Controller 的类才被拦截
+	annotations = Controller.class)
+public class MyControllerAd飞rice {
+
+	// 绑定格式化、参数转换规则和增加验证器等
+	@InitBinder
+	public void initDataBinder(WebDataBinder binder) {
+		// 自定义日期编辑器，限定格式为yyyy-MM-dd，且参数不允许为空
+		CustornDateEditor dateEditor =
+				new CustornDateEditor(new SimpleDateFormat("yyyy-MM-dd"),false );
+		// 注册自定义日期编辑器
+		binder.registerCustornEditor(Date.class , dateEditor);
+	}
+
+	// 在执行控制器之前先执行，可以初始化数据模型
+	@ModelAttribute
+	public void projectModel(Model model) {
+		model.addAttribute("project_name", "test_example");
+	}
+
+	// 异常处理，使得被拦截的控制器方法发生异常时，都能用相同的视图l响应
+	@ExceptionHandler(value = Exception.class)
+	public String exception(Model model, Exception ex) {
+		// 给数据模型增加异常消息
+		model.addAttribute("exception_message", ex.getMessage());
+		// 返回异常视图
+		return "exception";
+	}
+
+	@PostMapping("/header/user")
+	@ResponseBody
+	// 通过 @RequestHeader 接收请求头参数
+	public User headerUser(@RequestHeader("id") Long id) {
+		User user = userService.getUser(id);
+		return user;
+	}
+}
+```
+
+## REST (Representational State Transfe1） 表现层状态转换
+
+	• @GetMapping ：对应 HTTP 的 GET 请求，获取资源。
+	• @PostMapping：对应 HTTP 的 POST 请求，创建资源。
+	• @PutMapping： 对应对应 HTTP 的 PUT 请求，提交所有资源属性以修改资源。
+	• @PatchMapping：对应 HTTP 的 PATCH 请求，提交资源部分修改的属性。
+	• @DeleteMapping：对应 HTTP 的 DELETE 请求，删除服务器端的资源。
+
+	@RequestMapping 、@GetMapping 等注解就能把URI 定位到对应的控制器方法上，通过注解 @PathVariable 就能够将URI 地址的参数获取，通过 @RequestBody 可以将请求体为JSON 的数据转化为复杂的Java 对象， 其他均可以依据Spring MVC 的参数规则进行处理。这样就能够进入到对应的控制器， 进入控制器后，就可以根据获取的参数来处理对应的逻辑。最后可以得到后台的数据，准备渲染给请求。
+
+	JSON前后端交互十分普遍。如果每一个方法都加入 @ResponseBody 才能将数据模型转换为JSON，显然冗余。
+
+	@RestController，可以将控制器返回的对象转化为JSON 数据集
+
+	使用 RestTemplate 请求后端, 底层是通过类 HttpURLConnection 实现的
+
+```java
+// 获取用户
+public static UserVo getUser (Long id) {
+	// 创建一个 RestTemplate 对象
+	RestTemplate restTmpl = new RestTemplate();
+	// 消费服务，第一个参数为 url ，第二个是返回类型， 第三个是URI 路径参数
+	UserVo userVo = restTmpl.getForObject("http://localhost:8080/user/{id}", UserVo.class, id);
+	// 打印用户名称
+	System.out.println(userVo.getUserName());
+	return userVo;
+}
+```
+
+## Spring Security 安全
+
+	@EnableWebSecurity 就可以驱动 Spring Sercurity
+
+```xml
+<!-- 添加安全依赖 -->
+<dependency>
+	<groupid>org.springframework.boot</groupid>
+	<artifactid>spring-boot-starter-security</artifactid>
+</dependency>
+```
+
+	有了安全配置的属性， 即使没有 @EnableWebSecurity, Spring Boot 也会根据配置的项自动启动安全机制。
+
+```ini
+# SECURITY (SecurityProperties)
+# Spring Security 过滤器排序
+spring.security.filter.order=-100
+# 安全过滤器责任链拦截的分发类型
+spring.security.filter.dispatcher-types=async,error,request
+# 用户名，默认值为user
+spring.security.user.name=user
+# 用户密码
+spring.security.user.password=
+# 用户角色
+spring.security.user.roles=
+# 阴匙配置 Pbkdf2PasswordEncoder 密码编码器类
+system.user.password.secret=uvwxyz
+
+# SECURITY OAUTH2 CLIENT (0Auth2C l ientProperties )
+# OAuth 提供者详细配置信息
+spring.security.oauth2.client.provider.*= #
+# OAuth 客户端登记信息
+spring.security.oauth2.client.registration.*=
+```
+
+	在 Spring 5 的 Security 中都要求使用密码编码器 BCryptPasswordEncoder，否则会发生异常。
+
+```sql
+/* 使用数据库定义用户认证服务 - 创建权限表 */
+/** 角色表 **/
+create table t_role (
+	id         int(l2) not null auto_increment,
+	role_name  varchar(60) not null,
+	note       varchar (256),
+	primary key (id)
+);
+
+/** 用户表 **/
+create table t_user (
+	id          int(l2) not null auto_incrernent,
+	user_name   varchar(60) not null ,
+	pwd         varchar(l00) not null,
+	/** 是否可用， 1 表示可用，0 表示不可用 **/
+	available   INT(1) DEFAULT 1 CHECK(available IN (0, 1)),
+	note        varchar(256),
+	primary key (id),
+	unique(user_name)
+);
+/** 用户角色表 **/
+create table t_user_role (
+	id        int(l2) not null auto_increment,
+	role_id   int(l2) not null,
+	user_id   int(l2) not null,
+	primary key (id),
+	unique(role_id , user_id)
+);
+
+/** 外键约束 **/
+alter table t_user_role add constraint FK_Reference_1 foreign key
+	(role_id) references t_role (id) on delete restrict on update restrict;
+alter table t_user_role add constraint FK Reference_2 foreign key
+	(user_id ) references t_user (id) on delete restrict on update restrict ;
+```
+```java
+/* ----- 使用数据库验证 ----- */
+package corn.xyz.example.main;
+
+@SpringBootApplication(scanBasePackages = "corn.xyz.example")
+public class TestApplication extends WebSecurityConfigurerAdapter {
+	// 注入数据源
+	@Autowired
+	private DataSource dataSource = null;
+	/*
+	// 注入配置的阴匙
+	@Value("${system.user.password.secret}")
+	private String secret = null ;
+	*/
+
+	// 使用用户名称查询密码
+	String pwdQuery = "select user_narne, pwd, available from t_user where user_name=?";
+	// 使用用户名称查询角色信息
+	String roleQuery = "select u.user_name, r.role_name "
+						+ "from t_user u, t_user_role ur, t_role r "
+						+ "where u.id = ur.user_id and r.id = ur.role_id "
+						+ "and u.user_name = ?";
+	/*
+	* 覆盖WebSecurityConfigurerAdapter 用户详情方法
+	* @param auth 用户签名管理器构造器
+	*/ 
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		/* 使用配置的阴匙
+		PasswordEncoder passwordEncoder =new Pbkdf2PasswordEncoder(this.secret) ;
+		*/
+		// 密码编码器
+		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		auth.jdbcAuthentication()
+			// 密码编码器
+			. passwordEncoder(passwordEncoder)
+			// 数据源
+			.dataSource(dataSource)
+			// 查询用户，自动判断密码是否一致
+			.usersByUsernameQuery(pwdQuery)
+			// 赋予权限
+			.authoritiesByUsernameQuery(roleQuery);
+	}
+}
+```
+
+
+305
+
+
+
+
+
+
+
+
+
+
+
 
