@@ -2666,16 +2666,175 @@ public class TestApplication extends WebSecurityConfigurerAdapter {
 }
 ```
 
+## Spring 其他技术
 
-305
+	* 异步线程池
 
+```java
+/* ------ 使用Java 配置定义线程池和启用异步 ------ */
+package com.xyz.example.config;
 
+@Configuration
+@EnableAsync  // 开启 Spring 异步
+public class AsyncConfig implements AsyncConfigurer {
+	// 定义线程池
+	@Override
+	public Executor getAsyncExecutor() {
+		// 定义线程池
+		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+		// 核心线程数
+		taskExecutor.setCorePoolSize(10);
+		// 线程池最大线程数
+		taskExecutor.setMaxPoolSize(30) ;
+		// 线程队列最大线程数
+		taskExecutor.setQueueCapacity(2000) ;
+		// 初始化
+		taskExecutor.initialize();
+		return taskExecutor;
+	}
+}
+```
+```java
+/* ------ 异步服务接口 ------ */
+package com.xyz.example.service;
+public interface AsyncService {
+	// 模拟报表生成的异步方法
+	public void generateReport();
+}
 
+/* ------ 异步服务接口 ------ */
+package com.xyz.example.service.impl;
+@Service
+public class AsyncServiceImpl implements AsyncService {
+	@Override
+	@Async    // 声明使用异步调用
+	public void generateReport() {
+		// 打印异步线程名称
+		System.out.println("报表线程名称："+"【"+Thread.currentThread().getName()+"】");
+	}
+}
 
+/* ------ 异步服务接口 ------ */
+package com.xyz.example.controller;
+@Controller
+@RequestMapping("/async")
+public class AsyncController {
+	// 注入异步服务接口
+	@Autowired
+	private AsyncService asyncService = null;
 
+	@GetMapping("/page") 
+	public String asyncPage() {
+		System.out.println("请求线程名称："+"【"+Thread.currentThread().getName()+"】");
+		// 调用异步服务
+		asyncService.generateReport();
+		return "async";
+	}
+}
+```
 
+	* 异步消息（JMS、ActiveMQ、Kafka、AMQP、RabbitMQ）, 发送消息给其他系统，让其完成对应的功能。
 
+	Java 引入了JMS (Java Message Service, Java 消息服务)。JMS 按其规范分为点对点（ Point-to-Point ）和发布订阅（ Publish/Subscribe）两种形式。在更多的时候， 开发者往往更多地使用发布订阅模式，因为可以进行更多的扩展，使得更多的系统能够监控得到消息。
 
+	AMQP —— RabbitMQ（Advanced Message Queuing Protocol）是一个提供统一消息服务的应用层标准协议， 基于此协议的客户端与消息中间件可传递消息， 并不受客户端/中间件不同产品、不同开发语言等条件的限制。
+
+### JMS实例 —— ActiveMQ
+
+	首先在 ActiveMQ 官网下载相应程序，即可运行该消息服务管理程序
+
+	* 配置关于ActiveMQ 的依赖
+```xml
+<!-- 依赖于starter ，这样可以使用自动配置 -->
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-activemq</artifactId>
+</dependency>
+<!-- 依赖于连接池，这样就可以启用JMS 连接池 -->
+<dependency>
+	<groupId>org.apache.activemq</groupId>
+	<artifactId>activemq-pool</artifactId>
+</dependency>
+```
+	* 配置ActiveMQ 和JMS 信息
+```ini
+# ActiveMQ 地址
+spring.activemq.broker-url=tcp://localhost:61616
+# 配置用户名和密码
+spring.activemq.vemq.user=admin
+spring.activemq.vemq.password=admin
+# 是否使用发布订阅模式，默认为false，即用的是点对点的模式
+spring.jms.pub-sub-domain=true
+# 默认目的地址
+spring.jms.template.default-destination=activemq.default.destination
+# 是否启用连接池
+spring.activemq.pool.enabled=true
+# 连接池最大连接数配置
+spring.activemq.pool.max-connections=50
+```
+	* 定义ActiveMQ 服务接口
+```java
+package com.xyz.example.service;
+// ActiveMQ 服务接口
+public interface ActiveMqService {
+	// 发送消息
+	public void sendMsg(String message);
+	// 接收消息
+	public void receiveMsg(String message);
+}
+
+/* ------ ActiveMQ 服务实现类 ------ */
+package com.xyz.example.service.impl;
+@Service
+public class ActiveMqServiceImpl implements ActiveMqService {
+	// 注入由Spring Boot 自动生产的 jmsTemplate
+	@Autowired
+	private JmsTemplate jmsTemplate = null;
+
+	@Override
+	public void sendMsg(String message) {
+		System.out.println(" 发送消息【"+ message +"】");
+		jmsTemplate.convertAndSend(message);
+		// 自定义发送地址
+		// jmsTemplate.convertAndSend("your-destination", message);
+	}
+
+	@Override
+	// 使用注解，监听地址发送过来的消息
+	@JmsListener(destination = "${spring.jms.template.default-destination}")
+		public void receiveMsg(String message) {
+		System.out.println("接收到消息：【" + message + "】");
+	}
+}
+```
+	* 使用AMQP —— RabbitMQ
+```xml
+<dependency>
+	<groupId>org.springfrarnework.boot </groupId>
+	<artifactId>spring-boot-starter-amqp</artifactId>
+</dependency>
+```
+```ini
+# 使用Spring Boot 配置RabbitMQ
+# RabbitMQ 服务器地址
+spring.rabbitmq.host=localhost
+# RabbitMQ 端口
+spring.rabbitmq.port=5672
+# RabbitMQ 用户
+spring.rabbitmq.usernarne=admin
+# RabbitMQ 密码
+spring.rabbitmq.password=l23456
+# 是否确认发送的消息已经被消费
+spring.rabbitmq.publisher-confirms=true
+# RabbitMQ 的消息队列名称， 由它发送字符串
+rabbitmq.queue.msg=spring-boot-queue-msg
+# RabbitMQ 的消息队列名称，由它发送用户对象
+rabbitmq.queue.user=spring-boot-queue-user
+```
+
+### 定时任务
+
+317
 
 
 
