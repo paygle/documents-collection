@@ -2834,7 +2834,185 @@ rabbitmq.queue.user=spring-boot-queue-user
 
 ### 定时任务
 
-317
+	@EnableScheduling ，就能够使用注解驱动定时任务的机制， 然后通过注解@Scheduled 去配置如何定时。
+```java
+/* ------- 测试简易定时任务 ------ */
+package com.xyz.example.service.impl;
+
+@Service
+public class ScheduleServiceimpl {
+	// 计数器
+	int count1 = 1;
+	int count2 = 1 ;
+
+	// 每隔一秒执行一次
+	@Scheduled(fixedRate = 1000)
+	// 使用异步执行
+	@Async
+	public void job1() {
+		System.out.println("【" +Thread.currentThread().getName () +"】"
+				+ "【job1】每秒钊1执行一次， 执行第【" ＋ count1 ＋ "】次");
+		count1++ ;
+	}
+
+	// 每隔一秒执行一次
+	@Scheduled(fixedRate = 1000)
+	// 使用异步执行
+	@Async
+	public void job2() {
+		System.out.println("【" +Thread.currentThread().getName () +"】"
+				+ "【job2】每秒钊1执行一次， 执行第【" ＋ count2 ＋ "】次");
+		count2++ ;
+	}
+}
+```
+
+|@Scheduled 的配置项| 类型 | 描述 |
+|-------------------|----------|----------------------------------------|
+|cron              |String  | 使用表达式的方式定义任务执行时间 |
+|zone              |String  | 可以通过它设定区域时间 |
+|fixedDelay        |long    | 表示从上一个任务完成开始到下一个任务开始的间隔， 单位为毫秒 |
+|fixedDelayString  |String  | 与fixedDelay 相同，只是使用字符串，这样可以使用Sp EL 来引入配置文件的配置 |
+|initialDelay      |long    | 在Spring loC 容器完成初始化后， 首次任务执行延迟时间， 单位为毫秒 |
+|initialDelayString|String  | 与initi a lDe lay 相同，只是使用字符串，这样可以使用SpEL 来引入配置文件的配置 |
+|fixedRate         |long    | 从上一个任务开始到下一个任务开始的间隔， 单位为毫秒 |
+|fixedRateString   |String  | 与fi xedRate 相同， 只是使用字符串， 这样可以使用SpEL 来引入配置文件的配置 |
+
+
+### WebSocket 应用
+
+	目前很多浏览器己经实现了Web Socket 协议，但是依旧存在着很多浏览器没有实现该协议，为了兼容那些没有实现该协议的浏览器， 往往还需要通过STOMP 协议来完成这些兼容。
+
+```xml
+<!-- websocket 侬赖 -->
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-websocket</artifactId>
+</dependency>
+```	
+```java
+/* ------ 自定义WebSocket 服务端点配置 ------ */
+package com.xyz.example.main;
+
+@Configuration
+public class WebSocketConfig {
+	// 创建服务器端点, 有了这个Bean，就可以使用＠ServerEndpoint 定义一个端点服务类
+	@Bean
+	public ServerEndpointExporter serverEndpointExporter() {
+	return new ServerEndpointExporter();
+	}
+}
+```
+
+	• @ServerEndpoint ("/ws") ： 表示让Spring 创建WebSocket 的服务端点， 其中请求地址是“/ws”。
+	• @OnOpen：标注客户端打开WebSocket 服务端点调用方法。
+	• @OnClose ： 标注客户端关闭WebSocket 服务端点调用方法。
+	• @OnMessage ： 标注客户端发送消息， WeSocket 服务端点调用方法。
+	• @OnError ：标注客户端请求WeSocket 服务端点发生异常调用方法。
+
+```java
+/* ------ 定义WebSocket 服务端站点 ------ */
+package com.xyz.example.service.impl;
+
+@ServerEndpoint ("/ws")
+@Service
+public class WebSocketServiceImpl {
+	// 静态变量，用来记录当前在线连接数。应该把它设计成线程安全的
+	private static int onlineCount = 0;
+	// concurrent 包的线程安全Set ，用来存放每个客户端对应的 WebSocketServiceImpl 对象
+	private static CopyOnWriteArraySet<WebSocketServiceImpl> 
+	                          webSocketSet = new CopyOnWriteArraySet<>();
+	// 与某个客户端的连接会话，需要通过它来给客户端发送数据
+	private Session session ;
+
+	/* 连接建立成功调用的方法 */
+	@OnOpen
+	public void onOpen(Session session) {
+		this.session = session;
+		webSocketSet.add(this) ; // 加入set 中
+		addOnlineCount();        // 在线数加1
+		System.out.println("有新连接加入！ 当前在线人数为" ＋ getOnlineCount());
+		try {
+			sendMessage("有新的连接加入了！！");
+		} catch (IOException e) {
+			System.out.println("IO异常" );
+		}
+	}
+
+	// 连接关闭调用的方法
+	@OnClose
+	public void onClose() {
+		webSocketSet.remove(this);  // 从set中删除
+		subOnlineCount() ; // 在线数减l
+		System.out.println("有一连接关闭！ 当前在线人数为" ＋ getOnlineCount());
+	}
+
+	/*
+	 * 收到客户端消息后调用的方法
+	 * @param message 客户端发送过来的消息
+	 */
+	@OnMessage
+	public void onMessage(String message, Session session) {
+		System.out.println("来自客户端的消息：" ＋ message);
+		// 群发消息
+		for (WebSocketServiceImpl item : webSocketSet) {
+			try {
+				/*
+				// 获取当前用户名称
+				String userName = item.getSession().getUserPrincipal().getName();
+				System.out.println(userName);
+				*/
+				item.sendMessage(message);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	// 发生错误时调用
+	@OnError
+	publiC void onError(Sesion session, Throwable error) {
+		Systern.out.println("发生错误");
+		error.printStackTrace() ;
+	}
+
+	/*
+	 * 发送消息
+	 * @pararn message 客户端消息
+	 * @throws IOException
+	 */
+	private void sendMessage(String message) throws IOException {
+		this.session.getBasicRemote().sendText(message);
+	}
+	// 返回在线数
+	private static synchronized int getOnlineCount () {
+		return onlineCount;
+	}
+	// 当连接人数增加时
+	private static synchronized void addOnlineCount () {
+		WebSocketServiceImpl.onlineCount++;
+	}
+	// 当连接人数减少时
+	private static synchronized void subOnlineCount () {
+		WebSocketServiceImpl.onlineCount --;
+	}
+}
+```
+
+## Spring WebFlux 框架
+
+333
+
+
+
+
+
+
+
 
 
 
