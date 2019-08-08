@@ -1,6 +1,29 @@
 # Spring Boot 2.x 笔记
 
-### Spring Boot 的依赖和自动配置
+* [1.依赖和自动配置](#springconfig)
+* [2.自定义第三方Bean](#custbean)
+* [3.依赖注入： @Autowired](#autowiredbean)
+* [4.Bean 生命周期](#lifebean)
+* [5.使用属性文件](#configfile)
+* [6.条件装配Bean， 注解 @Conditional](#conditionalbean)
+* [7.Bean 的作用域](#beanscope)
+* [8.部署环境的切换， @Profile 定义配置环境](#changeprofile)
+* [9.引入 XML 配置Bean](#xmlconfigbean)
+* [10.使用 Spring EL 表达式 #{...} 内计算](#springel)
+* [11.Spring AOP 约定编程](#springaop)
+* [12.访问数据库](#springdatabase)
+* [13.数据库事务处理](#databasetansaction)
+* [14.使用性能利器 Redis](#springredist)
+* [15.Spring MVC 框架](#springmvc)
+* [16.Spring Security 安全](#springsecurity)
+* [17.Spring 其他技术](#springother)
+* [18.Spring WebFlux 响应式框架](#springwebflux)
+* [19.Spring 测试](#springtest)
+* [20.Actuator 监控端点](#springactuator)
+* [21.分布武开发 Spring Cloud](#springcloud)
+
+
+## <a name="springconfig"></a> 1. Spring Boot 的依赖和自动配置
 
 	org.springframework.boot.autoconfigure.web.servlet
 
@@ -42,7 +65,7 @@ package com.xyz.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-// ＠Configuration 代表这是一个Java 配置文件
+// @Configuration 代表这是一个Java 配置文件
 // Spring 的容器会根据它来生成IoC 容器去装配Bean
 
 @Configuration
@@ -87,7 +110,7 @@ public class IoCTest {
 // 然后将配置里面的Bean 装配到IoC 容器中，于是可以使用getBean 方法获取对应的POJO
 ```
 	
-## 1. 装配你的Bean
+### 装配你的Bean
 
 	如果一个个的Bean 使用注解 @Bean 注入Spring loC 容器中，那将是一件很麻烦的事情。
 	对于扫描装配而言使用的注解是 @Component 和 @ComponentScan。
@@ -139,7 +162,7 @@ public class AppConfig {
 }
 ```
 	
-## 2. 自定义第三方Bean
+## <a name="custbean"></a>2. 自定义第三方Bean
 
 	把第三方包的类对象也放入到Spring IoC 容器中，这时 @Bean 注解就可以发挥作用了。
 
@@ -180,7 +203,7 @@ public DataSource getDataSource () {
 }
 ```
 	
-## 3. 依赖注入： @Autowired
+## <a name="autowiredbean"></a>3. 依赖注入： @Autowired
 
 	例如，人类（Person）有时候利用 <---- 动物(Animal）去完成一些事情，
 	比方说狗（Dog）是用来看门的，猫（Cat）是用来抓老鼠的，鹦鹉（Parrot)是用来迎客的…
@@ -292,7 +315,7 @@ public class BussinessPerson implements Person {
 
 ```
 
-## 4. 生命周期
+## <a name="lifebean"></a>4. Bean 生命周期
 
 	大致分为Bean 定义、Bean 的初始化、Bean 的生存期和Bean 的销毁4 个部分。
 	
@@ -394,7 +417,7 @@ public class BeanPostProcessorExample implements BeanPostProcessor {
 }
 ```
 	
-## 5. 使用属性文件
+## <a name="configfile"></a>5. 使用属性文件
 	
 	在Spring Boot 中使用属性文件，默认为我们准备的 application.properties ，也可以使用自定义的配置文件。
 
@@ -455,7 +478,7 @@ public class DataBaseProperties {
 }
 ```
 	
-## 6. 条件装配Bean， 注解 @Conditional
+## <a name="conditionalbean"></a>6. 条件装配Bean， 注解 @Conditional
 	
 ```java
 // ......
@@ -505,7 +528,7 @@ public class DatabaseConditional implements Condition {
 }
 ```
 
-## 7. Bean 的作用域
+## <a name="beanscope"></a>7. Bean 的作用域
 
 | 作用域类型 | 使用范围 | 作用域描述 |
 |-----------|-------------------|-------------------------------|
@@ -532,7 +555,7 @@ public class DatabaseConditional implements Condition {
 
 ```
 
-## 8. 部署环境的切换， @Profile 定义配置环境
+## <a name="changeprofile"></a>8. 部署环境的切换， @Profile 定义配置环境
 
 	启动Profile机制参数: JAVA_OPTS="-Dspring.profiles.active=dev"
 	若不配置启动参数，被@Profile 标注的Bean 将不会被Spring 装配到 IoC 容器中。
@@ -570,7 +593,7 @@ public DataSource getTestDataSource() {
 }
 ```
 
-## 9. 引入 XML 配置Bean
+## <a name="xmlconfigbean"></a>9. 引入 XML 配置Bean
 
 	使用的是注解 @ImportResource ，通过它可以引入对应的XML 文件，用以加载Bean。
 
@@ -607,7 +630,7 @@ public class AppConfig {
 }
 ```
 
-## 10. 使用 Spring EL 表达式 #{...} 内计算
+## <a name="springel"></a>10. 使用 Spring EL 表达式 #{...} 内计算
 
   数字型的可以使用 == 比较符，如果是字符串型的可以使用 eq 比较符
 
@@ -627,7 +650,7 @@ public class AppConfig {
 
 ```
 
-## 11. Spring AOP 约定编程
+## <a name="springaop"></a>11. Spring AOP 约定编程
 
 	任何AOP编程，首先要确定的是在什么地方需要AOP ，也就是需要确定连接点（在Spring 中就是什么类的什么方法）的问题。
 
@@ -1113,7 +1136,7 @@ public User validateAndPrint(Long id, String userName, String note) {
 	但是对于是否拥有接口则不是Spring AOP 的强制要求， 对于动态代理的也有多种实现方式， 我业界比较流行的还有CGLIB 、Javassist 、ASM 等。Spring 采用了JDK 和CGLIB ， 对于JDK 而言，它是要求被代理的目标对象必须拥有接口， 而对于CGLIB 则不做要求。因此在默认的情况下， Spring 会按照这样的一条规则处理，即当你需要使用AOP 的类拥有接口时， 它会以JDK 动态代理运行，否则以CGLIB 运行。
 
 
-## 访问数据库
+## <a name="springdatabase"></a>12.访问数据库
 
 	* POM.XML中添加 DBCP 数据源依赖，commons-dbcp2
 
@@ -1485,7 +1508,7 @@ public class MainApplication {
 }
 ```
 
-## 数据库事务处理
+## <a name="databasetansaction"></a>13.数据库事务处理
 
 	在Spring 中，数据库事务是通过AOP 技术来提供服务的。
 
@@ -1764,7 +1787,7 @@ public class UserBatchServiceImpl implements UserBatchService /*, ApplicationCon
 }
 ```
 
-## 使用性能利器 Redis
+## <a name="springredist"></a>14.使用性能利器 Redis
 
 	Redis 支持Lua 语言，而且在Redis 中Lua 语言的执行是原子性的，也就是在Redis 执行Lua 时， 不会被其他命令所打断，这样就能够保证在高并发场景下的一致性。Redis 除了操作那些数据类型的功能外， 还能支持事务、流水线、发布订阅等功能。
 
@@ -2141,7 +2164,7 @@ private RedisConnectionFactory connectionFactory = null;
 }
 ```
 
-## Spring MVC （Model-View-Controller) 框架
+## <a name="springmvc"></a>15.Spring MVC （Model-View-Controller) 框架
 
 	Spring MVC 的流程是围绕 DispatcherServlet 而工作，掌握流程和组件就是Spring MVC开发的基础。
 
@@ -2518,7 +2541,7 @@ public class MyControllerAd飞rice {
 }
 ```
 
-## REST (Representational State Transfe1） 表现层状态转换
+### REST (Representational State Transfe1） 表现层状态转换
 
 	• @GetMapping ：对应 HTTP 的 GET 请求，获取资源。
 	• @PostMapping：对应 HTTP 的 POST 请求，创建资源。
@@ -2547,7 +2570,7 @@ public static UserVo getUser (Long id) {
 }
 ```
 
-## Spring Security 安全
+## <a name="springsecurity"></a>16. Spring Security 安全
 
 	@EnableWebSecurity 就可以驱动 Spring Sercurity
 
@@ -2666,7 +2689,7 @@ public class TestApplication extends WebSecurityConfigurerAdapter {
 }
 ```
 
-## Spring 其他技术
+## <a name="springother"></a>17. Spring 其他技术
 
 	* 异步线程池
 
@@ -2998,22 +3021,199 @@ public class WebSocketServiceImpl {
 	}
 	// 当连接人数减少时
 	private static synchronized void subOnlineCount () {
-		WebSocketServiceImpl.onlineCount --;
+		WebSocketServiceImpl.onlineCount--;
 	}
 }
 ```
 
-## Spring WebFlux 框架
+## <a name="springwebflux"></a>18. Spring WebFlux 响应式框架
 
-333
+	需要了解 RxJava 和Reactor 就是数据流（data streams）、异步（asynchronous）和消息。
+
++ 灵敏的： 就是可以快速响应的，只要有任何可能，系统都应该能够尽可能快地做出响应。
+
++ 可恢复的： 系统在运行中可能出现问题，但是能够有很强大的容错机制和修复机制保持响应性。
+
++ 可伸缩的： 在任何负载下，响应式编程都可以根据自身压力变化，请求少时，通过减少资源释放服务器的压力，负载大时能够通过扩展算法和软硬件的方式扩展服务能力，以经济实惠的方式实现可伸缩性。
+
++ 消息驱动的：响应式编程存在异步消息机制，事件之间的协作是通过消息进行连接的。
+
+	响应式编程而言分为Router Functions 、Spring WebFlux 和HTTP/Reactive Streams共3 层。
+
++ Router Functions ：是一个路由分发层，也就是它会根据请求的事件，决定采用什么类的什么方法处理客户端发送过来的事件请求。显然，在Reactor 模式中，它就是Selector 的作用。
+
++ Spring-webflux ：是一种控制层，类似Spring MVC 框架的层级，它主要处理业务逻辑前进行的封装和控制数据流返回格式等。
+
++ HTTP/Reactive Streams ：是将结果转换为数据流的过程。
+
+```xml
+<!-- 引入依赖包 -->
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-data-jpa<artifactId>
+</dependency>
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
+</dependency>
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-webflux</artifactId>
+</dependency>
+<!-- Tomcat 依赖 -->
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-tomcat</artifactId>
+	<scope>provided</scope>
+</dependency>
+```
+
+	这里之所以引入MongoDB 的依赖， 是因为Spring WebFlux只能支持Spring Data Reactive ， 它是一种非阻塞的数据响应方式。遗憾的是，因为数据库的开发往往是阻塞的，所以Spring Data Reactive 并不能对数据库的开发给予有效支持。如果需要使用数据库的场景，则需要处理很多细节，实用性价值不大。幸好Spring Data Reactive 可以支持Redis 、MongoDB 等NoSQL 的开发，而Redis 功能有限，它更加适合作为缓存使用。请注意这里不要把spring-boot-starter-web 的依赖也加载进来，如果将它也加载进来， Spring 只会加载Spring MVC,而非Spring WebFlux 了。
+
++ 其中 @Controller、@ResponseMapping 、@GetMapping 、@PostMapping 等 Spring MVC 注解依旧有效。
 
 
++ 乐观锁是一种不使用数据库锁的机制，并且不会造成线程的阻塞，只是采用多版本号机制来实现。但是，因为版本的冲突造成了请求失败的概率剧增，所以这时往往需要通过重入的机制将请求失败的概率降低。但是，多次的重入会带来过多执行SQL 的问题。为了克服这个问题，可以考虑使用按时间戳或者限制重入次数的办法。可见乐观锁还是一个相对比较复杂的机制。目前，有些企业已经开始使用NoSQL 来处理这方面的问题，其中当属Redis 解决方案。
 
 
+### 热部署
+
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-devtools</artifactId>
+	<!-- 表示依赖不会传递 -->
+	<optional>true</optional>
+</dependency>
+```
+
+- 其中配置了 optional 边项为 true,代表别的项目依赖于当前项目，这个热部署不会在该项目上生效。热部署是通过LiveReload 进行支持的。
+
+```ini
+# 热部署配置项 DEVTOOLS (DevToolsProperties)
+# 是否启用一个livereload.com 兼容的服务器
+spring.devtools.livereload.enabled=true
+# 端口livereload.com 服务苦苦端口
+spring.devtools.livereload.port=35729
+# 在原来的基础上新增不亟启服务的文件夹目录
+spring.devtools.restart.additional-exclude=
+# 在原来的基础上新增重启服务的文件夹目录
+spring.devtools.restart.additional-paths=
+# 是否启用自动重启功能
+spring.devtools.restart.enabled=true
+# 不重启服务的文件夹配置
+spring.devtools.restart.exclude=META-INF/maven/**, META-INF/resources/**, resources/**,static/**,public/**,templates/**,**/*Test.class,**/*Tests.class,git.properties
+# 设置一对路径变化进行监测的时间间隔（以毫秒为单位）
+spring.devtools.restart.poll-interval=lOOO
+# 在没有改变任何classpath 的情况下， 在重启被触发前的静默时－ ~ （ 以毫秒计）
+spring.devtools.restart.quiet-period=400
+# 设置触，发文件， 当需要实际触发重启检查时， 则需要修改这个文件
+spring.devtools.restart.trigger-file=
+```
+
+### <a name="springtest"></a>19. 测试
+
+- spring-boot-starter-test 会引入JUnit 的测试包， 这也是现实中使用得最多的方案。在Spring Boot 可以支持多种方面的测试， 如JPA 、MongoDB 、REST 风格和 Redis 等。
+
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-test</artifactId>
+	<scope>test</scope>
+</dependency>
+```
+```java
+package com.xyz.example.main;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+public class ExampleApplicationTests {
+	// 注入用户服务类
+	@Autowired
+	private UserService userService = null;
+
+	// REST 测试模板, Spring Boot 自动提供
+	// @Autowired
+	// private TestRestTemplate restTemplate = null;
+
+	@Test
+	public void contextLoads() {
+		User user = userService.getUser(1L);
+
+		// 测试获取用户功能，请求当前启动的服务，请注意URI 的缩写
+		// User user = this.restTemplate.getForObject("/user/{id}"), User.class, 1L);
+
+		// 判断用户信息是否为空
+		Assert.assertNotNull(user);
+	}
+}
+```
+
+### <a name="springactuator"></a>20. Actuator 监控端点
+
+ 在引入依赖包的基础上，启动Spring Boot，在浏览器地址栏中输入: http://localhost:8080/actuator/health
+
+```xml
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+<dependency>
+	<groupId>org.springframework.hateoas</groupId>
+	<artifactId>spring-hateoas</artifactId>
+	<version>0.24.0.RELEASE</version>
+</dependency>
+```
+```ini
+# 显示项目的敏感信息配置 
+management.endpoints.web.exposure.include=info,health,beans
+# 暴露所有端点
+management.endpoints.web.exposure.include=*
+# 不暴露env 端点
+management.endpoints.web.exposure.exclude=env
+# 启用 shutdown 端点
+management.endpoint.shutdown.enabled=true
+```
+
++ Actuator 端点说明
+
+| ID | 描述 | 默认启用 |
+|---------|---------------------------------|--------|
+| auditevents | 公开当前应用程序的审查事件信息 | 是 |
+| beans | 显示S pring loC 容器关于Bean 的信息 | 是 |
+| conditions | 显示自动配置类的评估和配置条件，并且显示他们匹配或者不匹配的原因 | 是 |
+| configprops | 显示当前项目的属性配置信息（通过@ConfigurationProperties 配置）  | 是 |
+| env | 显示当前Spring 应用环境配置属性（ConfigurableEnvironment) |  是 |
+| flyway | 显示已经应用于flyway 数据库迁移的信息 | 是 |
+| health | 显示当前应用健康状态 | 是 |
+| httptrace | 显示最新追踪信息（默认为最新100 次HTTP 请求）  | 是 |
+| info | 显示当前应用信息 | 是 |
+| loggers | 显示并修改应用程序中记录器的配置 | 是 |
+| liquibase | 显示己经应用于liquibase 数据库迁移的信息 | 是 |
+| metrics | 显示当前配置的各项“度量”指标 | 是 |
+| mappings | 显示由@RequestMapping（@GetMapping 和＠PostMapping 等）配置的映射路径信息 | 是 |
+| scheduledtasks | 显示当前应用的任务计划 | 是 |
+| sessions | 允许从Spring 会话支持的会话存储库检索和删除用户会话，只是Spring 会话对响应式Web 应用还暂时不能支持 | 是 |
+| shutdown | 允许当前应用被优雅地进行关闭（在默认的情况下不启用这个端点）  | 否 |
+| threaddump | 显示线程泵 | 是 |
+ 
++ JMX 监控
+
+	对于Spring Boot ，还可以通过Java管理扩展Java Management Extensions, JMX 来监控JVM的状况。
+
+	在JAVA HOME/bin 目录，里面有一个可运行文件jconsole.exe 。在运行Spring Boot 应用后再运行它。
 
 
+## <a name="springcloud"></a>21. 分布武开发 Spring Cloud
 
+	Spring Cloud 是一套组件，如服务发现、配置中心、消息总线、负载均衡、断路器和数据监控等。
 
++ 服务治理和服务发现： 在Spring Cloud 中主要是使用Netflix Eureka 作为服务治理的， Spring Cloud 对其进行了一次封装，使得开发者可以以Spring Boot 的风格使用它，这样就为它的使用带来了极大的便利。通过服务注册将单个微服务节点注册给服务治理中心，这样服务治理中心就可以治理单个微服务节点。服务发现则是微服务节点可以对服务治理中心发送消息，使得服务治理中心可以将新的微服务节点纳入管理。
 
++ 客户端负载均衡： 在微服务的开发中，会将一个大的系统拆分为多个微服务系统，而各个微服务系统之间需要相互协作才能完成业务需求。每一个微服务系统可能存在多个节点，当一个微服务（服务消费者）调用另外一个微服务（服务提供者）时，服务提供者需要负载均衡算法提供一个节点进行响应。
 
++ 声明服务调用：为了简化多次调用的复杂度， Spring Cloud 提供了接口式的声明服务调用编程，它就是Feign。通过它请求其他做服务时，就如同调度本地服务的Java 接口一样，从而在多次调用的情况下可以简化开发者的编程，提高代码的可读性。
 
++ 断路器：在分布式中，因为存在网络延迟或者故障，所以一些服务调用无法及时响应。如果此时服务消费者还在大量地调用这些网络延迟或者故障的服务提供者，那么很快消费者也会因为大量的等待，造成积压，最终导致其自身出现服务瘫痪。为了克服这个问题， Spring Cloud引入了Netflix 的开源框架Hystrix 来处理这些问题。
+
++ API 网关：Spring 中是Zuul。网关存在两个作用： 第一个作用是将请求的地址映射为真实服务器的地址。从这点来说，可以把它称为服务端负载均衡。第二个作用是过滤服务，在互联网中，服务器可能面临各种攻击， Zuul 提供了过滤器，通过它过滤那些恶意或者无效的请求，把它们排除在服务网站之外，这样就可以降低网站服务的风险。
