@@ -26,9 +26,9 @@
 ## <a name="springconfig"></a> 1. Spring Boot 的依赖和自动配置
 
 	org.springframework.boot.autoconfigure.web.servlet
-
+	
 	@Component以及他的特殊化(@Controller, @Service 和 @Repository)允许在通过类路径扫描自动发现。
-
+	
 	@Bean却只能在配置类中明确的声明一个单例的bean。
 
 |注解|说明|
@@ -38,7 +38,7 @@
 |@Repository  |  数据管理/存储,企业级应用使用(Dao, DDD) |
 |@Service  |  提供一个商业逻辑 - 一个无状态的切面 |
 
-	
+
 ### Spring 中是通过注解描述来创建IoC对象。
 
 	Spring Boot并不建议使用XML，而是通过注解的描述生成对象。
@@ -49,17 +49,17 @@
 		* 通过描述管理Bean ， 包括发布和获取Bean; 
 		
 		* 通过描述完成Bean 之间的依赖关系。
-		
+
 ### 所有的IoC 容器都需要实现接口 BeanFactory ，它是一个顶级容器接口。
-	
+
 ### ApplicationContext 是 BeanFactory 的子接口之一
 
 	是最为重要的接口设计，大部分Spring IoC 容器是 ApplicationContext 接口的实现类。
-	
+
 ### AnnotationConfigApplicationContext 是一个基于注解的IoC 容器。
-	
+
 	* @Configuration 和 @Bean 注解例子
-	
+
 ```java
 package com.xyz.config;
 import org.springframework.context.annotation.Bean;
@@ -83,10 +83,10 @@ public class AppConfig {
 		return user;
 	}
 }
-```	
+```
 
 	* 构建自己的IoC 容器
-	
+
 ```java
 package com.xyz.config ;
 import org.apache.log4j.Logger;
@@ -109,16 +109,16 @@ public class IoCTest {
 // AppConfig 传递给Annotat ionConfigApp li cationContext 的构造方法，这样它就能够读取配置了。
 // 然后将配置里面的Bean 装配到IoC 容器中，于是可以使用getBean 方法获取对应的POJO
 ```
-	
+
 ### 装配你的Bean
 
 	如果一个个的Bean 使用注解 @Bean 注入Spring loC 容器中，那将是一件很麻烦的事情。
 	对于扫描装配而言使用的注解是 @Component 和 @ComponentScan。
-
+	
 	> @Bean 是标明“哪个方法”的返回值被扫描进入Spring IoC 容器
-
+	
 	> @Component 是标明“哪个类”被扫描进入Spring IoC 容器
-
+	
 	> @ComponentScan 是标明采用何种策略去扫描装配Bean。
 
 ```java
@@ -139,9 +139,9 @@ public class User {
 	其中配置的“user＂则是作为 Bean 的名称，当然你也可以不配置这个字符串
 	那么IoC 容器就会把类名第一个字母作为小写，其他不变作为Bean 名称放入到IoC 容器中
 	注解@Value 则是指定具体的值，使得Spring IoC 给予对应的属性注入对应的值。
-	
+
 ### 为了让Spring IoC 容器装配这个 @Component 注解类， 需要改造配置类 AppConfig
-	
+
 ```java
 package com.xyz.config ;
 import org.springframework.context.annotation.ComponentScan;
@@ -161,7 +161,7 @@ public class AppConfig {
 	// ......
 }
 ```
-	
+
 ## <a name="custbean"></a>2. 自定义第三方Bean
 
 	把第三方包的类对象也放入到Spring IoC 容器中，这时 @Bean 注解就可以发挥作用了。
@@ -176,7 +176,7 @@ public class AppConfig {
 	<groupid>mysql</groupid>
 	<artifactid>mysql-connector-java</artifactid>
 </dependency>
-```	
+```
 
 	* 使用DBCP 生成第三方数据源
 
@@ -202,7 +202,7 @@ public DataSource getDataSource () {
 	return dataSource;
 }
 ```
-	
+
 ## <a name="autowiredbean"></a>3. 依赖注入： @Autowired
 
 	例如，人类（Person）有时候利用 <---- 动物(Animal）去完成一些事情，
@@ -332,7 +332,7 @@ public class BussinessPerson implements Person {
 ```
 
 	* 加入生命周期接口和自定义	
-	
+
 ```java
 package com.xyz,pojo;
 
@@ -393,7 +393,7 @@ public class BussinessPerson implements Person, BeanNameAware,
 ```
 
 	* 后置Bean 初始化器，对所有的Bean 有效
-
+	
 	* 可以使用注解＠Bean 来配置自定义初始化和销毁方法： @Bean(initMethod="init", destroyMethod="destroy")
 
 ```java
@@ -416,9 +416,9 @@ public class BeanPostProcessorExample implements BeanPostProcessor {
 	}
 }
 ```
-	
+
 ## <a name="configfile"></a>5. 使用属性文件
-	
+
 	在Spring Boot 中使用属性文件，默认为我们准备的 application.properties ，也可以使用自定义的配置文件。
 
 ```xml
@@ -431,7 +431,7 @@ public class BeanPostProcessorExample implements BeanPostProcessor {
 ```
 
 	* 使用属性配置
-	
+
 
 ```java
 package com.xyz.pojo ;
@@ -477,9 +477,9 @@ public class DataBaseProperties {
 	/** getters **/
 }
 ```
-	
+
 ## <a name="conditionalbean"></a>6. 条件装配Bean， 注解 @Conditional
-	
+
 ```java
 // ......
 	@Bean(name="dataSource", destroyMethod="close")
@@ -560,7 +560,7 @@ public class DatabaseConditional implements Condition {
 	启动Profile机制参数: JAVA_OPTS="-Dspring.profiles.active=dev"
 	若不配置启动参数，被@Profile 标注的Bean 将不会被Spring 装配到 IoC 容器中。
 	Spring 优先先判定 spring.profiles.active 配置后， 不存在再去查找spring.profiles.default 的配置
-
+	
 	按照 Spring Boot 的规则，假设把选项 -Dspring.profiles.active 配置的值记为 {profile}
 	则它会用 application-{profile}.properties 文件去代替原来默认的 application.properties 文件
 
@@ -596,9 +596,9 @@ public DataSource getTestDataSource() {
 ## <a name="xmlconfigbean"></a>9. 引入 XML 配置Bean
 
 	使用的是注解 @ImportResource ，通过它可以引入对应的XML 文件，用以加载Bean。
-
+	
 	使用XML配置的Bean，要求所在的包并不在 @ComponentScan 定义的扫描包范围内，而且没有标注 @Component
-
+	
 	* 被配置到 Bean XML 上的 Bean 类
 
 ```java
@@ -875,28 +875,28 @@ private static void testProxy() {
 	其次，通过约定，可以将一些业务逻辑织入流程中，并且可以将一些通用的逻辑抽取出来，
 	然后给予默认实现，这样你只需要完成部分的功能就可以了,
 	这样做可以使得开发者的代码更加简短，同时可维护性也得到提高
-
+	
 	AOP 最为典型的应用实际就是数据库事务的管控。例如， 当我们需要保存一个用户时，可能要连同它的角色信息一并保存到数据库中。
-
+	
 	@Transactional 注解，表明该方法需要事务运行，实现了数据库资源的打开和关闭、事务的回漆和提交。
 
 #### AOP 术语和流程
-	
+
 	1. 连接点（joinpoint）：对应的是具体被拦截的对象，因为Spring只能支持方法，所以被拦截的对象往往就是指特定的方法。
 		例如，我们前面提到的HelloServiceimpl的sayHello方法就是一个连接点，AOP将通过动态代理技术把它织入对应的流程中。
-
-	2. 切点（point cut）：有时候，我们的切面不单单应用于单个方法，也可能是多个类的不同方法，这时，可以通过正则式和指示器的规则去定义，从而适配连接点。切点就是提供这样一个功能的概念。
-
-	3. 通知（advice）：就是按照约定的流程下的方法，分为前置通知（before advice）、后置通知（after advice）、环绕通知（around advice）、事后返回通知（afterRetuming advice）和异常通知（afterThrowing advice），它会根据约定织入流程中，需要弄明白它们在流程中的顺序和运行的条件。
-
-	4. 目标对象（target）：即被代理对象，例如，约定编程中的 HelloServiceImpl 实例就是一个目标对象，它被代理了。
-
-	5. 引入（introduction）：是指引入新的类和其方法，增强现有Bean的功能。
-
-	6. 织入（weaving）：它是一个通过动态代理技术，为原有服务对象生成代理对象，然后将与切点定义匹配的连接点拦截，并按约定将各类通知织入约定流程的过程。
-
-	7. 切面（aspect）：是一个可以定义切点、各类通知和引入的内容，Spring AOP将通过它的信息来增强Bean的功能或者将对应的方法织入流程。
 	
+	2. 切点（point cut）：有时候，我们的切面不单单应用于单个方法，也可能是多个类的不同方法，这时，可以通过正则式和指示器的规则去定义，从而适配连接点。切点就是提供这样一个功能的概念。
+	
+	3. 通知（advice）：就是按照约定的流程下的方法，分为前置通知（before advice）、后置通知（after advice）、环绕通知（around advice）、事后返回通知（afterRetuming advice）和异常通知（afterThrowing advice），它会根据约定织入流程中，需要弄明白它们在流程中的顺序和运行的条件。
+	
+	4. 目标对象（target）：即被代理对象，例如，约定编程中的 HelloServiceImpl 实例就是一个目标对象，它被代理了。
+	
+	5. 引入（introduction）：是指引入新的类和其方法，增强现有Bean的功能。
+	
+	6. 织入（weaving）：它是一个通过动态代理技术，为原有服务对象生成代理对象，然后将与切点定义匹配的连接点拦截，并按约定将各类通知织入约定流程的过程。
+	
+	7. 切面（aspect）：是一个可以定义切点、各类通知和引入的内容，Spring AOP将通过它的信息来增强Bean的功能或者将对应的方法织入流程。
+
 ### AOP 开发详解
 
 	1. 确定连接点
@@ -923,7 +923,7 @@ public class UserServiceImpl implements UserService{
 	}
 }
 ```
-	
+
 	2. 开发切面
 
 ```java
@@ -988,12 +988,13 @@ public class MyAspect implements Ordered {
 
 
 	* 环绕通知（Around） 是所有通知中最为强大的通知，强大也意味着难以控制。
-
+	
 	* 使用它的场景是在你需要大幅度修改原有目标对象的服务逻辑时， 否则都尽量使用其他的通知。
-
+	
 	* 环绕通知是一个取代原有目标对象方法的通知， 当然它也提供了回调原有目标对象方法的能力。
 
-	
+
+​	
 #### AspectJ 关于Spring AOP 切点的指示器
 
 |项目类型|描述|
@@ -1145,7 +1146,7 @@ public User validateAndPrint(Long id, String userName, String note) {
 spring.datasource.url=jdbc:mysql://localhost:3306/mydatabase
 spring.datasource.username=root
 spring.datasource.password=l23456
-#spring .datasource.driver-class-name=com.mysql . jdbc Driver
+#spring.datasource.driver-class-name=com.mysql.jdbcDriver
 # 指定数据库连接池的类型
 spring.datasource.type=org.apache.commonsdbcp2.BasicDataSource
 ```
@@ -1238,22 +1239,22 @@ public class MainApplication {
 
 #### MyBatis 可配置的内容
 
-	•  properties （属性）： 属性文件在实际应用中一般采用Spring 进行配置，而不是MyBatis
-
+	• properties （属性）： 属性文件在实际应用中一般采用Spring 进行配置，而不是MyBatis
+	
 	• settings（设置）：它的配置将改变MyBatis 的底层行为，可以配置映射规则，如自动映射和驼峰映射、执行器（Executor ）类型、缓存等内容，比较复杂，具体配置项可看 MyBatis在线参考。
-
+	
 	• typeAliases（类型别名）：使用类全限定名会比较长，所以MyBatis 会对常用的类提供默认的别名，此外还允许我们通过typeAliases 配置自定义的别名。
-
+	
 	• typeHandlers（类型处理器）： 这是MyBatis 的重要配置之一，在MyBatis 写入和读取数据库的过程中对于不同类型的数据（对于Java 是JavaType，对于数据库则是JdbcType ）进行自定义转换，在大部分的情况下我们不需要使用自定义的typeHandler ，因为在MyBatis 自身就已经定义了比较多的typeHandler, MyBatis 会自动识别javaTyp巳和jdbcType ，从而实现各种类型的转换。一般来说， typeHandler的使用集中在枚举类型上。
-
+	
 	• objectFactory（对象工厂）：这是一个在MyBatis 生成返回的POJO 时会调用的工厂类。一般我们使用MyBatis 默认提供的对象工厂类（DefaultObjectFactory）就可以了，而不需要任何配置。
-
+	
 	• mappers（映射器）： 最核心的组件，它提供SQL和POJO 映射关系， 这是MyBatis开发的核心。
-
+	
 	• plugins（插件）：有时候也称为拦截器， 是MyBatis 最强大也是最危险的组件，它通过动态代理和责任链模式来完成，可以修改MyBatis 底层的实现功能。掌握它需要比较多的MyBatis知识。
-
+	
 	• environments（数据库环境）： 可以配置数据库连接内容和事务。一般这些交由Spring托管。
-
+	
 	• databaseIdProvider（数据库厂商标识）：允许MyBatis 配置多类型数据库支持， 不常用。
 
 ```java
@@ -1329,8 +1330,8 @@ public class SexTypeHandler extends BaseTypeHandler<SexEnum> {
 ```java
 /* --------- 定义 MyBatis 操作接口 -------- */
 package com.xyz.example.dao;
-// @Repository 注解，扫描在加载 MyBatis 接口Bean 时需要，也可以使用注解 @Mapper
-@Repository
+// 在接口上加 @Mapper 注解，或使用 @MapperScan 扫描对应的目录；
+@Mapper
 public interface MyBatisUserDao {
 	public User getUser(Long id);
 }
@@ -1339,7 +1340,7 @@ public interface MyBatisUserDao {
 # 配置 application.properties 中映射文件和扫描别名
 # MyBatis 映射文件通配
 mybatis.mapper-locations=classpath:com/xyz/example/mapper/*.xml
-# MyBatis 扫描别名包，和主解 @Alias 联用
+# MyBatis 扫描别名包，和注解 @Alias 联用
 mybatis.type-aliases-package=com.xyz.example.pojo
 # 配置 typeHandler 的扫描包
 mybatis.type-handlers-package=com.xyz.example.typehandler
@@ -1511,7 +1512,7 @@ public class MainApplication {
 ## <a name="databasetansaction"></a>13.数据库事务处理
 
 	在Spring 中，数据库事务是通过AOP 技术来提供服务的。
-
+	
 	如一个批处理，它将处理多个交易，但是在一些交易中发生了异常， 这个时候则不能将所有的交易都回滚。如果所有的交易都回渎，那么那些本能够正常处理的业务也无端地被回滚了，这显然不是我们所期待的结果。通过Spring 的数据库事务传播行为，可以很方便地处理这样的场景。
 
 ### JDBC 的数据库事务
@@ -1570,7 +1571,7 @@ public class JdbcServiceImpl implements JdbcService {
 ### Spring 声明式数据库事务约定
 
 	@Transactional 注解可以标注在类或者方法上，当它标注在类上时，代表这个类所有公共（public）非静态的方法都将启用事务功能。在 @Transactional 中，还允许配置许多的属性，如事务的隔离级别和传播行为。
-
+	
 	PlatformTransactionManager 事务管理器类，getTransaction 方法的参数是一个事务定义器，它是依赖于我们配置的 @ Transactional 的配置项生成，且能够设置事务的属性，而提交和回滚事务也就可以通过commit和rollback方法来执行。
 
 ```sql
@@ -1703,28 +1704,28 @@ public class MainApplication {
 
 	多个事务都提交引发的丢失更新称为第二类丢失更新。为了克服这些问题， 数据库提出了事务之间的隔离级别的概念。
 	数据库现有的技术完全可以避免丢失更新，但是这样做的代价， 就是付出锁的代价，在互联网中， 系统不单单要考虑数据的一致性，还要考虑系统的性能。
-
+	
 	1. 未提交读（read uncommitted）是最低的隔离级别，其含义是允许一个事务读取另外一个事务没有提交的数据。
 	未提交读是一种危险的隔离级别，所以一般在我们实际的开发中应用不广， 但是它的优点在于并发能力高，适合那些对数据一致性没有要求而追求高并发的场景，它的最大坏处是出现脏读。
-
+	
 	2. 写提交（read committed）隔离级别， 是指一个事务只能读取另外一个事务已经提交的数据，不能读取未提交的数据。
-
+	
 	3. 可重复读，等待已有事务提交才允许读取数据库。
-
+	
 	4. 串行化（Serializable）是数据库最高的隔离级别，它会要求所有的SQL 都会按照顺序执行，这样就可以克服上述隔离级别出现的各种问题，所以它能够完全保证数据的一致性。
 
 
 	* 隔离级别和可能发生的现象
-
+	
 	Oracle 只能支持读写提交和串行化，默认的隔离级别为读写提交.
 	MySQL 则能够支持4 种，，默认的隔离级别为可重复读。
 
 |隔离级别|脏读|不可重复读|幻读|
 |---------|---|---|---|
 | 未提交读 | √ | √ | √ |
-| 读写提交 | × | √ | √ | 
-| 可重复读 | × | × | √ |  
-| 串行化   | × | × | × | 
+| 读写提交 | × | √ | √ |
+| 可重复读 | × | × | √ |
+| 串行化   | × | × | × |
 
 ```ini
 # application.properties 设置隔离级别数字配置的含义
@@ -1743,9 +1744,9 @@ spring.datasource.tomcat.default-transaction-isolation=2
 
 	org.springframework.transaction.annotation.Propagation
 	其中， REQUIRED, REQUIRES_NEW 和 NESTED 这3 种最常用的传播行为。
-
+	
 	在绝大部分的情况下，我们会认为数据库事务要么全部成功， 要么全部失败。但现实中也许会有特殊的情况。
-
+	
 	@Transactional 自调用失效问题, AOP 的原理是动态代理， 在自调用的过程中， 是类自身的调用，而不是代理对象去调用， 那么就不会产生AOP，这样Spring就不能把你的代码织入到约定的流程中， 于是就产生了现在看到的失败场景。 用一个Service 去调用另一个Service ， 这样就是代理对象的调用， Spring才会将你的代码织入事务流程。当然也可以从Spring IoC 容器中获取代理对象去启用AOP。
 
 ```java
@@ -1790,9 +1791,9 @@ public class UserBatchServiceImpl implements UserBatchService /*, ApplicationCon
 ## <a name="springredist"></a>14.使用性能利器 Redis
 
 	Redis 支持Lua 语言，而且在Redis 中Lua 语言的执行是原子性的，也就是在Redis 执行Lua 时， 不会被其他命令所打断，这样就能够保证在高并发场景下的一致性。Redis 除了操作那些数据类型的功能外， 还能支持事务、流水线、发布订阅等功能。
-
+	
 	使用 Spring 缓存注解操作 Redis
-
+	
 	• @CachePut 表放示将方法结果返回存到缓存中。
 	• @Cacheable 表示先从缓存中通过定义的键查询，如果可以查询到数据，则返回，否则执行该方法，返回数据，并且将返回结果保存到缓存中。
 	• @CacheEvict 通过定义的键移除缓存，它有一个Boolean 类型的配置项beforeInvocation，表示在方法之前或者之后移除缓存。因为其默认值为false，所以默认为方法之后将缓存移除。
@@ -1849,7 +1850,7 @@ public class RedisConfig {
 ```
 
 	RedisTemplate 是一个强大的类，它会自动从RedisConnectionFactory 工厂中获取连接，然后执行对应的Redis命令，在最后还会关闭Redis的连接。
-
+	
 	* RedisTemplate 中的序列化器属性
 
 |属性|描述|备注|
@@ -1891,7 +1892,7 @@ public class ExampleMain {
 ```
 
 	* Spring 对Redis 数据类型操作的封装
-
+	
 	Redis 能够支持7 种类型的数据结构，这7 种类型是字符串、散列、列表（链表） 、集合、有序集合、基数和地理位置。
 
 ```java
@@ -1912,7 +1913,7 @@ redisTemplate.opsForZSet();
 ```
 
 	* SessionCallback 和 RedisCallback 接口
-
+	
 	它们的作用是让 RedisTemplate 进行回调，通过它们可以在同一条连接下执行多个Redis 命令。
 
 ```java
@@ -1989,11 +1990,11 @@ public Map<String, Object> testList() {
 #### 使用Redis 事务
 
 	Redis 是支持一定事务能力的NoSQL ， 在Redis 中使用事务，通常的命令组合是watch...multi .. . exec，也就是要在一个Redis 连接中执行多个命令，这时我们可以考虑使用S巳ssionCallback 接口来达到这个目的。
-
+	
 	watch 命令是可以监控Redis 的一些键; 
-
+	
 	multi 命令是开始事务，开始事务后， 该客户端的命令不会马上被执行，而是存放在一个队列里，这点是需要注意的地方，也就是在这时我们执行一些返回数据的命令， Redis 也是不会马上执行的，而是把命令放到一个队列里，所以此时调用Redis 的命令，结果都是返回null ，这是初学者容易犯的错误；
-
+	
 	exec 命令的意义在于执行事务，只是它在队列命令执行前会判断被watch 监控的Redis 的键的数据是否发生过变化（即使赋予与之前相同的值也会被认为是变化过)，如果它认为发生了变化，那么Redis 就会取消事务， 否则就会执行事务， Redis 在执行事务时，要么全部执行， 要么全部不执行，而且不会被其他客户端打断，这样就保证了Redis 事务下数据的一致性。
 
 ```java
@@ -2026,7 +2027,7 @@ public Map<String, Object> testMulti() {
 ```
 
 	* 使用Redis 流水线
-
+	
 	在默认的情况下， Redis 客户端是一条条命令发送给Redis 服务器的，这样显然性能不高。在关系数据库中我们可以使用批量，也就是只有需要执行SQL 时，才一次性地发送所有的SQL 去执行，这样性能就提高了许多。
 
 ```java
@@ -2053,7 +2054,7 @@ public Map<String, Object> testPipeline() {
 ```
 
 	* Redis 发布订阅
-
+	
 	Redis 提供一个渠道，让消息能够发送到这个渠道上，而多个系统可以监听这个渠道， 如短信、微信和邮件系统都可以监昕这个渠道，当一条消息发送到渠道，渠道就会通知它的监昕者，这样短信、微信和邮件系统就能够得到这个渠道给它们的消息了，这些监听者会根据自己的需要去处理这个消息，于是我们就可以得到各种各样的通知了。
 
 ```java
@@ -2117,7 +2118,7 @@ public class TestApplication {
 ```
 
 	* Redis 使用 Lua 脚本
-
+	
 	一种是直接发送Lua 到Redis 服务器去执行，另一种是先把Lua 发送给Redis, Redis 会对Lua 脚本进行缓存，然后返回一个SHA1 的32 位编码回来，之后只需要发送SHA1 和相关参数给Redis 便可以执行了。
 
 ```java
@@ -2334,7 +2335,7 @@ public class ExampleApplication implements WebMvcConfigurer {
 ### 国际化消息源
 
 	SpringMVC 提供了 MessageSource 接口体系，在大部分的情况下，是使用JDK 的ResourceBundle 处理国际化信息的，为此这里主要使用 ResourceBundleMessageSource 这个国际化消息源。
-
+	
 	配置 basename 后在 resources 目录中放置 messages.properties 和 messages_zh_CN.properties 等国际化消息文件
 
 ```ini
@@ -2360,11 +2361,11 @@ spring.mvc.locale-resolver=accept-header
 #### 国际化解析器
 
 	• AcceptHeaderLocaleResolver： 使用浏览器头请求的信息去实现国际化区域，默认使用。
-
+	
 	• FixedLocaleResolver ： 固定的国际化区域。只能选择一种， 不能变化， 所以用处不大
-
+	
 	• CookieLocaleResolver ： 将国际化区域信息设置在浏览器Cookie 中，这样使得系统可以从Cookie 中读取国际化信息来确定用户的国际化区域。
-
+	
 	• SessionLocaleResolver：类似于CookieLocaleResolver，只是将国际化信息设置在Session中，这样就能读取Session 中的信息去确定用户的国际化区域，这是最常用的。
 
 ```java
@@ -2489,11 +2490,11 @@ public class SessionController {
 #### 给控制器增加通知
 
 	• @ControllerAdvice：定义一个控制器的通知类，允许定义一些关于增强控制器的各类通知和限定增强哪些控制器功能等。
-
+	
 	• @InitBinder：定义控制器参数绑定规则，如转换规则、格式化等，它会在参数转换之前执行。
-
+	
 	• @ExceptionHandler：定义控制器发生异常后的操作。一般来说，发生异常后，可以跳转到指定的友好页面。
-
+	
 	• @ModelAttribute：可以在控制器方法执行之前，对数据模型进行操作。
 
 ```java
@@ -2548,13 +2549,13 @@ public class MyControllerAd飞rice {
 	• @PutMapping： 对应对应 HTTP 的 PUT 请求，提交所有资源属性以修改资源。
 	• @PatchMapping：对应 HTTP 的 PATCH 请求，提交资源部分修改的属性。
 	• @DeleteMapping：对应 HTTP 的 DELETE 请求，删除服务器端的资源。
-
+	
 	@RequestMapping 、@GetMapping 等注解就能把URI 定位到对应的控制器方法上，通过注解 @PathVariable 就能够将URI 地址的参数获取，通过 @RequestBody 可以将请求体为JSON 的数据转化为复杂的Java 对象， 其他均可以依据Spring MVC 的参数规则进行处理。这样就能够进入到对应的控制器， 进入控制器后，就可以根据获取的参数来处理对应的逻辑。最后可以得到后台的数据，准备渲染给请求。
-
+	
 	JSON前后端交互十分普遍。如果每一个方法都加入 @ResponseBody 才能将数据模型转换为JSON，显然冗余。
-
+	
 	@RestController，可以将控制器返回的对象转化为JSON 数据集
-
+	
 	使用 RestTemplate 请求后端, 底层是通过类 HttpURLConnection 实现的
 
 ```java
@@ -2757,15 +2758,15 @@ public class AsyncController {
 ```
 
 	* 异步消息（JMS、ActiveMQ、Kafka、AMQP、RabbitMQ）, 发送消息给其他系统，让其完成对应的功能。
-
+	
 	Java 引入了JMS (Java Message Service, Java 消息服务)。JMS 按其规范分为点对点（ Point-to-Point ）和发布订阅（ Publish/Subscribe）两种形式。在更多的时候， 开发者往往更多地使用发布订阅模式，因为可以进行更多的扩展，使得更多的系统能够监控得到消息。
-
+	
 	AMQP —— RabbitMQ（Advanced Message Queuing Protocol）是一个提供统一消息服务的应用层标准协议， 基于此协议的客户端与消息中间件可传递消息， 并不受客户端/中间件不同产品、不同开发语言等条件的限制。
 
 ### JMS实例 —— ActiveMQ
 
 	首先在 ActiveMQ 官网下载相应程序，即可运行该消息服务管理程序
-
+	
 	* 配置关于ActiveMQ 的依赖
 ```xml
 <!-- 依赖于starter ，这样可以使用自动配置 -->
@@ -2916,7 +2917,7 @@ public class ScheduleServiceimpl {
 	<groupId>org.springframework.boot</groupId>
 	<artifactId>spring-boot-starter-websocket</artifactId>
 </dependency>
-```	
+```
 ```java
 /* ------ 自定义WebSocket 服务端点配置 ------ */
 package com.xyz.example.main;
@@ -3161,7 +3162,7 @@ public class ExampleApplicationTests {
 <dependency>
 	<groupId>org.springframework.hateoas</groupId>
 	<artifactId>spring-hateoas</artifactId>
-	<version>0.24.0.RELEASE</version>
+	<version>0.25.2.RELEASE</version>
 </dependency>
 ```
 ```ini
@@ -3196,7 +3197,7 @@ management.endpoint.shutdown.enabled=true
 | sessions | 允许从Spring 会话支持的会话存储库检索和删除用户会话，只是Spring 会话对响应式Web 应用还暂时不能支持 | 是 |
 | shutdown | 允许当前应用被优雅地进行关闭（在默认的情况下不启用这个端点）  | 否 |
 | threaddump | 显示线程泵 | 是 |
- 
+
 + JMX 监控
 
 	对于Spring Boot ，还可以通过Java管理扩展Java Management Extensions, JMX 来监控JVM的状况。
