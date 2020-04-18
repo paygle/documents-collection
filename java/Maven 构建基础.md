@@ -5,6 +5,17 @@ mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc8 -Dversion=12.2
 ### mvn help用法
 在命令控制台，进入 /project 目录，执行以下命令：
 ```shell
+# 创建javaWeb项目
+C:\project>mvn archetype:generate -DgroupId=cn.yanbowen -DartifactId=training9 -DarchetypeArtifactId=maven-archetype-webapp -DinteractiveMode=false
+C:\project>mvn archetype:generate -DgroupId=cn.yanbowen -DartifactId=demo -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+
+# 分析依赖关系, 用来取出无用, 重复依赖
+C:\project>mvn dependency:analyze
+
+# 打印出整个项目树
+C:\project>mvn dependency:tree
+
+
 # 检查当前Maven环境启用的文件
 C:\project>mvn help:effective-settings
 
