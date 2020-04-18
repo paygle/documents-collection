@@ -238,18 +238,6 @@ public void init(ServletConfig config) throws SevletException{
 }
 ```
 
-```xml
-
-```
-
-```xml
-
-```
-
-```xml
-
-```
-
 # web.xml 各版本的 Schema 头部声明
 
 ```xml
