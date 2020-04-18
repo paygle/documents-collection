@@ -1,6 +1,30 @@
-### 安装文件到本地仓库：
+### 安装文件到本地仓库（配置完成Maven环境变量之后）：
+
 mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc8 -Dversion=12.2.0.1 -Dpackaging=jar -Dfile=ojdbc8.jar 
- 
+
+### mvn help用法
+在命令控制台，进入 /project 目录，执行以下命令：
+```shell
+# 检查当前Maven环境启用的文件
+C:\project>mvn help:effective-settings
+
+# 查看当前项目的pom配置，包括所有依赖
+C:\project>mvn help:effective-pom
+
+# 查看当前处于激活状态的profile
+C:\project>mvn help:active-profiles
+
+# 指定使用某个配置文件执行Maven命令
+C:\project>mvn -s <filepath> <goal>
+C:\project>mvn -s ~/.m2/settings_local.xml clean deploy
+
+# 检查环境
+C:\project>mvn -X
+
+# 打印所有可用的环境变量和Java系统属性
+C:\project>mvn help:system
+```
+
 ### Maven 构建生命周期
 
 |阶段	 | 处理 | 描述|
