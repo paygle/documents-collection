@@ -2,6 +2,8 @@
 
 mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc8 -Dversion=12.2.0.1 -Dpackaging=jar -Dfile=ojdbc8.jar 
 
+[点击获取 Maven插件帮助](https://maven.apache.org/plugins/index.html)
+
 ### mvn help用法
 在命令控制台，进入 /project 目录，执行以下命令：
 ```shell
