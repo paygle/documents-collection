@@ -36,6 +36,54 @@ C:\project>mvn -X
 C:\project>mvn help:system
 ```
 
+### Maven项目的标准目录结构
+
+┣━ src
+┃   ┣━ main
+┃   ┃   ┣━ java         源文件 
+┃   ┃   ┣━ resources    资源文件
+┃   ┃   ┣━ filters      资源过滤文件
+┃   ┃   ┣━ config       配置文件
+┃   ┃   ┣━ scripts      脚本文件
+┃   ┃   ┗━ webapp       web应用文件
+┃   ┃ 
+┃   ┣━ test
+┃   ┃   ┣━ java         测试源文件
+┃   ┃   ┣━ resources    测试资源文件
+┃   ┃   ┗━ filters      测试资源过滤文件
+┃   ┃ 
+┃   ┣━ it               集成测试
+┃   ┣━ assembly         assembly descriptors
+┃   ┗━ site             Site
+┃ 
+┣━ target
+┃   ┣━ generated-sources
+┃   ┣━ classes
+┃   ┣━ generated-test-sources
+┃   ┣━ test-classes
+┃   ┗━  xxx.jar
+┃ 
+┣━ pom.xml
+┣━ LICENSE.txt
+┣━ NOTICE.txt
+┣━ README.txt
+
+
+### Maven 默认插件
+
+  如果针对各个 plugin 有特殊配置的话，需要显示指定 plugin 和 属性配置。
+
+| plugin |	function |	life cycle phase
+|----------|----------|----------
+| maven-clean-plugin |	清理上一次执行创建的目标文件 |	clean
+| maven-resources-plugin |	处理源资源文件和测试资源文件 |	resources,testResources
+| maven-compiler-plugin |	编译源文件和测试源文件 |	compile,testCompile
+| maven-surefire-plugin |	执行测试文件 |	test
+| maven-jar-plugin |	创建 jar |	jar
+| maven-install-plugin |	安装 jar，将创建生成的 jar 拷贝到 .m2/repository 下面 | install
+| maven-deploy-plugin |	发布 jar |	deploy
+
+
 ### Maven 构建生命周期
 
 |阶段	 | 处理 | 描述|
