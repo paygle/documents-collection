@@ -137,17 +137,67 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
 
 ```xml
 <select
-  id="selectPerson"
-  parameterType="int"
-  parameterMap="deprecated"
-  resultType="hashmap"
-  resultMap="personResultMap"
-  flushCache="false"
-  useCache="true"
-  timeout="10"
-  fetchSize="256"
-  statementType="PREPARED"
-  resultSetType="FORWARD_ONLY">
+　　<!-- 
+　　　　1. id（必须配置） id是命名空间中的唯一标识符，可被用来代表这条语句
+　　　　一个命名空间（namespace）对应一个dao接口,这个id也应该对应dao里面的某个方法（sql相当于方法的实现），因此id应该与方法名一致
+　　 -->
+　　id="selectUser"
+
+　　<!-- 
+　　　　2. parapeterType（可选配置，默认由mybatis自动选择处理）
+　　　　将要传入语句的参数的完全限定名或别名，如果不配置，mybatis会通过ParamterHandler根据参数类型默认选择合适的typeHandler进行处理
+　　　　paramterType 主要指定参数类型，可以是int, short, long, string等类型，也可以是复杂类型（如对象）
+　　 -->
+　　parapeterType="int"
+
+　　<!-- 
+　　　　3. resultType（resultType 与 resultMap 二选一配置）
+　　　　用来指定返回类型，指定的类型可以是基本类型，也可以是java容器，也可以是javabean
+　　 -->
+　　resultType="hashmap"
+　　
+　　<!-- 
+　　　　4. resultMap（resultType 与 resultMap 二选一配置）
+　　　　用于引用我们通过 resultMap 标签定义的映射类型，这也是mybatis组件高级复杂映射的关键
+　　 -->
+　　resultMap="USER_RESULT_MAP"
+　　
+　　<!-- 
+　　　　5. flushCache（可选配置）
+　　　　将其设置为true，任何时候语句被调用，都会导致本地缓存和二级缓存被清空，默认值：false
+　　 -->
+　　flushCache="false"
+
+　　<!-- 
+　　　　6. useCache（可选配置）
+　　　　将其设置为true，会导致本条语句的结果被二级缓存，默认值：对select元素为true
+　　 -->
+　　useCache="true"
+
+　　<!-- 
+　　　　7. timeout（可选配置）
+　　　　这个设置是在抛出异常之前，驱动程序等待数据库返回请求结果的秒数，默认值为：unset（依赖驱动）
+　　 -->
+　　timeout="10000"
+
+　　<!-- 
+　　　　8. fetchSize（可选配置）
+　　　　这是尝试影响驱动程序每次批量返回的结果行数和这个设置值相等。默认值为：unset（依赖驱动）
+　　 -->
+　　fetchSize="256"
+
+　　<!-- 
+　　　　9. statementType（可选配置）
+　　　　STATEMENT, PREPARED或CALLABLE的一种，这会让MyBatis使用选择Statement, PrearedStatement或CallableStatement，默认值：PREPARED
+　　 -->
+　　statementType="PREPARED"
+
+　　<!-- 
+　　　　10. resultSetType（可选配置）
+　　　　FORWARD_ONLY，SCROLL_SENSITIVE 或 SCROLL_INSENSITIVE 中的一个，默认值为：unset（依赖驱动）
+　　 -->
+　　resultSetType="FORWORD_ONLY"
+>
   SELECT * FROM PERSON WHERE ID = #{id}
 </select>
 ```
@@ -172,16 +222,24 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
 
 ```xml
 <insert
-  id="insertAuthor"
-  parameterType="domain.blog.Author"
-  flushCache="true"
-  statementType="PREPARED"
-  keyProperty=""
-  keyColumn=""
-  useGeneratedKeys=""
-  timeout="20">
-  insert into Author (id,username,password,email,bio)
-  values (#{id},#{username},#{password},#{email},#{bio})
+    <!--
+　　　　同 select 标签
+　　 -->
+    id="insertAuthor"
+    <!-- 同 select 标签 -->
+    parameterType="domain.blog.Author"
+    flushCache="true"
+    statementType="PREPARED"
+　　<!-- 2. keyProperty（可选配置，与 useGeneratedKeys 相配合）用于获取数据库自动生成的主键 -->
+    keyProperty="projectId"
+    keyColumn=""
+    <!-- 
+　　　　1. useGeneratedKeys（可选配置，与 keyProperty 相配合）设置为true，并将 keyProperty 属性设为数据库主键对应的实体对象的属性名称
+　　 --> 
+    useGeneratedKeys="true"
+    timeout="20">
+    insert into Author (id,username,password,email,bio)
+    values (#{id},#{username},#{password},#{email},#{bio})
 </insert>
 
 <update
@@ -236,13 +294,69 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
 
 ### 结果映射（resultMap）
 
-| 属性 |	描述
-|-----|-----------------------|
-| id |	当前命名空间中的一个唯一标识，用于标识一个结果映射。
-| type |	类的完全限定名, 或者一个类型别名（关于内置的类型别名，可以参考上面的表格）。
-| autoMapping |	如果设置这个属性，MyBatis 将会为本结果映射开启或者关闭自动映射。 这个属性会覆盖全局的属性 autoMappingBehavior。默认值：未设置（unset）。
+- Id 和 Result 的属性
+
+| 属性 |	描述 |
+|----------|---------------------------------|
+| property |	映射到列结果的字段或属性。如果 JavaBean 有这个名字的属性（property），会先使用该属性。否则 MyBatis 将会寻找给定名称的字段（field）。 无论是哪一种情形，你都可以使用常见的点式分隔形式进行复杂属性导航。 比如，你可以这样映射一些简单的东西：“username”，或者映射到一些复杂的东西上：“address.street.number”。
+| column |	数据库中的列名，或者是列的别名。一般情况下，这和传递给 resultSet.getString(columnName) 方法的参数一样。
+| javaType |	一个 Java 类的全限定名，或一个类型别名（关于内置的类型别名，可以参考上面的表格）。 如果你映射到一个 JavaBean，MyBatis 通常可以推断类型。然而，如果你映射到的是 HashMap，那么你应该明确地指定 javaType 来保证行为与期望的相一致。
+| jdbcType |	JDBC 类型，所支持的 JDBC 类型参见这个表格之后的“支持的 JDBC 类型”。 只需要在可能执行插入、更新和删除的且允许空值的列上指定 JDBC 类型。这是 JDBC 的要求而非 MyBatis 的要求。如果你直接面向 JDBC 编程，你需要对可以为空值的列指定这个类型。
+| typeHandler |	我们在前面讨论过默认的类型处理器。使用这个属性，你可以覆盖默认的类型处理器。 这个属性值是一个类型处理器实现类的全限定名，或者是类型别名。
 
 ```xml
+<!-- 
+　　1. type 对应的返回类型，可以是javabean, 也可以是其它
+　　2. id 必须唯一， 用于标示这个resultMap的唯一性，在使用resultMap的时候，就是通过id引用
+　　3. extends 继承其他resultMap标签
+ -->
+<resultMap id="" type="" extends="">　　
+　　<!-- 
+　　　　1. id 唯一性，注意啦，这个id用于标示这个javabean对象的唯一性， 不一定会是数据库的主键（不要把它理解为数据库对应表的主键）
+　　　　2. property 属性对应javabean的属性名
+　　　　3. column 对应数据库表的列名
+       （这样，当javabean的属性与数据库对应表的列名不一致的时候，就能通过指定这个保持正常映射了）
+　　 -->
+　　<id property="" column=""/>
+        
+　　<!-- result 与id相比，对应普通属性 -->    
+　　<result property="" column="" javaType="" jdbcType="" typeHandler=""/>
+        
+　　<!-- constructor 对应javabean中的构造方法 -->
+　　<constructor>
+　　　　<!-- idArg 对应构造方法中的id参数 -->
+       <idArg column=""/>
+       <!-- arg 对应构造方法中的普通参数 -->
+       <arg column=""/>
+   </constructor>
+   
+   <!-- 
+　　　　collection 为关联关系，是实现一对多的关键 
+　　　　1. property 为javabean中容器对应字段名
+　　　　2. ofType 指定集合中元素的对象类型
+　　　　3. select 使用另一个查询封装的结果
+　　　　4. column 为数据库中的列名，与select配合使用
+    -->
+　　<collection property="" column="" ofType="" select="">
+　　　　<!-- 当使用select属性时，无需下面的配置 -->
+　　　　<id property="" column=""/>
+　　　　<result property="" column=""/>
+　　</collection>
+        
+　　<!-- 
+　　　　association 为关联关系，是实现一对一的关键
+　　　　1. property 为javabean中容器对应字段名
+　　　　2. javaType 指定关联的类型，当使用select属性时，无需指定关联的类型
+　　　　3. select 使用另一个select查询封装的结果
+　　　　4. column 为数据库中的列名，与select配合使用
+　　 -->
+　　<association property="" column="" javaType="" select="">
+　　　　<!-- 使用select属性时，无需下面的配置 -->
+　　　　<id property="" column=""/>
+　　　　<result property="" column=""/>
+　　</association>
+</resultMap>
+
 <!-- 非常复杂的结果映射 -->
 <resultMap id="detailedBlogResultMap" type="Blog">
   <constructor>
@@ -273,38 +387,19 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
   </collection>
 </resultMap>
 ```
- 1. constructor - 用于在实例化类时，注入结果到构造方法中
-    - idArg - ID 参数；标记出作为 ID 的结果可以帮助提高整体性能
-    - arg - 将被注入到构造方法的一个普通结果
- 2. id – 一个 ID 结果；标记出作为 ID 的结果可以帮助提高整体性能
- 3. result – 注入到字段或 JavaBean 属性的普通结果
- 4. association – 一个复杂类型的关联；许多结果将包装成这种类型
-    - 嵌套结果映射 – 关联可以是 resultMap 元素，或是对其它结果映射的引用
- 5. collection – 一个复杂类型的集合
-    - 嵌套结果映射 – 集合可以是 resultMap 元素，或是对其它结果映射的引用
- 6. discriminator – 使用结果值来决定使用哪个 resultMap
-    - case – 基于某些值的结果映射
-      嵌套结果映射 – case 也是一个结果映射，因此具有相同的结构和元素；或者引用其它的结果映射
-
-#### Id 和 Result 的属性
-
-| 属性 |	描述
-|----------|-----------------------------|
-| property |	映射到列结果的字段或属性。如果 JavaBean 有这个名字的属性（property），会先使用该属性。否则 MyBatis 将会寻找给定名称的字段（field）。 无论是哪一种情形，你都可以使用常见的点式分隔形式进行复杂属性导航。 比如，你可以这样映射一些简单的东西：“username”，或者映射到一些复杂的东西上：“address.street.number”。
-| column |	数据库中的列名，或者是列的别名。一般情况下，这和传递给 resultSet.getString(columnName) 方法的参数一样。
-| javaType |	一个 Java 类的全限定名，或一个类型别名（关于内置的类型别名，可以参考上面的表格）。 如果你映射到一个 JavaBean，MyBatis 通常可以推断类型。然而，如果你映射到的是 HashMap，那么你应该明确地指定 javaType 来保证行为与期望的相一致。
-| jdbcType |	JDBC 类型，所支持的 JDBC 类型参见这个表格之后的“支持的 JDBC 类型”。 只需要在可能执行插入、更新和删除的且允许空值的列上指定 JDBC 类型。这是 JDBC 的要求而非 MyBatis 的要求。如果你直接面向 JDBC 编程，你需要对可以为空值的列指定这个类型。
-| typeHandler |	我们在前面讨论过默认的类型处理器。使用这个属性，你可以覆盖默认的类型处理器。 这个属性值是一个类型处理器实现类的全限定名，或者是类型别名。
-
 
 ### mapper 实例
+
+  - 在Java代码中引用某个 sql 映射时，使用的亦是含有名称空间的全路径。如
+  - session.update("com.enh.mapper.PersonMapper.udpateUser", user); 
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.apache.ibatis.submitted.rounding.Mapper">
+<!-- 每个sql映射文件元素中，都需要指定一个名称空间，用以确保每个映射语句的id属性不会重复 -->
+<mapper namespace="com.enh.mapper.PersonMapper.Mapper">
 
-	<resultMap type="org.apache.ibatis.submitted.rounding.User" id="usermap">
+	<resultMap type="com.enh.mapper.PersonMapper.User" id="usermap">
 		<id column="id" property="id"/>
 		<result column="name" property="name"/>
 		<result column="funkyNumber" property="funkyNumber"/>
@@ -321,7 +416,7 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
 	    )
 	</insert>
 
-	<resultMap type="org.apache.ibatis.submitted.rounding.User" id="usermap2">
+	<resultMap type="com.enh.mapper.PersonMapper.User" id="usermap2">
 		<id column="id" property="id"/>
 		<result column="name" property="name"/>
 		<result column="funkyNumber" property="funkyNumber"/>
