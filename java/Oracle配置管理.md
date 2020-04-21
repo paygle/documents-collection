@@ -1,5 +1,17 @@
 # Oracle 管理设置
 
+### jdbc:oracle:thin:@localhost:1521:orcl 为例，URL解释如下
+
+- jdbc：代表以jdbc的方式连接；
+- oracle: 表示连接的是oracle数据库；
+- thin: 表示连接时采用thin模式(oracle中有两种模式)；
+- @ 表示地址；
+- localhost:1521:orcl中localhost代表本地数据库，1521代表本地数据库端口号，orcl代表本地数据库的sid。
+
+关于thin的解释：
+- thin是一种瘦客户端的连接方式，即采用这种连接方式不需要安装oracle客户端,只要求classpath中包含jdbc驱动的jar包就行。thin就是纯粹用Java写的ORACLE数据库访问接口。
+- oci是一种胖客户端的连接方式，即采用这种连接方式需要安装oracle客户端。oci是Oracle Call Interface的首字母缩写，是ORACLE公司提供了访问接口，就是使用Java来调用本机的Oracle客户端，然后再访问数据库，优点是速度快，但是需要安装和配置数据库。
+
 ## 查看用户具有的权限和角色
 ```sql
 /* 1.查看所有用户 */

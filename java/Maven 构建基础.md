@@ -1,6 +1,6 @@
 ### 安装文件到本地仓库（配置完成Maven环境变量之后）：
 
-mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc8 -Dversion=12.2.0.1 -Dpackaging=jar -Dfile=ojdbc8.jar 
+mvn install:install-file -DgroupId=com.oracle.jdbc -DartifactId=ojdbc8 -Dversion=12.2.0.1 -Dpackaging=jar -Dfile=ojdbc8.jar 
 
 [点击获取 Maven插件帮助](https://maven.apache.org/plugins/index.html)
 
