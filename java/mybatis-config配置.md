@@ -368,8 +368,6 @@ SQL 映射文件只有很少的几个顶级元素（按照应被定义的顺序�
     <result property="username" column="author_username"/>
     <result property="password" column="author_password"/>
     <result property="email" column="author_email"/>
-    <result property="bio" column="author_bio"/>
-    <result property="favouriteSection" column="author_favourite_section"/>
   </association>
   <collection property="posts" ofType="Post">
     <id property="id" column="post_id"/>
