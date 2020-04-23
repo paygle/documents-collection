@@ -565,11 +565,9 @@ POM 标签大全详解
                 <!--提供一个文件名，通过检测该文件的存在或不存在来激活profile。missing检查文件是否存在，如果不存在则激活 profile。另一方面，exists则会检查文件是否存在，如果存在则激活profile。 -->
                 <file>
                     <!--如果指定的文件存在，则激活profile。 -->
-                    <exists>/usr/local/hudson/hudson-home/jobs/maven-guide-zh-to-production/workspace/
-                    </exists>
+                    <exists>/usr/local/hudson/hudson-home/jobs/maven-guide-zh-to-production/workspace/</exists>
                     <!--如果指定的文件不存在，则激活profile。 -->
-                    <missing>/usr/local/hudson/hudson-home/jobs/maven-guide-zh-to-production/workspace/
-                    </missing>
+                    <missing>/usr/local/hudson/hudson-home/jobs/maven-guide-zh-to-production/workspace/</missing>
                 </file>
             </activation>
             <!--构建项目所需要的信息。参见build元素 -->
